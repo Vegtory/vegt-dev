@@ -1,0 +1,89 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "aRecords": {
+            "value": [
+                {
+                    "name": "home",
+                    "ttl": 3600,
+                    "value": "84.80.79.79"
+                },
+                {
+                    "name": "nas",
+                    "ttl": 3600,
+                    "value": "84.80.79.79"
+                }
+            ]
+        },
+        "txtRecords": {
+            "value": [
+                {
+                    "name": "@",
+                    "ttl": 3600,
+                    "value": [
+                        {
+                            "value": [
+                                "zoho-verification=zb65141987.zmverify.zoho.eu"
+                            ]
+                        },
+                        {
+                            "value": [
+                                "v=spf1 include:zohomail.eu ~all"
+                            ]
+                        },
+                        {
+                            "value": [
+                                "google-site-verification=AGH54QT66yV5UiRozaQqD4gbtxtk8TCn593980DFU8U"
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "name": "zmail._domainkey",
+                    "ttl": 3600,
+                    "value": [
+                        {
+                            "value": [
+                                "v=DKIM1; k=rsa; p=MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCO0VD5XG8skN8qg5vuz80xKQ4/0tGcvlw8MCTLsBx+xrwtwglNLXRWj4YdDDhiv/LMpGjEbMvhIaQeFr/YwuMfNwtDDNLGX11qUvfyFrvD7796C5X8RgylR47AOU0oBbgMNbVrK12G8cwZGrOWcvS7OqxbYnWheAbr4trcranOHQIDAQAB"
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "name": "_dmarc",
+                    "ttl": 3600,
+                    "value": [
+                        {
+                            "value": [
+                                "v=DMARC1; p=none; rua=mailto:w.j.vegt@gmail.com; ruf=mailto:w.j.vegt@gmail.com; sp=none; adkim=r; aspf=r"
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        "mxRecords": {
+            "value": [
+                {
+                    "name": "@",
+                    "ttl": 3600,
+                    "value": [
+                        {
+                            "exchange": "mx.zoho.eu",
+                            "preference": 10
+                        },
+                        {
+                            "exchange": "mx2.zoho.eu",
+                            "preference": 20
+                        },
+                        {
+                            "exchange": "mx3.zoho.eu",
+                            "preference": 50
+                        }
+                    ]
+                }
+            ]
+        }
+    }
+}

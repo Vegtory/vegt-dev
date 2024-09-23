@@ -1,0 +1,19 @@
+---
+import { getCollection } from 'astro:content';
+import { allMarkdownComponents } from '#template/mdx-components/';
+
+export async function getStaticPaths() {
+  const slugName = 'blog';
+  const blogEntries = await getCollection(slugName);
+  const blogPaths = blogEntries?.map(entry => ({
+    params: { slug: entry.slug },
+    props: { entry },
+  }));
+
+  return blogPaths ?? [];
+}
+
+const { entry } = Astro.props;
+const { Content } = await entry.render();
+---
+<Content components={allMarkdownComponents} />

@@ -1,0 +1,69 @@
+# we could add a 
+# includeExcludeFilters:
+#   include: [ string ] # List of items to include.
+trigger:
+  batch: true
+  branches:
+    include:
+      - "main"
+
+resources:
+  repositories:
+    - repository: templates
+      type: git
+      name: astro-template
+      persistCredentials: true
+    - repository: azure-dns
+      type: git
+      name: azure-dns
+      persistCredentials: true
+
+pool:
+  vmImage: "windows-latest"
+
+stages:
+  - stage: Build_Astro
+    jobs:
+      - template: pipelines/build-astro.yml@templates
+
+  - stage: DNS_Zone
+    dependsOn: Build_Astro
+    jobs:
+      - template: pipelines/release-dns.yml@templates
+        parameters:
+          serviceConnection: "azure-serviceconnection-william"
+          resourceGroupName: "william"
+          projectName: portfolio
+          organizationName: william
+          domainNames: [vegt.dev]
+
+  - stage: Develop
+    displayName: '1: Develop'
+    dependsOn: DNS_Zone
+    jobs:
+      - template: pipelines/release-astro.yml@templates
+        parameters:
+          serviceConnection: "azure-serviceconnection-william"
+          resourceGroupName: "william"
+          projectName: portfolio
+          environmentName: dev
+          organizationName: william 
+          customSubDomains: [test.vegt.dev]
+          contactFormEnabled: false
+          startDate: "2024-06-01"
+
+  - stage: Production
+    displayName: '2: Production'
+    dependsOn: DNS_Zone
+    jobs:
+      - template: pipelines/release-astro.yml@templates
+        parameters:
+          serviceConnection: "azure-serviceconnection-william"
+          resourceGroupName: "william"
+          projectName: portfolio
+          environmentName: prd
+          organizationName: william
+          customSubDomains: [www.vegt.dev]
+          contactFormEnabled: false
+          startDate: "2024-06-01"
+
