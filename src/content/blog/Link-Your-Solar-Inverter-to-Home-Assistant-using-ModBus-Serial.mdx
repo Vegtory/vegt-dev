@@ -19,8 +19,6 @@ imageItem:
 date: 2024-06-09T22:00:00.000Z
 ---
 
-**UPDATE 22-06-2024: I improved the wiring diagram, so that you are able to supply the NodeMCU board with a different voltage than 5V.**
-
 ## Introduction
 
 I decided to embark on this project because the app provided by my solar inverter was clunky and didn't offer an easy way to connect to Home Assistant. I wanted a seamless integration that allowed me to have full control over my solar panels, especially to automate shutting them down when energy prices go negative. This guide will walk you through how I achieved this using an ESP8266, MODBUS communication, and Home Assistant, giving you the ability to efficiently manage your solar energy system.
@@ -60,7 +58,7 @@ For this solution, I used an ESP8266 with a MAX485. Alternatively, you can use a
 Follow the schematic for these connections:
 
 * **ESP8266 to MAX485**
-  * 3V to VCC
+  * 3V (or VIN) to VCC (**Be mindful**: the USB on my inverter was not 5V but around 9V)
   * GND to GND
   * TX to DI
   * RX to RO
