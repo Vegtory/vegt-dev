@@ -5,7 +5,7 @@ import { allMarkdownComponents } from '#template/mdx-components/';
 export async function getStaticPaths() {
   const slugName = 'blog';
   const blogEntries = await getCollection(slugName);
-  const blogPaths = blogEntries?.map(entry => ({
+  const blogPaths = blogEntries?.filter(entry => !entry.data.ishidden).map(entry => ({
     params: { slug: entry.slug },
     props: { entry },
   }));
