@@ -11,7 +11,11 @@
 		"start": "npm run update && npx tinacms dev -c \"astro dev --port 8080\"",
 		"build": "npm run update && npx tinacms build && astro build",
 		"preview": "astro preview --port 8080",
-		"update": "cp -R ./astro-template/update-files/* ./"
+		"update": "cp -R ./astro-template/update-files/* ./",
+        "pulumi:up": "dotenv -e .env pulumi up",
+        "pulumi:preview": "dotenv -e .env pulumi preview",
+        "pulumi:destroy": "dotenv -e .env pulumi destroy",
+        "pulumi:refresh": "dotenv -e .env pulumi refresh"
 	},
 	"dependencies": {
 		"@astrojs/mdx": "^4.0.6",
@@ -25,13 +29,18 @@
 		"svelte": "^5.19.0",
 		"tailwind-fontawesome": "^0.7.1",
 		"tailwindcss": "^3.4.17",
-		"tinacms": "^2.6.0",
-		"typescript": "^5.7.3"
+		"tinacms": "^2.6.0"
 	},
 	"devDependencies": {
+        "@pulumi/cloudflare": "^5.49.1",
+        "@pulumi/pulumi": "^3.113.0",
 		"@types/node": "^22.10.7",
+		"@pulumi/command": "^1.0.2",
 		"prettier": "^3.4.2",
 		"prettier-plugin-tailwindcss": "^0.6.10",
-		"dotenv": "^16.4.7"
+		"dotenv": "^16.4.7",
+        "dotenv-cli": "^8.0.0",
+		"ts-node": "^10.9.2",
+		"typescript": "^5.8.2"
 	}
 }

@@ -1,0 +1,75 @@
+name: astro-vegt-portfolio
+description: Vegt website
+main: ./astro-template/pulumi/
+runtime:
+  name: nodejs
+  options:
+    typescript: true
+config:
+  accountId: "8a2d392cc0dff6894ec1aee19bc691bc"
+  zoneIds:
+    - "978d5ed98253a10dfeadfaaaa4e4c7d9"
+  projectName: "vegt"
+  siteDomains:
+    - "vegt.dev"
+  subDomains:
+    - "www"
+  dnsRecords:
+    - id: "a2"
+      type: "A"
+      name: "home.vegt.dev"
+      content: "84.80.79.79"
+      ttl: 3600
+    - id: "a3"
+      type: "A"
+      name: "nas.vegt.dev"
+      content: "84.80.79.79"
+      ttl: 3600
+    - id: "mx1"
+      type: "MX"
+      name: "vegt.dev"
+      content: "mx.zoho.eu"
+      ttl: 3600
+      priority: 10
+    - id: "mx2"
+      type: "MX"
+      name: "vegt.dev"
+      content: "mx2.zoho.eu"
+      ttl: 3600
+      priority: 20
+    - id: "mx3"
+      type: "MX"
+      name: "vegt.dev"
+      content: "mx3.zoho.eu"
+      ttl: 3600
+      priority: 50
+    - id: "txt1"
+      type: "TXT"
+      name: "vegt.dev"
+      content: "zoho-verification=zb65141987.zmverify.zoho.eu"
+      ttl: 3600
+    - id: "txt2"
+      type: "TXT"
+      name: "vegt.dev"
+      content: "v=spf1 include:zohomail.eu ~all"
+      ttl: 3600
+    - id: "txt3"
+      type: "TXT"
+      name: "vegt.dev"
+      content: "google-site-verification=AGH54QT66yV5UiRozaQqD4gbtxtk8TCn593980DFU8U"
+      ttl: 3600
+    - id: "txt4"
+      type: "TXT"
+      name: "_dmarc.vegt.dev"
+      content: "v=DMARC1; p=none; rua=mailto:w.j.vegt@gmail.com; ruf=mailto:w.j.vegt@gmail.com; sp=none; adkim=r; aspf=r"
+      ttl: 3600
+    - id: "txt5"
+      type: "TXT"
+      name: "google-site-verification.vegt.dev"
+      content: "AGH54QT66yV5UiRozaQqD4gbtxtk8TCn593980DFU8U"
+      ttl: 3600
+    - id: "txt6"
+      type: "TXT"
+      name: "zmail._domainkey.vegt.dev"
+      content: "v=DKIM1; k=rsa; p=MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCO0VD5XG8skN8qg5vuz80xKQ4/0tGcvlw8MCTLsBx+xrwtwglNLXRWj4YdDDhiv/LMpGjEbMvhIaQeFr/YwuMfNwtDDNLGX11qUvfyFrvD7796C5X8RgylR47AOU0oBbgMNbVrK12G8cwZGrOWcvS7OqxbYnWheAbr4trcranOHQIDAQAB"
+      ttl: 3600

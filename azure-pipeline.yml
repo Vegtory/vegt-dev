@@ -26,31 +26,16 @@ stages:
     jobs:
       - template: pipelines/build-astro.yml@templates
 
-  - stage: DNS_Zone
-    dependsOn: Build_Astro
-    jobs:
-      - template: pipelines/release-dns.yml@templates
-        parameters:
-          serviceConnection: "azure-serviceconnection-william"
-          resourceGroupName: "william"
-          projectName: portfolio
-          organizationName: william
-          domainNames: [vegt.dev]
-
   - stage: Develop
     displayName: '1: Develop'
     dependsOn: DNS_Zone
     jobs:
       - template: pipelines/release-astro.yml@templates
         parameters:
-          serviceConnection: "azure-serviceconnection-william"
-          resourceGroupName: "william"
-          projectName: portfolio
-          environmentName: dev
-          organizationName: william 
-          customSubDomains: [test.vegt.dev]
+          stack: "dev"
+          environmentName: "dev"
+          projectName: "william_portfolio"
           contactFormEnabled: false
-          startDate: "2024-06-01"
 
   - stage: Production
     displayName: '2: Production'
@@ -58,12 +43,8 @@ stages:
     jobs:
       - template: pipelines/release-astro.yml@templates
         parameters:
-          serviceConnection: "azure-serviceconnection-william"
-          resourceGroupName: "william"
-          projectName: portfolio
-          environmentName: prd
-          organizationName: william
-          customSubDomains: [www.vegt.dev]
+          stack: "prod"
+          environmentName: "prd"
+          projectName: "william_portfolio"
           contactFormEnabled: false
-          startDate: "2024-06-01"
 
