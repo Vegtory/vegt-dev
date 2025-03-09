@@ -35,7 +35,6 @@ stages:
           stack: "dev"
           environmentName: "dev"
           projectName: "william_portfolio"
-          contactFormEnabled: false
 
   - stage: Production
     displayName: '2: Production'
@@ -46,5 +45,4 @@ stages:
           stack: "prod"
           environmentName: "prd"
           projectName: "william_portfolio"
-          contactFormEnabled: false
 
