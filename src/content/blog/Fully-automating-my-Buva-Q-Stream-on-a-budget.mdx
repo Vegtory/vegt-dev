@@ -1,15 +1,13 @@
 ---
 ishidden: true
-title: Fully automating my Buva Q-Stream on a budget
+title: 'Making My Bathroom Smarter: Automating Mechanical Ventilation on a Budget'
 description: Buva Q-Stream
 keywords: Buva Q-Stream
 date: 2025-04-15T22:00:00.000Z
 layout: '#template/layouts/BlogLayout.astro'
 ---
 
-# Making My Bathroom Smarter: Automating Mechanical Ventilation
-
-So, I live in a fairly new home, and like most modern houses, it came with a mechanical ventilation system. In my case, it's a baseline **Buva Q-Stream** unit. Pretty standard stuff. The issue? It only comes with a *wired* control panel located in the **kitchen**.
+So, I live in a fairly new home, and like most modern houses, it came with a mechanical ventilation system. In my case, it's a baseline **Buva Q-Stream** unit. The issue? It only comes with a *wired* control panel located in the **kitchen**.
 
 Now, that’s not exactly where I need it most. What I really want is for the system to kick in **automatically when someone is taking a shower**, so the bathroom doesn't turn into a steam room and soak the walls.
 
@@ -26,6 +24,9 @@ Naturally, I opened up the control panel and dug into the manual.
 And there it was: a **DIP switch** setting that allows the unit to be controlled via **0–10V voltage control**. Bingo!
 Looking at the manual its also described there:
 
+* Number 4 being the DIP switches
+* Number 5 being the 0-10V connectors
+
 ![](</../src/assets/Screenshot 2025-04-16 at 22.31.13.png>)
 
 ## Supplying 0–10V
@@ -40,6 +41,20 @@ After a bit of Googling, I discovered that some **smart LED dimmers** use the sa
 
 Excited, I ordered a **Shelly Plus 0–10V dimmer**. But unfortunately, it didn’t work.
 
-Why? Turns out this type of dimmer is \*\*
+Why? Turns out this type of dimmer is **“sinking”**, meaning it doesn’t output voltage unless the input is already powered. The ventilation unit expects a **“sourcing”** signal instead. So back to the drawing board.
 
-Now onto connecting it in home assistant.
+## Second Attempt: Shelly Dimmer 0/1–10V PM Gen3
+
+Luckily, **Shelly now offers a sourcing-type dimmer**: the **Shelly Dimmer 0/1–10V PM Gen3**.
+
+Ordered that one, wired it up... and **whola!** It works 🎉
+
+Now I can control the ventilation system directly from the **Shelly app**, or automate it with other smart home triggers.
+
+## Wiring Diagram
+
+Check out the diagram below to see how I connected the dimmer to the ventilation unit. It's fairly straightforward and should work with most 0–10V controlled systems.
+
+*(Image goes here)*
+
+# Now onto connecting it in home assistant.
