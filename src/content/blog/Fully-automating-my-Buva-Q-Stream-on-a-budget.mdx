@@ -1,0 +1,45 @@
+---
+ishidden: true
+title: Fully automating my Buva Q-Stream on a budget
+description: Buva Q-Stream
+keywords: Buva Q-Stream
+date: 2025-04-15T22:00:00.000Z
+layout: '#template/layouts/BlogLayout.astro'
+---
+
+# Making My Bathroom Smarter: Automating Mechanical Ventilation
+
+So, I live in a fairly new home, and like most modern houses, it came with a mechanical ventilation system. In my case, it's a baseline **Buva Q-Stream** unit. Pretty standard stuff. The issue? It only comes with a *wired* control panel located in the **kitchen**.
+
+Now, that’s not exactly where I need it most. What I really want is for the system to kick in **automatically when someone is taking a shower**, so the bathroom doesn't turn into a steam room and soak the walls.
+
+## The Quest for a Remote
+
+My first idea was to look for a **wireless remote** that I could stick on the bathroom wall.
+
+Turns out... those are **unreasonably expensive** — we're talking **€100+**, and even then, you’d still have to press a button manually every time you shower. Not ideal.
+
+## Time to Tinker
+
+Naturally, I opened up the control panel and dug into the manual.
+
+And there it was: a **DIP switch** setting that allows the unit to be controlled via **0–10V voltage control**. Bingo!
+Looking at the manual its also described there:
+
+![](</../src/assets/Screenshot 2025-04-16 at 22.31.13.png>)
+
+## Supplying 0–10V
+
+Now the question became: *how do I supply a 0–10V signal*?
+
+In my previous blog post, I used **ESPHome** to solve a similar problem, so that was my first thought here as well. But in this case, generating a clean analog voltage output using ESPHome is a bit tricky.
+
+After a bit of Googling, I discovered that some **smart LED dimmers** use the same 0–10V voltage range. That sounded promising.
+
+## First Attempt: Shelly Plus 0–10V Dimmer
+
+Excited, I ordered a **Shelly Plus 0–10V dimmer**. But unfortunately, it didn’t work.
+
+Why? Turns out this type of dimmer is \*\*
+
+Now onto connecting it in home assistant.
