@@ -37,7 +37,7 @@ In my previous blog post, I used **ESPHome** to solve a similar problem, so that
 
 After a bit of Googling, I discovered that some **smart LED dimmers** use the same 0–10V voltage range. That sounded promising.
 
-## First Attempt: Shelly Plus 0–10V Dimmer
+## First Attempt: Shelly Plus 0–10V Dimmer **(Did not work)**
 
 Excited, I ordered a **Shelly Plus 0–10V dimmer**. But unfortunately, it didn’t work.
 
@@ -45,9 +45,9 @@ Why? Turns out this type of dimmer is **“sinking”**, meaning it doesn’t ou
 
 ## Second Attempt: Shelly Dimmer 0/1–10V PM Gen3
 
-Luckily, **Shelly now offers a sourcing-type dimmer**: the **Shelly Dimmer 0/1–10V PM Gen3**.
+Luckily, Shelly now offers a sourcing-type dimmer: the **Shelly Dimmer 0/1–10V PM Gen3**.
 
-Ordered that one, wired it up... and **whola!** It works 🎉
+Ordered that one, wired it up... and whola! **It works** 🎉
 
 Now I can control the ventilation system directly from the **Shelly app**, or automate it with other smart home triggers.
 
@@ -56,5 +56,9 @@ Now I can control the ventilation system directly from the **Shelly app**, or au
 Check out the diagram below to see how I connected the dimmer to the ventilation unit. It's fairly straightforward and should work with most 0–10V controlled systems.
 
 *(Image goes here)*
+
+This is how it looks in my ventilation box.
+
+<MdxCustomPicture description="Real life wiring" />
 
 # Now onto connecting it in home assistant.
