@@ -76,3 +76,17 @@ Here is a screenshot, and as a bonus you also get the current wattage and voltag
 <MdxCustomPicture image="/../src/assets/IMG_5268.PNG" description="A screenshot of the Shelly app showing the control of the Buva Qstrea" />
 
 ## Home Assistant
+
+First off go to integrations and add the Shelly unit to your home assistant, it should auto discover it.
+
+Once it is available in Home Assistant we need to use it in an automation, I chose to use this [automation from Blacky.\
+](https://community.home-assistant.io/t/bathroom-humidity-exhaust-fan/509992)Follow the steps on that page on how to setup the derivative humidity sensor.
+
+2 Tips for using this automation with the Shelly:
+
+1. I made an shower boolean setting: settings>helpers> new input boolean\
+   Used that sensor as the fan entity in the automation
+2. And then use the lights section to link to the actual Shelly.\
+   You can use the brightness to control the speed.
+
+<MdxCustomPicture image="/../src/assets/Screenshot 2025-05-05 at 21.52.23.png" description="Home Assistant mechanical ventilation automation with Shelly" />
