@@ -26,15 +26,15 @@ stages:
     jobs:
       - template: pipelines/build-astro.yml@templates
 
-  - stage: Develop
-    displayName: '1: Develop'
-    dependsOn: Build_Astro
-    jobs:
-      - template: pipelines/release-astro.yml@templates
-        parameters:
-          stack: "dev"
-          environmentName: "dev"
-          projectName: "william_portfolio"
+  # - stage: Develop
+  #   displayName: '1: Develop'
+  #   dependsOn: Build_Astro
+  #   jobs:
+  #     - template: pipelines/release-astro.yml@templates
+  #       parameters:
+  #         stack: "dev"
+  #         environmentName: "dev"
+  #         projectName: "william_portfolio"
 
   - stage: Production
     displayName: '2: Production'
