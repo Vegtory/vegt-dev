@@ -42,7 +42,6 @@ stages:
     jobs:
       - template: pipelines/release-astro.yml@templates
         parameters:
-          stack: "prod"
           environmentName: "prd"
           projectName: "william_portfolio"
 
