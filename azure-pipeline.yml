@@ -43,5 +43,5 @@ stages:
       - template: pipelines/release-astro.yml@templates
         parameters:
           environmentName: "prd"
-          projectName: "william_portfolio"
+          projectName: "vegt"
 
