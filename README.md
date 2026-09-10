@@ -27,7 +27,7 @@ git submodule update --init
 | `pnpm check` | typecheck |
 | `pnpm check:template` | which copied components have upstream updates |
 | `pnpm dev:worker` | `wrangler dev` — the only way to exercise `/api/contact` |
-| `pnpm deploy` | `astro build && wrangler deploy` |
+| `pnpm run deploy` | `astro build && wrangler deploy` (the `run` is required — see below) |
 
 `pnpm dev` does not serve `/api/contact`; that route belongs to the Worker.
 
@@ -59,8 +59,12 @@ gitignored `.dev.vars`.
 Then:
 
 ```bash
-pnpm deploy
+pnpm run deploy
 ```
+
+`pnpm deploy` without `run` will **not** work: `deploy` is a built-in pnpm
+command for deploying a package out of a workspace, and it shadows the script.
+Always write `pnpm run deploy`.
 
 There is no infrastructure-as-code in the repo. DNS and any storage buckets are
 managed in the Cloudflare dashboard, or with `wrangler` directly — for example
