@@ -90,8 +90,12 @@ pnpm build           # static build to dist/
 pnpm check           # astro check (typecheck) - run before committing
 pnpm check:template  # which copied components have upstream updates
 pnpm dev:worker      # wrangler dev, the only way to test /api/contact
-pnpm deploy          # astro build && wrangler deploy
+pnpm run deploy      # astro build && wrangler deploy
 ```
+
+> **`pnpm run deploy`, never `pnpm deploy`.** `deploy` is a built-in pnpm
+> command for deploying a package out of a workspace, and it shadows the
+> script — `pnpm deploy` will fail rather than deploy the site.
 
 > `pnpm dev` does **not** serve `/api/contact`. That route belongs to the
 > Worker, so the contact form only works under `pnpm dev:worker`. This is the
