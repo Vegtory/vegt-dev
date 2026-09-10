@@ -1,0 +1,275 @@
+---
+/**
+ * @component CustomPicture
+ * @version   1.0.0
+ * @updated   2026-09-10
+ * @source    astro-template@10c3958
+ * @copied    2026-09-10
+ * @modified  false
+ */
+import { getImage } from "astro:assets";
+import type { ImageMetadata } from "astro";
+import sharp from "sharp";
+import { resolve } from "path";
+import TextRender from "@ui/TextRender.astro";
+
+export interface Props {
+  /** A path under src/assets (any shape), an ImageMetadata, or an external URL. */
+  srcImagePath: string | ImageMetadata;
+  alt?: string;
+  subText?: string;
+  classes?: string;
+  sizes?: string;
+  loading?: "eager" | "lazy";
+  /** 1-100; defaults to 40, which is plenty for photographic content. */
+  qualityOverride?: number;
+  priority?: boolean;
+  widthsOverride?: number[];
+}
+
+const {
+  alt,
+  srcImagePath,
+  classes,
+  sizes,
+  loading,
+  qualityOverride,
+  subText,
+  priority,
+  widthsOverride,
+} = Astro.props;
+
+function isImageMetadata(value: unknown): value is ImageMetadata {
+  return typeof value === "object" && value !== null && "src" in value && "width" in value && "height" in value;
+}
+
+function toImageMetadata(value: unknown): ImageMetadata | undefined {
+  if (isImageMetadata(value)) {
+    return value;
+  }
+
+  if (typeof value === "object" && value !== null && "default" in value) {
+    const moduleDefault = (value as { default?: unknown }).default;
+
+    if (isImageMetadata(moduleDefault)) {
+      return moduleDefault;
+    }
+  }
+
+  return undefined;
+}
+
+const directImage = toImageMetadata(srcImagePath);
+const safeClasses = classes ?? "";
+
+const rawImagePath = typeof srcImagePath === "string"
+  ? srcImagePath
+  : directImage?.src ?? "";
+const directImageUrl = typeof srcImagePath === "string"
+  && !rawImagePath.includes("/src/assets/")
+  && /^(?:https?:)?\/\/|^\/|^\.\//.test(rawImagePath)
+  ? rawImagePath
+  : undefined;
+
+// Clean the image path - remove leading slashes and normalize
+const cleansedImagePath = rawImagePath
+  ?.toString()
+  .replace(/^\/+/, '') // Remove leading slashes
+  .replace(/^src\/assets\//, '') // Remove src/assets/ prefix if present
+  .split("/")
+  .slice(-1)?.[0]
+  .split(".")?.[0] ?? '';
+
+const imageModules = import.meta.glob("/src/assets/**/*", { eager: true }) as Record<string, unknown>;
+const foundImages = Object.values(imageModules)
+  .map((imageModule) => toImageMetadata(imageModule))
+  .filter((imageModule): imageModule is NonNullable<typeof imageModule> => Boolean(imageModule));
+let hasFailed = false;
+
+if (!cleansedImagePath && !directImageUrl) {
+  hasFailed = true;
+}
+
+const matchesByBasename = foundImages.filter((imageModule) => {
+  const imageName = imageModule.src;
+  const imageFileName = imageName.split('/').pop()?.split('?')[0]?.split('.')[0];
+  return imageFileName === cleansedImagePath;
+});
+
+if (matchesByBasename.length > 1) {
+  console.warn(
+    `Ambiguous image "${cleansedImagePath}": ${matchesByBasename.length} files under src/assets share this basename. ` +
+      `Using the first. Pass an imported ImageMetadata instead to disambiguate.`,
+    matchesByBasename.map((imageModule) => imageModule.src),
+  );
+}
+
+const resolvedFromAssets = matchesByBasename[0];
+
+const passedImage = directImage ?? resolvedFromAssets;
+
+let webpsSrcSet;
+let jpegsSrcSet;
+let jpeg;
+let fixedAspectRatio;
+
+if (!hasFailed && !passedImage && !directImageUrl) {
+  console.error(
+    `Could not find image ${cleansedImagePath}. Available images:`,
+    foundImages.map((imageModule) => imageModule.src),
+  );
+  hasFailed = true;
+}
+
+if (!hasFailed && passedImage) {
+  const resolvedImage = passedImage;
+
+  const defaultWidths = [240, 480, 720, 960];
+  const imageWidths = (widthsOverride ?? defaultWidths).filter((w) => w <= resolvedImage.width);
+
+  if (imageWidths.length === 0) {
+    imageWidths.push(resolvedImage.width);
+  }
+
+  let quality = qualityOverride ?? 40;
+
+  // AVIF is intentionally not generated: its encoder is ~5-10x slower than
+  // WebP (especially at large widths / high quality), which pushes the gallery
+  // build past the host's 1-hour limit. WebP (~97% browser support) with a
+  // JPEG fallback covers all browsers at near-identical visual quality.
+  let webpsGen = await getImage({
+    src: resolvedImage,
+    format: "webp",
+    quality: quality,
+    widths: imageWidths,
+  });
+  let jpegsGen = await getImage({
+    src: resolvedImage,
+    format: "jpeg",
+    quality: quality,
+    widths: imageWidths,
+  });
+
+  webpsSrcSet = webpsGen.srcSet.attribute;
+  jpegsSrcSet = jpegsGen.srcSet.attribute;
+
+  // Select appropriate default size based on typical display - prefer smaller images
+  const getImageUrl = (srcSet: any) => {
+    const values = srcSet.values;
+    // Prefer smaller images to reduce bandwidth
+    return values.find((s: any) => s.descriptor === "200w")?.url ??
+           values.find((s: any) => s.descriptor === "160w")?.url ??
+           values.find((s: any) => s.descriptor === "240w")?.url ??
+           values[0]?.url ??
+           values[values.length - 1]?.url;
+  };
+
+  jpeg = getImageUrl(jpegsGen.srcSet);
+
+  fixedAspectRatio = resolvedImage.width / resolvedImage.height;
+}
+
+let bgColor: string | undefined;
+if (!hasFailed && passedImage) {
+  try {
+    // Astro 5 puts the on-disk path on local ImageMetadata. Prefer it: images
+    // that arrive through a content-collection `image()` field are fresh
+    // objects, so matching the glob by reference identity would miss them and
+    // silently drop the blur-up placeholder. Fall back to matching on `.src`.
+    const fsPath = (passedImage as { fsPath?: string }).fsPath;
+    const globPath = Object.entries(imageModules).find(
+      ([, mod]) => toImageMetadata(mod)?.src === passedImage.src,
+    )?.[0];
+    const absolutePath =
+      fsPath ?? (globPath ? resolve(process.cwd(), globPath.replace(/^\//, "")) : undefined);
+
+    if (absolutePath) {
+      const { data } = await sharp(absolutePath)
+        .resize(15, null, { fit: "inside" })
+        .blur(2)
+        .jpeg({ quality: 10 })
+        .toBuffer({ resolveWithObject: true });
+      const base64 = data.toString("base64");
+      bgColor = `url(data:image/jpeg;base64,${base64}) center/cover no-repeat`;
+    }
+  } catch (_) {}
+}
+---
+
+{
+  !hasFailed ? (
+    <div>
+      <div
+        class={`relative z-0 overflow-hidden ${safeClasses}`}
+        style={
+          safeClasses.includes("aspect-")
+            ? ""
+            : `aspect-ratio: ${fixedAspectRatio};`
+        }
+      >
+        {!rawImagePath.endsWith("svg") && (
+          <div
+            class="absolute w-full h-full flex justify-center items-center"
+            class:list={[!bgColor && "bg-secondary-200"]}
+            style={bgColor ? `background: ${bgColor}; filter: blur(20px); transform: scale(1.15)` : undefined}
+          >
+            {!bgColor && <svg
+              aria-hidden="true"
+              class="w-8 h-8 mr-2 text-accent-200 animate-spin fill-accent-500"
+              viewBox="0 0 100 101"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z"
+                fill="currentColor"
+              />
+              <path
+                d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z"
+                fill="currentFill"
+              />
+            </svg>}
+          </div>
+        )}
+        {bgColor && (
+          <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
+            <div class="w-5 h-5 rounded-full border-2 border-white/20 border-t-white/60 animate-spin" />
+          </div>
+        )}
+        {directImageUrl ? (
+          <img
+            src={directImageUrl}
+            alt={alt}
+            class="absolute inset-0 object-cover w-full h-full !m-0 !rounded-none"
+            loading={loading}
+            decoding="async"
+            fetchpriority={priority ? "high" : "auto"}
+          />
+        ) : (
+          <picture>
+            <source type="image/webp" srcset={webpsSrcSet} sizes={sizes} />
+            <source srcset={jpegsSrcSet} sizes={sizes} />
+            <img
+              src={jpeg as any}
+              alt={alt}
+              class="absolute inset-0 object-cover w-full h-full !m-0 !rounded-none"
+              width={passedImage?.width}
+              height={passedImage?.height}
+              loading={loading}
+              decoding="async"
+              fetchpriority={priority ? "high" : "auto"}
+            />
+          </picture>
+        )}
+      </div>
+      {subText && (
+        <span class="text-gray-500 text-xs ml-1 z-10">
+          <TextRender>{subText}</TextRender>
+        </span>
+      )}
+    </div>
+  ) : srcImagePath ? (
+    <div class="bg-red-100 text-red-700 border-l-8 rounded-md border-red-500 p-4">
+      <p>Could not find image</p>
+    </div>
+  ) : null
+}

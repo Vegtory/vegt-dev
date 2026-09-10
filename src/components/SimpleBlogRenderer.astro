@@ -1,0 +1,96 @@
+---
+/**
+ * @component SimpleBlogRenderer
+ * @version   1.0.0
+ * @updated   2026-09-10
+ * @source    astro-template@10c3958
+ * @copied    2026-09-10
+ * @modified  false
+ */
+import { getCollection } from "astro:content";
+import CustomPicture from "@ui/CustomPicture.astro";
+import TextRender from "@ui/TextRender.astro";
+
+export interface Props {
+  title?: string;
+  subtitle?: string;
+}
+
+const { title = "", subtitle = "" } = Astro.props;
+
+const collectionName = "blog";
+const allBlogs = await getCollection(collectionName);
+---
+
+<div class="bg-background py-16 sm:py-20">
+  <div class="mx-auto max-w-7xl px-6 lg:px-8">
+    <div class="mx-auto max-w-2xl text-center">
+      <h3 class="text-base font-semibold leading-7 text-secondaryText">
+        <TextRender>{subtitle}</TextRender>
+      </h3>
+      <h2
+        class="text-accentText mt-2 text-3xl font-bold tracking-tight sm:text-4xl"
+      >
+        <TextRender>{title}</TextRender>
+      </h2>
+      <div class="mt-6 text-lg leading-8 text-blackText">
+        <slot />
+      </div>
+    </div>
+    <div
+      class="mx-auto mt-16 grid max-w-2xl grid-cols-1 gap-x-8 gap-y-20 lg:mx-0 lg:max-w-none lg:grid-cols-3"
+    >
+      {
+        allBlogs
+          .filter(({ data }: any) => !data.ishidden)
+          .sort((a: any, b: any) => new Date(b.data.date).getTime() - new Date(a.data.date).getTime())
+          .slice(0, 3)
+          .map(({ id, data }: any) => (
+            <article>
+              <a href={`/blog/${id}`}>
+                <div class="relative w-full">
+                  <CustomPicture
+                    alt={data.description}
+                    classes="aspect-[16/9] w-full rounded-2xl object-cover sm:aspect-[2/1] lg:aspect-[3/2]"
+                    sizes="(min-width: 1360px) 384px, (min-width: 1040px) calc(26.67vw + 27px), (min-width: 760px) 672px, calc(95.45vw - 34px)"
+                    srcImagePath={data.imageItem.image}
+                    loading="lazy"
+                  />
+                  <div class="absolute inset-0 rounded-2xl ring-1 ring-inset ring-gray-900/10" />
+                </div>
+              </a>
+              <div class="max-w-xl">
+                <div class="mt-8 flex items-center gap-x-4 text-xs">
+                  <time datetime={data.date} class="text-gray-500">
+                    {new Date(data.date).toDateString()}
+                  </time>
+                </div>
+                <div class="group relative">
+                  <h3 class="mt-3 text-lg font-semibold leading-6 text-gray-900 group-hover:text-gray-600">
+                    <a href={`/blog/${id}`}>
+                      <span class="absolute inset-0" />
+                      <TextRender>{data.title}</TextRender>
+                    </a>
+                  </h3>
+                  <p class="mt-5 line-clamp-3 text-sm leading-6 text-gray-600">
+                    <TextRender>{data.description}</TextRender>
+                  </p>
+                </div>
+              </div>
+            </article>
+          ))
+      }
+    </div>
+    <div class="mt-12 text-center">
+      <a
+        href="/blog"
+        class="inline-flex items-center gap-2 text-sm font-semibold text-accentText hover:opacity-75 transition-opacity"
+      >
+        Alle artikelen bekijken
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+        </svg>
+      </a>
+    </div>
+  </div>
+</div>
