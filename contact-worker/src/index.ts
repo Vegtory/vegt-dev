@@ -9,20 +9,43 @@ export default {
     }
 
     const origin = req.headers.get("Origin");
-    const allowedOrigins = env.CORS_ORIGINS
-      ? env.CORS_ORIGINS.split(";").map((o) => o.trim())
-      : [];
-    const defaultResponseHeaders = {
-      "Access-Control-Allow-Origin": `${allowedOrigins.includes(origin) ? origin : "*"}`,
-      "Access-Control-Allow-Methods": "POST, OPTIONS",
-      "Access-Control-Allow-Headers": "Content-Type",
+    const allowedOrigins: string[] = (env.CORS_ORIGINS ?? "")
+      .split(";")
+      .map((o: string) => o.trim())
+      .filter(Boolean);
+
+    const isAllowedOrigin = origin !== null && allowedOrigins.includes(origin);
+
+    // Only ever echo back an origin that is actually on the list. A wildcard
+    // here would let any site on the internet POST this form from a visitor's
+    // browser. `Vary: Origin` keeps a cache from serving one origin's response
+    // to another.
+    const corsHeaders: Record<string, string> = {
+      Vary: "Origin",
+      ...(isAllowedOrigin
+        ? {
+            "Access-Control-Allow-Origin": origin,
+            "Access-Control-Allow-Methods": "POST, OPTIONS",
+            "Access-Control-Allow-Headers": "Content-Type",
+          }
+        : {}),
     };
+
+    // A browser always sends Origin on a cross-site POST, so an Origin that is
+    // present but not on the list is a cross-site caller: refuse before doing
+    // any work, preflight included. A *missing* Origin is a non-browser client
+    // (curl, an uptime check), which CORS was never able to police anyway --
+    // the honeypot and validation below are what actually guard against abuse.
+    if (origin !== null && !isAllowedOrigin) {
+      console.log("Rejected request from disallowed origin:", origin);
+      return new Response("Forbidden", { status: 403, headers: corsHeaders });
+    }
 
     // 1. Handle preflight
     if (req.method === "OPTIONS") {
       return new Response(null, {
         status: 204,
-        headers: defaultResponseHeaders,
+        headers: corsHeaders,
       });
     }
 
@@ -30,7 +53,7 @@ export default {
       console.log("Method not allowed:", req.method);
       return new Response("Method Not Allowed", {
         status: 405,
-        headers: defaultResponseHeaders,
+        headers: corsHeaders,
       });
     }
 
@@ -49,7 +72,7 @@ export default {
         console.log(`Missing or invalid env var: ${key}`);
         return new Response("Internal Server Error", {
           status: 500,
-          headers: defaultResponseHeaders,
+          headers: corsHeaders,
         });
       }
     }
@@ -69,7 +92,7 @@ export default {
         console.log("Missing fields in request body", data);
         return new Response("Bad Request: Missing required fields", {
           status: 400,
-          headers: defaultResponseHeaders,
+          headers: corsHeaders,
         });
       }
       // Sanitize and validate all user input
@@ -79,7 +102,7 @@ export default {
         console.log("Invalid email address:", data.email);
         return new Response("Bad Request: Invalid email address", {
           status: 400,
-          headers: defaultResponseHeaders,
+          headers: corsHeaders,
         });
       }
       // Only escape and strip low, do not trim, to preserve all newlines
@@ -92,14 +115,14 @@ export default {
       console.log("Validation error:", err);
       return new Response("Bad Request: Validation error", {
         status: 400,
-        headers: defaultResponseHeaders,
+        headers: corsHeaders,
       });
     }
 
     if (data.ph0ne) {
       console.log("Returned early, received honeypot text", JSON.stringify(data))
       return new Response("OK", {
-        headers: defaultResponseHeaders,
+        headers: corsHeaders,
       });
     }
 
@@ -120,7 +143,7 @@ export default {
       console.log("SMTP connect error:", err);
       return new Response("Internal Server Error", {
         status: 500,
-        headers: defaultResponseHeaders,
+        headers: corsHeaders,
       });
     }
 
@@ -151,13 +174,13 @@ export default {
       console.log("Send error:", err);
       return new Response("Internal Server Error", {
         status: 500,
-        headers: defaultResponseHeaders,
+        headers: corsHeaders,
       });
     }
 
     // 3. Attach CORS on the actual response
     return new Response("OK", {
-      headers: defaultResponseHeaders,
+      headers: corsHeaders,
     });
   },
 };

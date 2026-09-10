@@ -1,7 +1,10 @@
 {
   "extends": "astro/tsconfigs/strict",
   "include": [".astro/types.d.ts", "**/*"],
-  "exclude": ["dist", "astro-template/astro/icons"],
+  // cdktf/ is a separate project with its own tsconfig and its own dependency
+  // tree, installed only when you actually run it. Typechecking it from here
+  // would just report its uninstalled imports as missing.
+  "exclude": ["dist", "astro-template/astro/icons", "cdktf"],
   "compilerOptions": {
     "strict": true,
     "strictNullChecks": true,
