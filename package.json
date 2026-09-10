@@ -1,39 +1,38 @@
 {
-	"name": "wil-astro-starter",
-	"type": "module",
-	"version": "0.0.1",
-	"imports": {
-		"#template/*": "./astro-template/astro/*",
-		"#template-root/*": "./astro-template/*"
-	},
-	"scripts": {
-		"dev": "npm run update && npx tinacms dev -c \"astro dev --port 8080\"",
-		"start": "npm run update && npx tinacms dev -c \"astro dev --port 8080\"",
-		"build": "npm run update && npx tinacms build && astro build",
-		"preview": "astro preview --port 8080",
-		"update": "cp -R ./astro-template/update-files/* ./"
-	},
-	"dependencies": {
-		"@astrojs/mdx": "^4.0.6",
-		"@astrojs/sitemap": "^3.2.1",
-		"@astrojs/svelte": "^7.0.3",
-		"@astrojs/tailwind": "^5.1.4",
-		"@tinacms/cli": "^1.8.0",
-		"astro": "^5.1.7",
-		"astro-icon": "^1.1.5",
-		"fs-extra": "^11.3.0",
-		"svelte": "^5.19.0",
-		"tailwind-fontawesome": "^0.7.1",
-		"tailwindcss": "^3.4.17",
-		"tinacms": "^2.6.0"
-	},
-	"devDependencies": {
-		"@types/node": "^22.10.7",
-		"prettier": "^3.4.2",
-		"prettier-plugin-tailwindcss": "^0.6.10",
-		"dotenv": "^16.4.7",
-        "dotenv-cli": "^8.0.0",
-		"ts-node": "^10.9.2",
-		"typescript": "^5.8.2"
-	}
+  "name": "vegt-dev",
+  "type": "module",
+  "version": "1.0.0",
+  "private": true,
+  "packageManager": "pnpm@10.29.1",
+  "scripts": {
+    "dev": "astro dev --port 8080",
+    "start": "astro dev --port 8080",
+    "build": "astro build",
+    "preview": "wrangler dev",
+    "dev:worker": "wrangler dev",
+    "deploy": "astro build && wrangler deploy",
+    "check": "astro check",
+    "check:template": "node scripts/check-template-updates.mjs"
+  },
+  "dependencies": {
+    "@astrojs/mdx": "^4.0.6",
+    "@astrojs/sitemap": "^3.2.1",
+    "@astrojs/tailwind": "^5.1.5",
+    "@tailwindcss/typography": "^0.5.16",
+    "astro": "^5.18.1",
+    "astro-icon": "^1.1.5",
+    "mimetext": "^3.0.24",
+    "sharp": "^0.33.5",
+    "tailwindcss": "^3.4.17",
+    "validator": "^13.12.0",
+    "worker-mailer": "^1.0.4"
+  },
+  "devDependencies": {
+    "@types/node": "^22.13.1",
+    "prettier": "^3.6.2",
+    "prettier-plugin-astro": "^0.14.1",
+    "prettier-plugin-tailwindcss": "^0.6.11",
+    "typescript": "^5.9.2",
+    "wrangler": "^4.23.0"
+  }
 }

@@ -1,5 +1,0 @@
-User-agent: *
-Disallow: /2edit
-Allow: /
-
-Sitemap: https://www.vegt.dev/sitemap-index.xml

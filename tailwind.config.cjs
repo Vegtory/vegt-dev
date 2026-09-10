@@ -1,77 +1,14 @@
-import templateConfig from "#template-root/tailwind.config.cjs";
-
-templateConfig.theme = {
-  // fontFamily: {
-  //   'sans': ['ui-sans-serif', 'system-ui', ...],
-  //   'serif': ['ui-serif', 'Georgia', ...],
-  //   'mono': ['ui-monospace', 'SFMono-Regular', ...],
-  //   'display': ['Oswald', ...],
-  //   'body': ['"Open Sans"', ...],
-  // },
-  extend: {
-    ...templateConfig.theme.extend,
-    colors: {
-      ...templateConfig.theme.extend.colors,
-      secondary: {
-        50: "#ecffff",
-        100: "#d0fcfd",
-        200: "#a6f6fb",
-        300: "#69edf7",
-        400: "#24daec",
-        500: "#08bdd2",
-        600: "#0a97b0",
-        700: "#10788e",
-        800: "#166174",
-        900: "#175162",
-        950: "#093643",
-      },
-      primary: {
-        50: "#f1f7fe",
-        100: "#e1eefd",
-        200: "#bddcfa",
-        300: "#83bff6",
-        400: "#419fef",
-        500: "#1882df",
-        600: "#0a5eb0",
-        700: "#0a519a",
-        800: "#0d457f",
-        900: "#103b6a",
-        950: "#0b2546",
-      },
-      accent: {
-        50: "#ecffff",
-        100: "#d0fcfd",
-        200: "#a6f6fb",
-        300: "#69edf7",
-        400: "#24daec",
-        500: "#08bdd2",
-        600: "#0a97b0",
-        700: "#10788e",
-        800: "#166174",
-        900: "#175162",
-        950: "#093643",
-      },
-      background: {
-        50: "#f9f8f6",
-        100: "#f9f8f6",
-        200: "#f9f8f6",
-        300: "#f9f8f6",
-        400: "#f9f8f6",
-        500: "#f9f8f6",
-        600: "#f9f8f6",
-        700: "#f9f8f6",
-        800: "#f9f8f6",
-        900: "#f9f8f6",
-      },
-      background: "#f9f8f6",
-      blackText: "#000",
-      whiteText: "#f9f8f6",
-      primaryText: "#233040",
-      secondaryText: "#111627",
-      accentText: "#08bdd2",
+/** @type {import('tailwindcss').Config} */
+module.exports = {
+  // The preset supplies the design tokens, the typography plugin and its own
+  // content glob for astro-template/. Tailwind concatenates `content` and
+  // deep-merges `theme.extend`, so anything set here adds to it.
+  presets: [require("./astro-template/tailwind.preset.cjs")],
+  content: ["./src/**/*.{astro,html,js,jsx,md,mdx,svelte,ts,tsx,vue}"],
+  theme: {
+    extend: {
+      // Site-specific overrides go here. The preset's defaults are already the
+      // vegt.dev palette, so there is nothing to override yet.
     },
   },
 };
-
-/** @type {import('tailwindcss').Config} */
-module.exports = templateConfig;
