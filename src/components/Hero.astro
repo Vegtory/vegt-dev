@@ -200,6 +200,11 @@ const portrait = imageItems[0];
       {
         portrait?.image && (
           <div class="shrink-0 motion-safe:animate-rise-in" style="animation-delay: 200ms;">
+            {/* Quality is set high here on purpose: the portrait is a few
+                hundred pixels square, so the bytes are single-digit KB, and it
+                is the only photo of a face on the page and sits above the
+                fold. What caps its sharpness is the source asset, which is
+                400x400 — see "Things that will bite" in CLAUDE.md. */}
             <div class="rounded-2xl border border-white/10 bg-white/5 p-2 shadow-2xl">
               <CustomPicture
                 alt={portrait.description}
@@ -207,7 +212,7 @@ const portrait = imageItems[0];
                 sizes="(max-width: 639px) 176px, (max-width: 767px) 224px, 256px"
                 srcImagePath={portrait.image}
                 priority={true}
-                qualityOverride={60}
+                qualityOverride={82}
               />
             </div>
           </div>

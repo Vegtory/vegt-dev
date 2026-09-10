@@ -5,7 +5,13 @@
  * @updated   2026-09-10
  * @source    astro-template@10c3958
  * @copied    2026-09-10
- * @modified  false
+ * @modified  true
+ *
+ * Modified, in two places — both bugs are still upstream in astro-template:
+ *   - `imageWidths`: the width ladder now offers the image's own width as a
+ *     top rung when it falls between two fixed steps.
+ *   - `baseWidth`: pins `getImage`'s base render to a width already in the
+ *     srcSet, instead of letting it emit an unreferenced full-size encode.
  */
 import { getImage } from "astro:assets";
 import type { ImageMetadata } from "astro";
@@ -125,10 +131,41 @@ if (!hasFailed && passedImage) {
   const resolvedImage = passedImage;
 
   const defaultWidths = [240, 480, 720, 960];
-  const imageWidths = (widthsOverride ?? defaultWidths).filter((w) => w <= resolvedImage.width);
+  const ladder = widthsOverride ?? defaultWidths;
+  const nativeWidth = resolvedImage.width;
+
+  /**
+   * Rungs the source can actually fill, plus the source's own width.
+   *
+   * Filtering the fixed ladder alone throws away every pixel between the
+   * source and the rung below it: a 400px portrait kept only `[240]` and was
+   * served at 240w into a 176px slot on a 3x phone — a 2.2x upscale, and the
+   * reason the hero looked soft. Seven images in this repo were losing
+   * resolution that way, the hero worst at 40%.
+   *
+   * Two guards keep this from inflating the build, which matters here: the
+   * gallery already emits ~700 variants and AVIF was dropped over exactly that
+   * budget.
+   *
+   *  - Above the top of the ladder the fixed rungs already cover the useful
+   *    range, so the native width is skipped. Otherwise every one of the ~44
+   *    gallery originals would get a full-resolution variant.
+   *  - Below it, the rung is only worth encoding if it is meaningfully wider
+   *    than the best fixed rung underneath. A 740px source over a 720 rung is
+   *    a 2.8% gain nobody can see, for a full extra encode per format.
+   */
+  const MIN_GAIN = 1.1;
+  const rungs = ladder.filter((w) => w <= nativeWidth);
+  const bestRung = rungs.length ? Math.max(...rungs) : 0;
+  const nativeIsWorthIt =
+    nativeWidth <= Math.max(...ladder) && nativeWidth >= bestRung * MIN_GAIN;
+
+  const imageWidths = [
+    ...new Set([...rungs, ...(nativeIsWorthIt ? [nativeWidth] : [])]),
+  ].sort((a, b) => a - b);
 
   if (imageWidths.length === 0) {
-    imageWidths.push(resolvedImage.width);
+    imageWidths.push(nativeWidth);
   }
 
   let quality = qualityOverride ?? 40;
@@ -137,16 +174,29 @@ if (!hasFailed && passedImage) {
   // WebP (especially at large widths / high quality), which pushes the gallery
   // build past the host's 1-hour limit. WebP (~97% browser support) with a
   // JPEG fallback covers all browsers at near-identical visual quality.
+
+  // `width` is pinned to the largest rung on purpose. `getImage` renders a
+  // base image for its `src` return value *in addition to* the srcSet, and
+  // this component only ever uses the srcSet. Left unpinned that base render
+  // comes out at the source's full size: a second, unreferenced encode per
+  // format per image, up to 2560px for a gallery photo. Measured on this site
+  // it was 94 orphan files and 15.8MB shipped to the CDN, and ~6s of the image
+  // build. Pinning it to a width already in `widths` makes it resolve to a
+  // file being built anyway, so it costs nothing.
+  const baseWidth = imageWidths[imageWidths.length - 1];
+
   let webpsGen = await getImage({
     src: resolvedImage,
     format: "webp",
     quality: quality,
+    width: baseWidth,
     widths: imageWidths,
   });
   let jpegsGen = await getImage({
     src: resolvedImage,
     format: "jpeg",
     quality: quality,
+    width: baseWidth,
     widths: imageWidths,
   });
 
@@ -156,7 +206,8 @@ if (!hasFailed && passedImage) {
   // Select appropriate default size based on typical display - prefer smaller images
   const getImageUrl = (srcSet: any) => {
     const values = srcSet.values;
-    // Prefer smaller images to reduce bandwidth
+    // Only the <img> fallback for browsers that ignore <source srcset>; every
+    // current browser picks from the srcset above, so keep this one small.
     return values.find((s: any) => s.descriptor === "200w")?.url ??
            values.find((s: any) => s.descriptor === "160w")?.url ??
            values.find((s: any) => s.descriptor === "240w")?.url ??

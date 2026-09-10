@@ -110,5 +110,12 @@ pnpm run deploy      # astro build && wrangler deploy
 - **The gallery is heavy.** A full build generates ~700 image variants and takes
   about 40 seconds. AVIF is deliberately not generated — its encoder is slow
   enough to have blown a build time limit.
+- **Source images need roughly 3x the pixels they are displayed at.** Phones
+  are DPR 2-3, so a photo shown in a 256px slot wants a ~768px original.
+  `CustomPicture` generates variants at 240/480/720/960 plus the source's own
+  width, and it never upscales — hand it a 400px file and 400px is all any
+  screen gets, however large the slot. This is why the hero portrait
+  (`src/assets/image.jpeg`, 400x400) looks soft on a phone: replace it with a
+  ~1000px version and it sharpens with no code change.
 - **`PhotoCollage` reshuffles on every build.** The homepage collage picks four
   random gallery photos at build time, so consecutive deploys differ.
