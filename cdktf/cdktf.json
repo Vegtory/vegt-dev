@@ -1,0 +1,11 @@
+{
+  "language": "typescript",
+  "app": "npx ts-node --transpile-only main.ts",
+  "projectId": "37cd5174-d2da-4ddd-b722-f3d676836e93",
+  "sendCrashReports": "false",
+  "terraformProviders": [
+    "registry.terraform.io/cloudflare/cloudflare@~>5.5.0"
+  ],
+  "terraformModules": [],
+  "context": {}
+}
