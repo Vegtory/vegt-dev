@@ -20,13 +20,13 @@ After discussing the depth of the test and what the goals were, we decided to st
 
 This blog post will not go into the complicated ones. I think you'll be able to figure that out on your own after reading how easy it is.
 
-# How did I find Locust
+## How did I find Locust
 
 Since we had the infrastructure in Azure, I started looking into 'Azure Load Testing'. I had tried that before and it worked okay, but you had to use either JMeter scripts or set up curl commands. Both of those are not things most developers get excited by...
 
 But now they support 'Locust', and I must admit I had never heard of it. But it's great!
 
-# Starting with Locust
+## Starting with Locust
 
 How do you start? Simple! Let's do the following:
 
@@ -36,7 +36,7 @@ How do you start? Simple! Let's do the following:
 4. Then install Locust: `pip install locust`
 5. Create a new file `locustfile.py` in the root of the folder.
 
-## Creating a simple script
+### Creating a simple script
 
 Let's start with a simple script. I've hosted my website locally to start load testing it on my Mac. I'll continue writing in the comments.
 
@@ -94,7 +94,7 @@ And after running for a while, we can see stats. Turns out 100 users on my local
 
 Okay, now this was super simple. I'll show a slightly more complicated script.
 
-## Authentication and Parameters
+### Authentication and Parameters
 
 Most times you also need to authenticate and add parameters for the API calls.
 Let's read through this script:
@@ -201,36 +201,36 @@ class Starter(HttpUser):
 
 And now, within 100 rows, we have a load test that includes authentication with `Azure Entra ID` and allows for adding environment variables to pass a set of IDs.
 
-# Scaling Up: Running Your Locust Script in Azure Load Testing
+## Scaling Up: Running Your Locust Script in Azure Load Testing
 
 And this is what makes this go from good to great!
 The script we created and tested locally can simply be uploaded to `Azure Load Testing`, and we can add the parameters there directly or link a Key Vault.
 
 Let's try this:
 
-### 1. New load test resource
+#### 1. New load test resource
 
 Open the `Azure portal` & create a new `Azure Load Testing` resource.
 
-### 2. New Test
+#### 2. New Test
 
 Go to `Tests` in the left window and click `Create > Create test` (**not** a URL-based test).
 
-### 3. Upload your file
+#### 3. Upload your file
 
 Fill in all details and, when on the `Test` tab, upload your Locust file.
 Also upload `requirements.txt` if you need any packages.
 
 <MdxCustomPicture image="/../src/assets/test-file.png" description="Showing the Azure Portal Load Testing Test config tab" />
 
-### 4. Parameters
+#### 4. Parameters
 
 Add any environment variables you need in your script on the `parameters` tab.
 You can also just upload `csv` files next to your script.
 
 <MdxCustomPicture image="/../src/assets/test-parameters.png" description="Showing the Azure Portal Load Testing Test parameters tab" />
 
-### 5. Load
+#### 5. Load
 
 On the `Load` tab, you can select the number of users, and it will suggest the number of instances.
 You can have up to 400 instances by default, which is easily 200,000 users.
@@ -241,7 +241,7 @@ Also note, on the `Load` tab you can also run from within a VNET, which is very 
 
 <MdxCustomPicture image="/../src/assets/test-load.png" description="Showing the Azure Portal Load Testing Test load tab" />
 
-### 6. Extra: Azure resource monitoring
+#### 6. Extra: Azure resource monitoring
 
 On the monitoring tab, you can add resources that you think might be impacted by this load test.
 Say you call something that loads a SQL-database you could add that as a resource to monitor.
@@ -249,7 +249,7 @@ This will create a neatly organized overview after the test in which you can see
 
 <MdxCustomPicture image="/../src/assets/test-monitoring.png" description="Showing the Azure Portal Load Testing Test monitoring tab" />
 
-### Running the test
+#### Running the test
 
 When we have the test set up, we can run it by clicking `run`!
 You can monitor it while it's going, and after it is done you can look into how your load test went.

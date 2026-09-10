@@ -1,0 +1,96 @@
+---
+/**
+ * @component PhotoCollage
+ * @version   1.0.0
+ * @updated   2026-09-10
+ * @source    astro-template@0ad4fd0
+ * @copied    2026-09-10
+ * @modified  true
+ *
+ * Copied from the template and restyled onto this site's tokens.
+ *
+ * - The scattered rotations are gone. They fought the rest of the page, and
+ *   the tilt cropped the photographs at the corners of their own frames.
+ *   A straight grid with a hairline frame lets the photography carry itself.
+ * - The button comes from `@ui/Button.astro` rather than being the page's
+ *   only solid blue pill.
+ * - Heading pair comes from `@ui/SectionHeading.astro`.
+ */
+import type { ImageMetadata } from "astro";
+import CustomPicture from "@ui/CustomPicture.astro";
+import TextRender from "@ui/TextRender.astro";
+import SectionHeading from "@ui/SectionHeading.astro";
+import Button from "@ui/Button.astro";
+
+export interface CollageLink {
+  label: string;
+  link: string;
+}
+
+export interface Props {
+  title?: string;
+  subtitle?: string;
+  smallText?: string;
+  button?: CollageLink;
+}
+
+const {
+  title = "",
+  subtitle = "",
+  smallText = "",
+  button = { label: "", link: "" },
+} = Astro.props;
+
+// Pull every gallery image and pick up to four at random, so the homepage
+// shows a fresh selection on each build.
+const galleryImages = import.meta.glob<{ default: ImageMetadata }>(
+  "/src/assets/gallery/**/*.{jpg,jpeg,png,webp,avif,JPG,JPEG,PNG,WEBP,AVIF}",
+  { eager: true },
+);
+
+const pickedImages = Object.values(galleryImages)
+  .map((mod) => mod.default)
+  .sort(() => Math.random() - 0.5)
+  .slice(0, 4);
+---
+
+<section class="border-y border-hairline bg-surfaceMuted py-20 sm:py-28">
+  <div class="mx-auto max-w-6xl px-6 lg:px-8">
+    <div class="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
+      <SectionHeading eyebrow={subtitle} title={title} align="left" />
+      {
+        button?.link && (
+          <Button href={button.link} variant="secondary" arrow class="shrink-0">
+            <TextRender>{button.label}</TextRender>
+          </Button>
+        )
+      }
+    </div>
+
+    {
+      pickedImages.length > 0 && (
+        <div class="mt-12 grid grid-cols-2 gap-4 sm:gap-6 md:grid-cols-4">
+          {pickedImages.map((image) => (
+            <div class="group overflow-hidden rounded-2xl border border-hairline bg-surface p-2 shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-md">
+              <CustomPicture
+                alt="Een foto uit de gallerij"
+                classes="aspect-[4/5] w-full rounded-xl"
+                sizes="(min-width: 768px) 260px, 45vw"
+                srcImagePath={image}
+                loading="lazy"
+              />
+            </div>
+          ))}
+        </div>
+      )
+    }
+
+    {
+      smallText && (
+        <p class="mt-8 max-w-xl text-sm leading-relaxed text-mutedText">
+          <TextRender>{smallText}</TextRender>
+        </p>
+      )
+    }
+  </div>
+</section>

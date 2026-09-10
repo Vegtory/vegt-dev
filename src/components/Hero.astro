@@ -1,0 +1,190 @@
+---
+/**
+ * @component Hero
+ * @version   1.0.0
+ * @updated   2026-09-10
+ * @source    astro-template@0ad4fd0
+ * @copied    2026-09-10
+ * @modified  true
+ *
+ * Copied from the template and rebuilt as this site's brand anchor.
+ *
+ * What changed and why:
+ * - The blue gradient and the animated wave SVG are gone. The wave alone ate
+ *   ~200px of the viewport and forced the tag pills into an absolutely
+ *   positioned strip at `top-3/4`, where they clipped through it.
+ * - The nav moved out to `@ui/Header.astro`. It lived here as `hidden md:block`,
+ *   which is why the site had no mobile navigation whatsoever.
+ * - Added a real value proposition and calls to action. The old hero stated a
+ *   name and a job title and offered nowhere to go.
+ * - Tags are mono chips in the ink band rather than cyan pills; the cyan was
+ *   2.15:1 against its own background.
+ */
+import type { ImageMetadata } from "astro";
+import CustomPicture from "@ui/CustomPicture.astro";
+import TextRender from "@ui/TextRender.astro";
+import Button from "@ui/Button.astro";
+
+export interface ImageItem {
+  image: ImageMetadata | string;
+  description?: string;
+  subText?: string;
+}
+
+export interface HeroTag {
+  label: string;
+}
+
+export interface HeroLink {
+  label: string;
+  link: string;
+}
+
+export interface Props {
+  title?: string;
+  subtitle?: string;
+  /** One or two sentences saying what you actually do. */
+  intro?: string;
+  /** Small mono line above the name, e.g. a location or availability note. */
+  kicker?: string;
+  tags?: HeroTag[];
+  /** First is rendered solid, the rest outlined. */
+  ctas?: HeroLink[];
+  imageItems?: ImageItem[];
+}
+
+const {
+  title = "",
+  subtitle = "",
+  intro = "",
+  kicker = "",
+  tags = [],
+  ctas = [],
+  imageItems = [],
+} = Astro.props;
+
+const portrait = imageItems[0];
+---
+
+<style>
+  @keyframes heroIn {
+    from {
+      opacity: 0;
+      transform: translateY(14px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* Motion is an enhancement: without the media query the content is simply
+     already in place, rather than stuck at opacity 0 if animation never runs. */
+  @media (prefers-reduced-motion: no-preference) {
+    .hero-in {
+      opacity: 0;
+      animation: heroIn 0.6s ease-out forwards;
+    }
+  }
+</style>
+
+<section class="relative overflow-hidden bg-ink-950">
+  <!-- A faint dot grid. It is the one "developer" flourish in the band, and it
+       sits at 4% so it reads as texture rather than as a pattern. -->
+  <div
+    class="pointer-events-none absolute inset-0 opacity-[0.04]"
+    style="background-image: radial-gradient(#ffffff 1px, transparent 1px); background-size: 22px 22px;"
+    aria-hidden="true"
+  >
+  </div>
+  <!-- Warms the top-left corner just enough that the band is not a flat block. -->
+  <div
+    class="pointer-events-none absolute -left-40 -top-40 h-[28rem] w-[28rem] rounded-full bg-primary-600/20 blur-3xl"
+    aria-hidden="true"
+  >
+  </div>
+
+  <div class="relative mx-auto max-w-6xl px-6 py-20 sm:py-28 lg:px-8">
+    <div class="flex flex-col-reverse items-center gap-12 md:flex-row md:justify-between md:gap-16">
+      <div class="hero-in w-full max-w-xl text-center md:text-left">
+        {
+          kicker && (
+            <p class="flex items-center justify-center gap-2.5 font-mono text-xs font-medium uppercase tracking-[0.18em] text-accent-300 md:justify-start">
+              <span class="relative flex h-1.5 w-1.5" aria-hidden="true">
+                <span class="absolute inline-flex h-full w-full rounded-full bg-accent-400 opacity-75 motion-safe:animate-ping" />
+                <span class="relative inline-flex h-1.5 w-1.5 rounded-full bg-accent-400" />
+              </span>
+              <TextRender>{kicker}</TextRender>
+            </p>
+          )
+        }
+
+        <h1 class="mt-5 text-pretty text-4xl font-bold tracking-tight text-whiteText sm:text-5xl">
+          <TextRender>{title}</TextRender>
+        </h1>
+
+        {
+          subtitle && (
+            <p class="mt-3 font-mono text-sm text-accent-300 sm:text-base">
+              <TextRender>{subtitle}</TextRender>
+            </p>
+          )
+        }
+
+        {
+          intro && (
+            <p class="mt-6 text-pretty text-lg leading-relaxed text-ink-200">
+              <TextRender>{intro}</TextRender>
+            </p>
+          )
+        }
+
+        {
+          ctas.length > 0 && (
+            <div class="mt-9 flex flex-wrap justify-center gap-3 md:justify-start">
+              {ctas.map((cta, i) => (
+                <Button
+                  href={cta.link}
+                  tone="dark"
+                  variant={i === 0 ? "primary" : "secondary"}
+                  arrow={i === 0}
+                >
+                  <TextRender>{cta.label}</TextRender>
+                </Button>
+              ))}
+            </div>
+          )
+        }
+
+        {
+          tags.length > 0 && (
+            <ul class="mt-10 flex flex-wrap justify-center gap-2 md:justify-start">
+              {tags.map((t) => (
+                <li class="rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 font-mono text-xs text-ink-300">
+                  <TextRender>{t.label}</TextRender>
+                </li>
+              ))}
+            </ul>
+          )
+        }
+      </div>
+
+      {
+        portrait?.image && (
+          <div class="hero-in shrink-0" style="animation-delay: 0.15s;">
+            <div class="rounded-2xl border border-white/10 bg-white/5 p-2 shadow-2xl">
+              <CustomPicture
+                alt={portrait.description}
+                classes="w-44 rounded-xl sm:w-56 md:w-64"
+                sizes="(max-width: 639px) 176px, (max-width: 767px) 224px, 256px"
+                srcImagePath={portrait.image}
+                priority={true}
+                qualityOverride={60}
+              />
+            </div>
+          </div>
+        )
+      }
+    </div>
+  </div>
+</section>

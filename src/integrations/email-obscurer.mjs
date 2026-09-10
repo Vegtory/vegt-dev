@@ -18,10 +18,19 @@ function isHtmlResponse(contentType, html) {
 }
 
 function transformHtml(html) {
+  // Rewrite the href and nothing else.
+  //
+  // This used to also inject `class="email-obscured-link"` and an inline
+  // `style="color:#2563eb;text-decoration:underline"`. Both landed *before*
+  // the element's own class attribute, and duplicate attributes resolve to the
+  // first occurrence, so the injected pair won: every mailto link on the site
+  // rendered in a browser-blue that appears nowhere in the palette, whatever
+  // classes the author had put on it. Obscuring the address is this
+  // integration's job; deciding what a link looks like is the page's.
   let result = html.replace(
     /href=(["'])mailto:([^"']+)\1/gi,
     (_, __, mailtoTarget) =>
-      `href="#" data-mailto="${escapeHtmlAttribute(reverseEmail(`mailto:${mailtoTarget}`))}" class="email-obscured-link" style="cursor:pointer;color:#2563eb;text-decoration:underline;" onmouseover="this.style.color='#1d4ed8'" onmouseout="this.style.color='#2563eb'" onclick="window.location.href=(this.dataset.mailto||'').split('').reverse().join(''); return false;"`,
+      `href="#" data-email-obscured data-mailto="${escapeHtmlAttribute(reverseEmail(`mailto:${mailtoTarget}`))}" onclick="window.location.href=(this.dataset.mailto||'').split('').reverse().join(''); return false;"`,
   );
 
   result = result.replace(/>([^<]+)</g, (match, text) => {

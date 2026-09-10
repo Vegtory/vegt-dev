@@ -19,7 +19,7 @@ imageItem:
 date: 2024-06-09T22:00:00.000Z
 ---
 
-## Introduction
+### Introduction
 
 I decided to embark on this project because the app provided by my solar inverter was clunky and didn't offer an easy way to connect to Home Assistant. I wanted a seamless integration that allowed me to have full control over my solar panels, especially to automate shutting them down when energy prices go negative. This guide will walk you through how I achieved this using an ESP8266, MODBUS communication, and Home Assistant, giving you the ability to efficiently manage your solar energy system.
 
@@ -34,7 +34,7 @@ Before we start a quick explanation of all the terms used:
 
 Some of the product links in this article are affiliate links. I added them afterward to the mentioned items. Using these links helps support my work on articles like this one—thank you if you choose to use them! If not, no worries at all. 😊
 
-## Pre-requisites
+### Pre-requisites
 
 To follow the steps in this blog post, you'll need the following:
 
@@ -46,17 +46,17 @@ To follow the steps in this blog post, you'll need the following:
 * **RS485 board to use with ESP8266 (recommended: [MAX485 TTL](https://amzn.to/4ddu4CE))**
 * **A spare [ethernet cable ](https://amzn.to/4d8oOQC)for the RJ45.**
 
-## Debugging
+### Debugging
 
 **Before proceeding**, verify that you can get MODBUS serial to work with your inverter. I used a [USB RS485 board](https://amzn.to/44kheA3) for easy debugging with a trial of [Modbus Poll](https://www.modbustools.com/download.html "Modbus Poll"). I have wasted a lot of time starting directly on the [ESP8266](https://amzn.to/4m7IJDq) instead of starting with some isolated testing.
 
-## Hardware Setup
+### Hardware Setup
 
 For this solution, I used an [ESP8266](https://amzn.to/4m7IJDq) with a [MAX485](https://amzn.to/4ddu4CE). Alternatively, you can use a UART TTL to RS485 board with automatic flow control, although I found the more reliable. Setting up flow control on an ESPHome installation is just setting one configuration value.
 
-### Wiring
+#### Wiring
 
-#### MAX485 to ESP8266
+##### MAX485 to ESP8266
 
 Follow the schematic for these connections:
 
@@ -71,25 +71,25 @@ Follow the schematic for these connections:
 
 <MdxCustomPicture description="RS485 to ESP8266" image="/../src/assets/RS485 to ESP8266.jpg" />
 
-#### MAX485 to SolPlanet Inverter
+##### MAX485 to SolPlanet Inverter
 
 The installation manual of my inverter contained a schematic to connect it through an RJ45 jack. I connected A to A and B to B. In my situation, the wire is very short, so I did not bother connecting ground. In a typical T-568B layout, that means white-orange to A and orange to B.
 
 <MdxCustomPicture image="/../src/assets/Solplanet_RJ45_Pinout.png" description="SolPlanet RJ45 Pinout" subText="Source: SolPlanet inverter installation documentation" />
 
-## Software setup
+### Software setup
 
-### Home Assistant
+#### Home Assistant
 
 Ensure your Home Assistant is up and running. If not, set it up first. I suggest avoiding containers as they can be tricky with Home Assistant.
 
-### Setup ESPHome
+#### Setup ESPHome
 
 If you do not already have it, add the [official ESPHome add-on](https://esphome.io/guides/getting_started_hassio.html) to your Home Assistant.
 
 Once set up, install ESPHome on your ESP device using the [getting started guide](https://esphome.io/guides/getting_started_hassio.html).
 
-### Setup Modbus
+#### Setup Modbus
 
 Once ESPHome is set up, add the configuration.
 
@@ -149,7 +149,7 @@ switch:
 
 Translate the documentation of your inverter to the following template. A tip is that you can upload screenshots or text of the documentation to ChatGPT which may help you with transforming the documentation to YAML. The full yaml configuration for use with a [SolPlanet ASW 5K-LT-G2 Pro inverter is available on my Github.](https://github.com/Wixewr/misc-blog-items/blob/main/esphome-solplanet/configuration-example.yaml)
 
-#### Sensor Example
+##### Sensor Example
 
 Also, check out the ESPHome documentation for [MODBUS sensors](https://esphome.io/components/sensor/modbus_controller.html).
 
@@ -181,7 +181,7 @@ sensor:
   icon: "mdi:solar-power"
 ```
 
-#### Switch Example
+##### Switch Example
 
 Also, check out the ESPHome documentation for [MODBUS switches](https://esphome.io/components/switch/modbus_controller.html).
 
@@ -198,7 +198,7 @@ switch:
   icon: "mdi:toggle-switch"
 ```
 
-#### Other Sensors
+##### Other Sensors
 
 As of the time of writing, ESPHome also supports other types of sensors:
 
@@ -210,7 +210,7 @@ As of the time of writing, ESPHome also supports other types of sensors:
 * [Modbus Controller Select](https://esphome.io/components/select/modbus_controller)
 * [Modbus Controller Text Sensor](https://esphome.io/components/text_sensor/modbus_controller)
 
-## Result
+### Result
 
 Full local insight and control of your solar inverter.
 

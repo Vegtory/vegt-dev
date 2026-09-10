@@ -5,12 +5,13 @@ import BaseLayout from "../layouts/BaseLayout.astro";
 import { mdxComponents } from "../components/mdxComponents";
 import { site } from "../site";
 
-import Banner from "@template/Banner.astro";
-import Hero from "@template/Hero.astro";
-import TextWithLargeImage from "@template/TextWithLargeImage.astro";
-import ToolsShowcase from "@template/ToolsShowcase.astro";
-import PhotoCollage from "@template/PhotoCollage.astro";
+import SiteHeader from "@ui/SiteHeader.astro";
+import Hero from "@ui/Hero.astro";
+import TextWithLargeImage from "@ui/TextWithLargeImage.astro";
+import ToolsShowcase from "@ui/ToolsShowcase.astro";
+import PhotoCollage from "@ui/PhotoCollage.astro";
 import SimpleBlogRenderer from "@ui/SimpleBlogRenderer.astro";
+import SiteFooter from "@ui/SiteFooter.astro";
 
 type SectionData = CollectionEntry<"sections">["data"];
 
@@ -33,7 +34,9 @@ async function section<T extends SectionData["type"]>(id: string, type: T) {
   return { data: entry.data as Extract<SectionData, { type: T }>, Content };
 }
 
-const banner = await section("onder-constructie", "banner");
+// `onder-constructie.mdx` is deliberately not composed in. The banner was the
+// first thing on the page and it apologised for the site in alarm-red; the
+// file stays in the repo so it is one import and one line to put back.
 const hero = await section("hero", "hero");
 const over = await section("over", "textWithLargeImage");
 const tools = await section("tools", "toolsShowcase");
@@ -56,28 +59,34 @@ const { Content: BlogBody } = blog;
   locale={site.locale}
   umamiId={site.umamiId}
 >
-  {/* The wrapper ids are the in-page anchor targets, e.g. Hero links to #Over. */}
-  <div id="Onder_Constructie"><Banner {...banner.data} /></div>
+  <SiteHeader />
 
-  <div id="Hero"><Hero {...hero.data} /></div>
+  <main>
+    {/* The wrapper ids are the in-page anchor targets, e.g. the hero's CTA
+        links to #Over and the header's to #Contact. */}
+    <div id="Hero"><Hero {...hero.data} /></div>
 
-  <div id="Over">
-    <TextWithLargeImage {...over.data}>
-      <OverBody components={mdxComponents} />
-    </TextWithLargeImage>
-  </div>
+    <div id="Over">
+      <TextWithLargeImage {...over.data}>
+        <OverBody components={mdxComponents} />
+      </TextWithLargeImage>
+    </div>
 
-  <div id="Tools">
-    <ToolsShowcase {...tools.data}>
-      <ToolsBody components={mdxComponents} />
-    </ToolsShowcase>
-  </div>
+    <div id="Tools">
+      <ToolsShowcase {...tools.data}>
+        <ToolsBody components={mdxComponents} />
+      </ToolsShowcase>
+    </div>
 
-  <div id="Fotografie"><PhotoCollage {...fotografie.data} /></div>
+    <div id="Fotografie"><PhotoCollage {...fotografie.data} /></div>
 
-  <div id="Blog">
-    <SimpleBlogRenderer {...blog.data}>
-      <BlogBody components={mdxComponents} />
-    </SimpleBlogRenderer>
-  </div>
+    <div id="Blog">
+      <SimpleBlogRenderer {...blog.data}>
+        <BlogBody components={mdxComponents} />
+      </SimpleBlogRenderer>
+    </div>
+  </main>
+
+  <SiteFooter />
+
 </BaseLayout>

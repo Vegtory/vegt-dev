@@ -44,8 +44,13 @@ const sections = defineCollection({
         type: z.literal("hero"),
         title: z.string(),
         subtitle: z.string(),
+        /** Small mono line above the name — availability, location, status. */
+        kicker: z.string().default(""),
+        /** One or two sentences saying what you actually do. */
+        intro: z.string().default(""),
         tags: z.array(z.object({ label: z.string() })).default([]),
-        links: z.array(link).default([]),
+        /** First renders solid, the rest outlined. Two is plenty. */
+        ctas: z.array(link).default([]),
         imageItems: z.array(imageItem(image)).default([]),
       }),
       z.object({

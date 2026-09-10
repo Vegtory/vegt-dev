@@ -3,13 +3,28 @@
  * @component SimpleBlogRenderer
  * @version   1.0.0
  * @updated   2026-09-10
- * @source    astro-template@10c3958
+ * @source    astro-template@0ad4fd0
  * @copied    2026-09-10
- * @modified  false
+ * @modified  true
+ *
+ * Copied from the template and restyled onto this site's tokens.
+ *
+ * - Cards get a real frame (`surface` on `hairline`) and lift on hover, so
+ *   they read as one component with the tool cards.
+ * - `text-gray-900`/`text-gray-600`/`text-gray-500` become tokens.
+ * - Dates were `toDateString()`, i.e. "Mon Jun 15 2026", on a `lang="nl"`
+ *   site — and `BlogList` next door already formatted the same values as
+ *   "15 June 2026". Both now use `formatDate` from `@ui/date`.
+ * - "Alle artikelen bekijken" was the page's only cyan link; it now uses the
+ *   shared `@ui/Button.astro` inline variant.
  */
 import { getCollection } from "astro:content";
 import CustomPicture from "@ui/CustomPicture.astro";
 import TextRender from "@ui/TextRender.astro";
+import SectionHeading from "@ui/SectionHeading.astro";
+import Button from "@ui/Button.astro";
+import { formatDate } from "@ui/date";
+import { proseBase } from "@ui/prose";
 
 export interface Props {
   title?: string;
@@ -18,79 +33,62 @@ export interface Props {
 
 const { title = "", subtitle = "" } = Astro.props;
 
-const collectionName = "blog";
-const allBlogs = await getCollection(collectionName);
+const allBlogs = await getCollection("blog");
+const posts = allBlogs
+  .filter(({ data }) => !data.ishidden)
+  .sort((a, b) => b.data.date.getTime() - a.data.date.getTime())
+  .slice(0, 3);
 ---
 
-<div class="bg-background py-16 sm:py-20">
-  <div class="mx-auto max-w-7xl px-6 lg:px-8">
-    <div class="mx-auto max-w-2xl text-center">
-      <h3 class="text-base font-semibold leading-7 text-secondaryText">
-        <TextRender>{subtitle}</TextRender>
-      </h3>
-      <h2
-        class="text-accentText mt-2 text-3xl font-bold tracking-tight sm:text-4xl"
-      >
-        <TextRender>{title}</TextRender>
-      </h2>
-      <div class="mt-6 text-lg leading-8 text-blackText">
-        <slot />
-      </div>
+<section class="bg-background py-20 sm:py-28">
+  <div class="mx-auto max-w-6xl px-6 lg:px-8">
+    <div class="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
+      <SectionHeading eyebrow={subtitle} title={title} align="left" />
+      <Button href="/blog" variant="secondary" arrow class="shrink-0">
+        Alle artikelen
+      </Button>
     </div>
-    <div
-      class="mx-auto mt-16 grid max-w-2xl grid-cols-1 gap-x-8 gap-y-20 lg:mx-0 lg:max-w-none lg:grid-cols-3"
-    >
+
+    {/* The measure lives on this wrapper, not on the prose element: the
+        `max-w-none` inside `proseBase` is there so typography does not impose
+        its own width, and two max-width utilities on one element resolve by
+        stylesheet order rather than by which one you meant. */}
+    <div class="mt-8 max-w-2xl">
+      <div class={proseBase}><slot /></div>
+    </div>
+
+    <div class="mt-14 grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
       {
-        allBlogs
-          .filter(({ data }: any) => !data.ishidden)
-          .sort((a: any, b: any) => new Date(b.data.date).getTime() - new Date(a.data.date).getTime())
-          .slice(0, 3)
-          .map(({ id, data }: any) => (
-            <article>
-              <a href={`/blog/${id}`}>
-                <div class="relative w-full">
-                  <CustomPicture
-                    alt={data.description}
-                    classes="aspect-[16/9] w-full rounded-2xl object-cover sm:aspect-[2/1] lg:aspect-[3/2]"
-                    sizes="(min-width: 1360px) 384px, (min-width: 1040px) calc(26.67vw + 27px), (min-width: 760px) 672px, calc(95.45vw - 34px)"
-                    srcImagePath={data.imageItem.image}
-                    loading="lazy"
-                  />
-                  <div class="absolute inset-0 rounded-2xl ring-1 ring-inset ring-gray-900/10" />
-                </div>
-              </a>
-              <div class="max-w-xl">
-                <div class="mt-8 flex items-center gap-x-4 text-xs">
-                  <time datetime={data.date} class="text-gray-500">
-                    {new Date(data.date).toDateString()}
-                  </time>
-                </div>
-                <div class="group relative">
-                  <h3 class="mt-3 text-lg font-semibold leading-6 text-gray-900 group-hover:text-gray-600">
-                    <a href={`/blog/${id}`}>
-                      <span class="absolute inset-0" />
-                      <TextRender>{data.title}</TextRender>
-                    </a>
-                  </h3>
-                  <p class="mt-5 line-clamp-3 text-sm leading-6 text-gray-600">
-                    <TextRender>{data.description}</TextRender>
-                  </p>
-                </div>
-              </div>
-            </article>
-          ))
+        posts.map(({ id, data }) => (
+          <article class="group relative flex flex-col overflow-hidden rounded-2xl border border-hairline bg-surface shadow-sm transition duration-200 hover:-translate-y-1 hover:border-primary-200 hover:shadow-md focus-within:ring-2 focus-within:ring-primary-600 focus-within:ring-offset-2 focus-within:ring-offset-background">
+            <CustomPicture
+              alt={data.description}
+              classes="aspect-[16/9] w-full"
+              sizes="(min-width: 1040px) 368px, (min-width: 640px) 45vw, calc(100vw - 3rem)"
+              srcImagePath={data.imageItem.image}
+              loading="lazy"
+            />
+
+            <div class="flex flex-1 flex-col p-6">
+              <time datetime={data.date.toISOString()} class="font-mono text-xs text-mutedText">
+                {formatDate(data.date)}
+              </time>
+
+              <h3 class="mt-3 text-lg font-semibold leading-snug text-primaryText transition-colors group-hover:text-primary-700">
+                <a href={`/blog/${id}`} class="no-underline focus:outline-none">
+                  {/* Stretches the anchor over the whole card. */}
+                  <span class="absolute inset-0" aria-hidden="true" />
+                  <TextRender>{data.title}</TextRender>
+                </a>
+              </h3>
+
+              <p class="mt-3 line-clamp-3 text-sm leading-relaxed text-mutedText">
+                <TextRender>{data.description}</TextRender>
+              </p>
+            </div>
+          </article>
+        ))
       }
     </div>
-    <div class="mt-12 text-center">
-      <a
-        href="/blog"
-        class="inline-flex items-center gap-2 text-sm font-semibold text-accentText hover:opacity-75 transition-opacity"
-      >
-        Alle artikelen bekijken
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-        </svg>
-      </a>
-    </div>
   </div>
-</div>
+</section>

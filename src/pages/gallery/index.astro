@@ -3,6 +3,10 @@ import { getCollection } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import GalleryLightbox from '@ui/GalleryLightbox.astro';
 import CustomPicture from '@ui/CustomPicture.astro';
+import SiteHeader from '@ui/SiteHeader.astro';
+import SiteFooter from '@ui/SiteFooter.astro';
+import SectionHeading from '@ui/SectionHeading.astro';
+import { formatDate, formatMonth } from '@ui/date';
 import { site } from '../../site';
 import type { ImageMetadata } from 'astro';
 
@@ -38,58 +42,49 @@ const albumData = sortedAlbums.map((album) => {
   locale={site.locale}
   umamiId={site.umamiId}
 >
-  <main class="min-h-screen bg-background">
-    <!-- Top nav bar -->
-    <div class="border-b border-gray-200 bg-background/80 backdrop-blur-sm sticky top-0 z-40">
-      <div class="max-w-7xl mx-auto px-4 sm:px-8 py-3 flex items-center gap-4">
-        <a
-          href="/"
-          class="inline-flex items-center gap-1.5 text-xs font-medium tracking-widest uppercase text-primary-500 hover:text-primary-400 transition-colors shrink-0"
-        >
-          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7" />
-          </svg>
-          Home
-        </a>
-        <h1 class="text-sm font-bold text-primaryText">Foto's</h1>
+  <SiteHeader />
 
-        <!-- Mobile album picker -->
-        <div class="ml-auto lg:hidden">
-          <select
-            id="mobile-album-select"
-            class="text-xs border border-gray-300 rounded-lg px-2 py-1.5 bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary-500"
-          >
-            {albumData.map(({ album }) => (
-              <option value={album.id}>
-                {album.data.title} — {album.data.date.toLocaleDateString('nl-NL', { month: '2-digit', year: 'numeric' }).replace(' ', '-')}
-              </option>
-            ))}
-          </select>
-        </div>
+  <main class="min-h-screen bg-background">
+    <div class="mx-auto max-w-7xl px-6 pt-12 sm:px-8">
+      <SectionHeading eyebrow="Fotografie" title="Foto&apos;s" align="left" as="h1" />
+
+      <!-- Album picker, mobile only; the sidebar covers this on desktop. -->
+      <div class="mt-6 lg:hidden">
+        <select
+          id="mobile-album-select"
+          class="w-full rounded-xl border border-hairline bg-surface px-3 py-2 text-sm text-primaryText focus:outline-none focus:ring-2 focus:ring-primary-600"
+          aria-label="Spring naar album"
+        >
+          {albumData.map(({ album }) => (
+            <option value={album.id}>
+              {album.data.title} — {formatMonth(album.data.date)}
+            </option>
+          ))}
+        </select>
       </div>
     </div>
 
-    <div class="max-w-7xl mx-auto flex gap-8 px-4 sm:px-8 pt-8">
+    <div class="max-w-7xl mx-auto flex gap-8 px-6 sm:px-8 pt-10">
       <!-- Sticky sidebar (desktop) -->
       <aside class="hidden lg:block w-52 shrink-0">
-        <div class="sticky top-16 pt-2">
-          <p class="text-[10px] font-semibold tracking-widest uppercase text-gray-400 mb-3 px-3">
+        <div class="sticky top-24 pt-2">
+          <p class="mb-3 px-3 font-mono text-[10px] font-medium uppercase tracking-[0.18em] text-mutedText">
             Albums
           </p>
           <nav class="space-y-0.5" id="album-nav">
             {albumData.map(({ album, images }) => (
               <a
                 href={`#${album.id}`}
-                class="album-nav-link group flex items-center justify-between px-3 py-2 rounded-lg text-sm text-gray-600 hover:bg-gray-100 hover:text-primaryText transition-colors"
+                class="album-nav-link group flex items-center justify-between rounded-lg px-3 py-2 text-sm text-mutedText no-underline transition-colors hover:bg-surfaceMuted hover:text-primaryText"
                 data-album={album.id}
               >
                 <span class="flex flex-col min-w-0">
                   <span class="truncate font-medium">{album.data.title}</span>
-                  <span class="text-[10px] text-gray-400 group-hover:text-gray-500 tabular-nums">
-                    {album.data.date.toLocaleDateString('nl-NL', { month: '2-digit', year: 'numeric' }).replace(' ', '-')}
+                  <span class="font-mono text-[10px] tabular-nums text-mutedText">
+                    {formatMonth(album.data.date)}
                   </span>
                 </span>
-                <span class="text-xs text-gray-400 group-hover:text-gray-500 shrink-0 ml-1">
+                <span class="ml-1 shrink-0 font-mono text-xs text-mutedText">
                   {images.length}
                 </span>
               </a>
@@ -103,18 +98,14 @@ const albumData = sortedAlbums.map((album) => {
         {albumData.map(({ album, images }) => (
           <section id={album.id} class="mb-24 scroll-mt-16">
             <!-- Album header -->
-            <div class="flex items-start justify-between gap-4 mb-5 pb-4 border-b border-gray-200">
+            <div class="mb-5 flex items-start justify-between gap-4 border-b border-hairline pb-4">
               <div>
                 <h2 class="text-xl sm:text-2xl font-bold text-primaryText leading-tight">
                   {album.data.title}
                 </h2>
-                <div class="flex flex-wrap items-center gap-2 mt-1.5 text-sm text-gray-500">
+                <div class="mt-1.5 flex flex-wrap items-center gap-2 text-sm text-mutedText">
                   <time datetime={album.data.date.toISOString()}>
-                    {album.data.date.toLocaleDateString('nl-NL', {
-                      day: 'numeric',
-                      month: 'long',
-                      year: 'numeric',
-                    })}
+                    {formatDate(album.data.date)}
                   </time>
                   <span aria-hidden="true">·</span>
                   <span>{images.length} foto{images.length !== 1 ? "'s" : ''}</span>
@@ -128,7 +119,7 @@ const albumData = sortedAlbums.map((album) => {
               </div>
               <a
                 href={`/gallery/${album.id}`}
-                class="text-xs font-medium text-primary-500 hover:text-primary-400 transition-colors shrink-0 mt-1"
+                class="mt-1 shrink-0 text-sm font-semibold text-primary-600 no-underline transition-colors hover:text-primary-700"
               >
                 Bekijk album →
               </a>
@@ -139,7 +130,7 @@ const albumData = sortedAlbums.map((album) => {
               <div class="columns-2 lg:columns-3 gap-2">
                 {images.map((img, idx) => (
                   <button
-                    class="break-inside-avoid mb-2 w-full block focus:outline-none focus:ring-2 focus:ring-primary-500 rounded-md overflow-hidden group"
+                    class="break-inside-avoid mb-2 w-full block focus:outline-none focus:ring-2 focus:ring-primary-600 rounded-xl overflow-hidden group"
                     data-lightbox-trigger
                     data-album={album.id}
                     data-index={String(idx)}
@@ -150,7 +141,7 @@ const albumData = sortedAlbums.map((album) => {
                       <CustomPicture
                         srcImagePath={img.metadata}
                         alt={img.alt}
-                        classes="w-full rounded-md"
+                        classes="w-full rounded-xl"
                         sizes="(min-width: 1024px) 33vw, 50vw"
                         loading="lazy"
                       />
@@ -159,12 +150,12 @@ const albumData = sortedAlbums.map((album) => {
                 ))}
               </div>
             ) : (
-              <p class="text-gray-400 text-sm italic py-8 text-center">
+              <p class="py-8 text-center text-sm italic text-mutedText">
                 Geen foto's gevonden voor dit album.
                 <br />
                 <span class="text-xs">
                   Voeg foto's toe aan{' '}
-                  <code class="bg-gray-100 px-1 rounded">
+                  <code class="rounded bg-surfaceMuted px-1 font-mono">
                     src/assets/gallery/{album.id}/
                   </code>
                 </span>
@@ -174,7 +165,7 @@ const albumData = sortedAlbums.map((album) => {
         ))}
 
         {albumData.length === 0 && (
-          <div class="text-center py-24 text-gray-400">
+          <div class="py-24 text-center text-mutedText">
             <svg class="w-16 h-16 mx-auto mb-4 opacity-30" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
             </svg>
@@ -184,6 +175,8 @@ const albumData = sortedAlbums.map((album) => {
       </div>
     </div>
   </main>
+
+  <SiteFooter />
 
   <GalleryLightbox albums={albumData.map(({ album, images }) => ({ slug: album.id, images }))} />
 </BaseLayout>
@@ -211,7 +204,7 @@ const albumData = sortedAlbums.map((album) => {
             const slug = entry.target.id;
             navLinks.forEach((link) => {
               const isActive = link.dataset.album === slug;
-              link.classList.toggle('bg-gray-100', isActive);
+              link.classList.toggle('bg-surfaceMuted', isActive);
               link.classList.toggle('text-primaryText', isActive);
               link.classList.toggle('font-semibold', isActive);
             });

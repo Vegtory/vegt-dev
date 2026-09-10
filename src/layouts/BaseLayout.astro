@@ -1,11 +1,15 @@
 ---
 /**
  * @component BaseLayout
- * @version   1.0.0
+ * @version   1.0.1
  * @updated   2026-09-10
  * @source    astro-template@10c3958
  * @copied    2026-09-10
- * @modified  false
+ * @modified  true
+ *
+ * Modified: applies the site's font stacks and text colour to <body> so every
+ * page inherits them, and sets `scroll-padding-top` so an in-page anchor does
+ * not land underneath the sticky header.
  */
 export interface Props {
   title?: string;
@@ -34,7 +38,7 @@ const {
 } = Astro.props;
 ---
 
-<html lang={lang} class="w-full h-full">
+<html lang={lang} class="h-full w-full scroll-smooth [scroll-padding-top:5rem]">
   <head>
     <meta charset="utf-8" />
 
@@ -69,7 +73,7 @@ const {
     }
   </head>
 
-  <body class="w-full h-full bg-background">
+  <body class="h-full w-full bg-background font-sans text-blackText antialiased">
     <slot />
   </body>
 </html>

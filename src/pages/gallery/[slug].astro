@@ -3,6 +3,9 @@ import { getCollection } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import GalleryLightbox from '@ui/GalleryLightbox.astro';
 import CustomPicture from '@ui/CustomPicture.astro';
+import SiteHeader from '@ui/SiteHeader.astro';
+import SiteFooter from '@ui/SiteFooter.astro';
+import { formatDate } from '@ui/date';
 import { site } from '../../site';
 import type { ImageMetadata } from 'astro';
 
@@ -30,11 +33,7 @@ const images = Object.entries(allImages)
   }))
   .sort((a, b) => a.filename.localeCompare(b.filename));
 
-const formattedDate = album.data.date.toLocaleDateString('nl-NL', {
-  day: 'numeric',
-  month: 'long',
-  year: 'numeric',
-});
+const formattedDate = formatDate(album.data.date);
 
 ---
 
@@ -46,15 +45,17 @@ const formattedDate = album.data.date.toLocaleDateString('nl-NL', {
   locale={site.locale}
   umamiId={site.umamiId}
 >
+  <SiteHeader />
+
   <main class="min-h-screen bg-background">
-    <div class="max-w-7xl mx-auto px-4 sm:px-8 pt-10 pb-24">
+    <div class="mx-auto max-w-7xl px-6 pb-24 pt-12 sm:px-8">
       <!-- Back link -->
       <a
         href="/gallery"
-        class="inline-flex items-center gap-1.5 text-xs font-medium tracking-widest uppercase text-primary-500 hover:text-primary-400 transition-colors mb-8"
+        class="group mb-8 inline-flex items-center gap-1.5 text-sm font-semibold text-primary-600 no-underline transition-colors hover:text-primary-700"
       >
-        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7" />
+        <svg class="h-4 w-4 transition-transform duration-200 group-hover:-translate-x-0.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
         </svg>
         Alle albums
       </a>
@@ -64,7 +65,7 @@ const formattedDate = album.data.date.toLocaleDateString('nl-NL', {
         <h1 class="text-3xl sm:text-4xl font-bold text-primaryText leading-tight">
           {album.data.title}
         </h1>
-        <div class="flex flex-wrap items-center gap-2 mt-3 text-sm text-gray-500">
+        <div class="mt-3 flex flex-wrap items-center gap-2 text-sm text-mutedText">
           <time datetime={album.data.date.toISOString()}>
             {formattedDate}
           </time>
@@ -84,7 +85,7 @@ const formattedDate = album.data.date.toLocaleDateString('nl-NL', {
         <div class="columns-2 lg:columns-3 gap-2">
           {images.map((img, idx) => (
             <button
-              class="break-inside-avoid mb-2 w-full block focus:outline-none focus:ring-2 focus:ring-primary-500 rounded-md overflow-hidden group"
+              class="break-inside-avoid mb-2 w-full block focus:outline-none focus:ring-2 focus:ring-primary-600 rounded-xl overflow-hidden group"
               data-lightbox-trigger
               data-album={album.id}
               data-index={String(idx)}
@@ -95,7 +96,7 @@ const formattedDate = album.data.date.toLocaleDateString('nl-NL', {
                 <CustomPicture
                   srcImagePath={img.metadata}
                   alt={img.alt}
-                  classes="w-full rounded-md"
+                  classes="w-full rounded-xl"
                   sizes="(min-width: 1024px) 33vw, 50vw"
                   loading={idx < 6 ? 'eager' : 'lazy'}
                 />
@@ -104,14 +105,14 @@ const formattedDate = album.data.date.toLocaleDateString('nl-NL', {
           ))}
         </div>
       ) : (
-        <div class="text-center py-24 text-gray-400">
+        <div class="py-24 text-center text-mutedText">
           <svg class="w-16 h-16 mx-auto mb-4 opacity-30" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
           </svg>
           <p class="text-sm">Geen foto's gevonden voor dit album.</p>
           <p class="text-xs mt-2">
             Voeg foto's toe aan{' '}
-            <code class="bg-gray-100 px-1 rounded">
+            <code class="rounded bg-surfaceMuted px-1 font-mono">
               src/assets/gallery/{album.id}/
             </code>
           </p>
@@ -119,6 +120,8 @@ const formattedDate = album.data.date.toLocaleDateString('nl-NL', {
       )}
     </div>
   </main>
+
+  <SiteFooter />
 
   <GalleryLightbox albums={[{ slug: album.id, images }]} />
 </BaseLayout>
