@@ -36,24 +36,39 @@ function transformHtml(html) {
   return result;
 }
 
-function createBuildPlugin() {
-  return {
-    name: 'email-obscurer',
-    generateBundle(_options, bundle) {
-      for (const asset of Object.values(bundle)) {
-        if (asset.type !== 'asset' || !asset.fileName.endsWith('.html')) {
-          continue;
+/**
+ * Rewrite every generated page on disk.
+ *
+ * This runs in `astro:build:done` rather than a Vite `generateBundle` hook:
+ * Astro writes static pages through its own build pipeline, so they never
+ * appear as rollup assets and a bundle hook silently transforms nothing.
+ */
+async function transformBuiltPages(dir) {
+  const { readdir, readFile, writeFile } = await import('node:fs/promises');
+  const { fileURLToPath } = await import('node:url');
+  const path = await import('node:path');
+
+  const root = fileURLToPath(dir);
+  let changed = 0;
+
+  async function walk(current) {
+    for (const entry of await readdir(current, { withFileTypes: true })) {
+      const full = path.join(current, entry.name);
+      if (entry.isDirectory()) {
+        await walk(full);
+      } else if (entry.name.endsWith('.html')) {
+        const html = await readFile(full, 'utf8');
+        const transformed = transformHtml(html);
+        if (transformed !== html) {
+          await writeFile(full, transformed);
+          changed++;
         }
-
-        const html =
-          typeof asset.source === 'string'
-            ? asset.source
-            : Buffer.from(asset.source).toString();
-
-        asset.source = transformHtml(html);
       }
-    },
-  };
+    }
+  }
+
+  await walk(root);
+  return changed;
 }
 
 /** @returns {import('astro').AstroIntegration} */
@@ -61,14 +76,9 @@ export function emailObscurerIntegration() {
   return {
     name: 'email-obscurer',
     hooks: {
-      'astro:config:setup': ({ updateConfig, command }) => {
-        if (command === 'build') {
-          updateConfig({
-            vite: {
-              plugins: [createBuildPlugin()],
-            },
-          });
-        }
+      'astro:build:done': async ({ dir, logger }) => {
+        const changed = await transformBuiltPages(dir);
+        logger.info(`obscured email addresses in ${changed} page(s)`);
       },
       'astro:server:setup': ({ server }) => {
         server.middlewares.use((_req, res, next) => {
