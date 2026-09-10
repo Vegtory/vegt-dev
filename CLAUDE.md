@@ -20,7 +20,6 @@ src/
   site.ts             site-wide settings (name, lang, analytics id)
 astro-template/       submodule: shared components, imported as @template/*
 contact-worker/       Cloudflare Worker serving /api/contact
-cdktf/                DNS + R2 provisioning, run by hand
 ```
 
 ## Editing content

@@ -62,8 +62,10 @@ Then:
 pnpm deploy
 ```
 
-`cdktf/` provisions the DNS zone and the R2 bucket. It is run by hand, not on
-the deploy path — those change about once a year.
+There is no infrastructure-as-code in the repo. DNS and any storage buckets are
+managed in the Cloudflare dashboard, or with `wrangler` directly — for example
+`wrangler r2 bucket create <name>`. A CDKTF stack used to live here; it created
+a single unused R2 bucket, and CDKTF itself was deprecated in December 2025.
 
 ## Structure
 
