@@ -54,13 +54,13 @@ const { title = "", subtitle = "", imageItem, bulletPoints = [] } = Astro.props;
         `max-w-none` inside `proseBase` is there so typography does not impose
         its own width, and two max-width utilities on one element resolve by
         stylesheet order rather than by which one you meant. */}
-    <div class="mt-8 max-w-2xl">
+    <div class="mt-8 max-w-2xl" data-reveal style="--reveal-delay: 90ms">
       <div class={proseBase}><slot /></div>
     </div>
 
     {
       imageItem?.image && (
-        <div class="mt-14">
+        <div class="mt-14" data-reveal>
           <CustomPicture
             alt={imageItem.description}
             classes="w-full rounded-2xl ring-1 ring-hairline shadow-sm"
@@ -76,8 +76,8 @@ const { title = "", subtitle = "", imageItem, bulletPoints = [] } = Astro.props;
     {
       bulletPoints.length > 0 && (
         <dl class="mt-16 grid grid-cols-1 gap-x-8 gap-y-10 sm:grid-cols-2 lg:grid-cols-3">
-          {bulletPoints.map((bulletPoint) => (
-            <div>
+          {bulletPoints.map((bulletPoint, i) => (
+            <div data-reveal style={`--reveal-delay: ${i * 80}ms`}>
               <dt class="flex items-center gap-3 font-semibold text-primaryText">
                 <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-surfaceMuted text-accentText ring-1 ring-hairline">
                   <Icon name={bulletPoint.icon} class="h-4 w-4" />

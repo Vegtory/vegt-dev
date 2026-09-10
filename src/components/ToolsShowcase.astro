@@ -60,21 +60,23 @@ const defaultIcon =
         `max-w-none` inside `proseBase` is there so typography does not impose
         its own width, and two max-width utilities on one element resolve by
         stylesheet order rather than by which one you meant. */}
-    <div class="mt-8 max-w-2xl">
+    <div class="mt-8 max-w-2xl" data-reveal style="--reveal-delay: 90ms">
       <div class={proseBase}><slot /></div>
     </div>
 
     <div class="mt-14 grid grid-cols-1 gap-6 sm:grid-cols-2">
       {
-        tools.map((tool) => (
+        tools.map((tool, i) => (
           <a
             href={tool.link}
             target="_blank"
             rel="noopener noreferrer"
+            data-reveal
+            style={`--reveal-delay: ${i * 110}ms`}
             class="group flex flex-col rounded-2xl border border-hairline bg-surface p-7 no-underline shadow-sm transition duration-200 hover:-translate-y-1 hover:border-primary-200 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
           >
             <div class="flex items-center gap-4">
-              <span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-surfaceMuted text-accentText ring-1 ring-hairline transition-colors group-hover:bg-primary-50">
+              <span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-surfaceMuted text-accentText ring-1 ring-hairline transition duration-300 group-hover:scale-105 group-hover:bg-primary-50 group-hover:ring-primary-200">
                 <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.7" viewBox="0 0 24 24" aria-hidden="true">
                   <path stroke-linecap="round" stroke-linejoin="round" d={iconPaths[tool.icon] ?? defaultIcon} />
                 </svg>

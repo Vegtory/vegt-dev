@@ -52,10 +52,18 @@ const socials = [
 ].filter((s) => s.href);
 ---
 
-<footer class="border-t border-white/10 bg-ink-950">
-  <div class="mx-auto max-w-6xl px-6 py-16 sm:py-20 lg:px-8">
+<footer class="relative overflow-hidden border-t border-white/10 bg-ink-950">
+  <!-- One glow, drifting on the slower of the two hero cycles, so the closing
+       band feels related to the opening one without repeating it. -->
+  <div
+    class="pointer-events-none absolute -left-32 -top-40 h-[26rem] w-[26rem] rounded-full bg-primary-600/15 blur-3xl motion-safe:animate-drift-slower"
+    aria-hidden="true"
+  >
+  </div>
+
+  <div class="relative mx-auto max-w-6xl px-6 py-16 sm:py-20 lg:px-8">
     <div class="flex flex-col gap-12 md:flex-row md:justify-between">
-      <div class="max-w-md">
+      <div class="max-w-md" data-reveal>
         {
           contactTitle && (
             <p class="font-mono text-xs font-medium uppercase tracking-[0.18em] text-accent-300">
@@ -67,9 +75,16 @@ const socials = [
           email && (
             <a
               href={`mailto:${email}`}
-              class="mt-4 inline-block text-2xl font-semibold tracking-tight text-whiteText no-underline decoration-accent-400 underline-offset-8 transition-colors hover:text-accent-300 hover:underline sm:text-3xl"
+              class="group relative mt-4 inline-block text-2xl font-semibold tracking-tight text-whiteText no-underline transition-colors hover:text-accent-300 sm:text-3xl"
             >
               {email}
+              {/* A drawn rule rather than `hover:underline`: the underline
+                  would pop in, and the address is the one thing in this band
+                  worth drawing the eye to. */}
+              <span
+                class="absolute -bottom-1 left-0 h-px w-full origin-left scale-x-0 bg-accent-400 transition-transform duration-300 ease-out group-hover:scale-x-100"
+                aria-hidden="true"
+              />
             </a>
           )
         }
@@ -84,7 +99,7 @@ const socials = [
 
       {
         links.length > 0 && (
-          <nav aria-label="Voettekst navigatie">
+          <nav aria-label="Voettekst navigatie" data-reveal style="--reveal-delay: 100ms">
             <p class="font-mono text-xs font-medium uppercase tracking-[0.18em] text-ink-400">
               Navigatie
             </p>
@@ -119,7 +134,7 @@ const socials = [
                 href={s.href}
                 target="_blank"
                 rel="noopener noreferrer"
-                class="text-ink-400 transition-colors hover:text-whiteText"
+                class="text-ink-400 transition duration-200 hover:-translate-y-0.5 hover:text-whiteText"
               >
                 <span class="sr-only">{s.label}</span>
                 <svg class="size-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">

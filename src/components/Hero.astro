@@ -66,50 +66,68 @@ const {
 const portrait = imageItems[0];
 ---
 
-<style>
-  @keyframes heroIn {
-    from {
-      opacity: 0;
-      transform: translateY(14px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
+<script>
+  // Park the background animations while the hero is off-screen. They are
+  // cheap, but "cheap and permanent" still means a compositor frame every
+  // 16ms on a page the reader has scrolled past — and on a laptop that is
+  // battery. Purely an optimisation: if this never runs, the animations
+  // simply keep playing, which is the behaviour without it anyway.
+  const hero = document.querySelector("[data-hero]");
+  const layers = document.querySelectorAll<HTMLElement>("[data-hero-motion]");
 
-  /* Motion is an enhancement: without the media query the content is simply
-     already in place, rather than stuck at opacity 0 if animation never runs. */
-  @media (prefers-reduced-motion: no-preference) {
-    .hero-in {
-      opacity: 0;
-      animation: heroIn 0.6s ease-out forwards;
-    }
+  if (hero && layers.length && "IntersectionObserver" in window) {
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        layers.forEach((el) => {
+          el.style.animationPlayState = entry.isIntersecting ? "" : "paused";
+        });
+      },
+      { threshold: 0 },
+    );
+    io.observe(hero);
   }
-</style>
+</script>
 
-<section class="relative overflow-hidden bg-ink-950">
-  <!-- A faint dot grid. It is the one "developer" flourish in the band, and it
-       sits at 4% so it reads as texture rather than as a pattern. -->
+<section class="relative overflow-hidden bg-ink-950" data-hero>
+  <!-- Background, in three layers. All of it is `aria-hidden` decoration, and
+       all of it animates transform only, so the permanent motion is composited
+       rather than repainted. `data-hero-motion` lets the script below park the
+       animations whenever the band is off-screen. -->
+
+  <!-- A faint dot grid, panning one tile diagonally. It is the one "developer"
+       flourish in the band, and it sits at 4% so it reads as texture rather
+       than as a pattern. The layer is oversized by a tile in each direction so
+       the pan never exposes an edge. -->
+  <div class="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden="true">
+    <div
+      class="absolute -inset-8 opacity-[0.04] motion-safe:animate-grid-pan"
+      style="background-image: radial-gradient(#ffffff 1px, transparent 1px); background-size: 22px 22px;"
+      data-hero-motion
+    >
+    </div>
+  </div>
+
+  <!-- Two slow glows on different cycles. Together they keep the band feeling
+       lit rather than flat, without ever resolving into a pattern you notice. -->
   <div
-    class="pointer-events-none absolute inset-0 opacity-[0.04]"
-    style="background-image: radial-gradient(#ffffff 1px, transparent 1px); background-size: 22px 22px;"
+    class="pointer-events-none absolute -left-40 -top-40 h-[30rem] w-[30rem] rounded-full bg-primary-600/25 blur-3xl motion-safe:animate-drift-slow"
     aria-hidden="true"
+    data-hero-motion
   >
   </div>
-  <!-- Warms the top-left corner just enough that the band is not a flat block. -->
   <div
-    class="pointer-events-none absolute -left-40 -top-40 h-[28rem] w-[28rem] rounded-full bg-primary-600/20 blur-3xl"
+    class="pointer-events-none absolute -bottom-56 right-[-12rem] h-[26rem] w-[26rem] rounded-full bg-accent-500/10 blur-3xl motion-safe:animate-drift-slower"
     aria-hidden="true"
+    data-hero-motion
   >
   </div>
 
   <div class="relative mx-auto max-w-6xl px-6 py-20 sm:py-28 lg:px-8">
     <div class="flex flex-col-reverse items-center gap-12 md:flex-row md:justify-between md:gap-16">
-      <div class="hero-in w-full max-w-xl text-center md:text-left">
+      <div class="w-full max-w-xl text-center md:text-left">
         {
           kicker && (
-            <p class="flex items-center justify-center gap-2.5 font-mono text-xs font-medium uppercase tracking-[0.18em] text-accent-300 md:justify-start">
+            <p class="flex items-center justify-center gap-2.5 font-mono text-xs font-medium uppercase tracking-[0.18em] text-accent-300 motion-safe:animate-rise-in md:justify-start">
               <span class="relative flex h-1.5 w-1.5" aria-hidden="true">
                 <span class="absolute inline-flex h-full w-full rounded-full bg-accent-400 opacity-75 motion-safe:animate-ping" />
                 <span class="relative inline-flex h-1.5 w-1.5 rounded-full bg-accent-400" />
@@ -119,21 +137,28 @@ const portrait = imageItems[0];
           )
         }
 
-        <h1 class="mt-5 text-pretty text-4xl font-bold tracking-tight text-whiteText sm:text-5xl">
+        <h1 class="mt-5 text-pretty text-4xl font-bold tracking-tight text-whiteText motion-safe:animate-rise-in sm:text-5xl" style="animation-delay: 80ms;">
           <TextRender>{title}</TextRender>
         </h1>
 
         {
           subtitle && (
-            <p class="mt-3 font-mono text-sm text-accent-300 sm:text-base">
+            <p class="mt-3 font-mono text-sm text-accent-300 motion-safe:animate-rise-in sm:text-base" style="animation-delay: 160ms;">
               <TextRender>{subtitle}</TextRender>
+              {/* Terminal caret. Purely decorative, so it is hidden from
+                  assistive tech; a screen reader announcing a blinking block
+                  after the job title would be noise. */}
+              <span
+                class="ml-1 inline-block h-[1.05em] w-[0.5em] translate-y-[0.15em] bg-accent-400 motion-safe:animate-blink"
+                aria-hidden="true"
+              />
             </p>
           )
         }
 
         {
           intro && (
-            <p class="mt-6 text-pretty text-lg leading-relaxed text-ink-200">
+            <p class="mt-6 text-pretty text-lg leading-relaxed text-ink-200 motion-safe:animate-rise-in" style="animation-delay: 240ms;">
               <TextRender>{intro}</TextRender>
             </p>
           )
@@ -141,7 +166,7 @@ const portrait = imageItems[0];
 
         {
           ctas.length > 0 && (
-            <div class="mt-9 flex flex-wrap justify-center gap-3 md:justify-start">
+            <div class="mt-9 flex flex-wrap justify-center gap-3 motion-safe:animate-rise-in md:justify-start" style="animation-delay: 320ms;">
               {ctas.map((cta, i) => (
                 <Button
                   href={cta.link}
@@ -159,8 +184,11 @@ const portrait = imageItems[0];
         {
           tags.length > 0 && (
             <ul class="mt-10 flex flex-wrap justify-center gap-2 md:justify-start">
-              {tags.map((t) => (
-                <li class="rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 font-mono text-xs text-ink-300">
+              {tags.map((t, i) => (
+                <li
+                  class="rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 font-mono text-xs text-ink-300 transition-colors duration-200 hover:border-accent-400/40 hover:text-whiteText motion-safe:animate-rise-in"
+                  style={`animation-delay: ${400 + i * 70}ms`}
+                >
                   <TextRender>{t.label}</TextRender>
                 </li>
               ))}
@@ -171,7 +199,7 @@ const portrait = imageItems[0];
 
       {
         portrait?.image && (
-          <div class="hero-in shrink-0" style="animation-delay: 0.15s;">
+          <div class="shrink-0 motion-safe:animate-rise-in" style="animation-delay: 200ms;">
             <div class="rounded-2xl border border-white/10 bg-white/5 p-2 shadow-2xl">
               <CustomPicture
                 alt={portrait.description}

@@ -43,11 +43,13 @@ const alignment =
   align === "center" ? "mx-auto max-w-2xl text-center items-center" : "max-w-3xl items-start";
 ---
 
-<div class:list={["flex flex-col", alignment, extraClass]}>
+<div class:list={["flex flex-col", alignment, extraClass]} data-reveal>
   {
     eyebrow && (
       <p class="flex items-center gap-2.5 font-mono text-xs font-medium uppercase tracking-[0.18em] text-accentText">
-        <span class="h-px w-6 bg-accentText/40" aria-hidden="true" />
+        {/* Draws itself out from the mark as the heading arrives; the states live
+            in ScrollReveal's global sheet, keyed off `data-reveal-rule`. */}
+        <span class="h-px w-6 origin-left bg-accentText/40" data-reveal-rule aria-hidden="true" />
         <TextRender>{eyebrow}</TextRender>
       </p>
     )

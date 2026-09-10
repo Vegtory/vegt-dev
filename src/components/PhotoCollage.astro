@@ -70,15 +70,23 @@ const pickedImages = Object.values(galleryImages)
     {
       pickedImages.length > 0 && (
         <div class="mt-12 grid grid-cols-2 gap-4 sm:gap-6 md:grid-cols-4">
-          {pickedImages.map((image) => (
-            <div class="group overflow-hidden rounded-2xl border border-hairline bg-surface p-2 shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-md">
-              <CustomPicture
-                alt="Een foto uit de gallerij"
-                classes="aspect-[4/5] w-full rounded-xl"
-                sizes="(min-width: 768px) 260px, 45vw"
-                srcImagePath={image}
-                loading="lazy"
-              />
+          {pickedImages.map((image, i) => (
+            <div
+              class="group overflow-hidden rounded-2xl border border-hairline bg-surface p-2 shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-md"
+              data-reveal
+              style={`--reveal-delay: ${i * 90}ms`}
+            >
+              {/* The zoom lives on an inner clip box so the photo grows within
+                  its mount rather than spilling over the white frame. */}
+              <div class="overflow-hidden rounded-xl">
+                <CustomPicture
+                  alt="Een foto uit de gallerij"
+                  classes="aspect-[4/5] w-full rounded-xl transition-transform duration-500 ease-out group-hover:scale-[1.06]"
+                  sizes="(min-width: 768px) 260px, 45vw"
+                  srcImagePath={image}
+                  loading="lazy"
+                />
+              </div>
             </div>
           ))}
         </div>
@@ -87,7 +95,7 @@ const pickedImages = Object.values(galleryImages)
 
     {
       smallText && (
-        <p class="mt-8 max-w-xl text-sm leading-relaxed text-mutedText">
+        <p class="mt-8 max-w-xl text-sm leading-relaxed text-mutedText" data-reveal>
           <TextRender>{smallText}</TextRender>
         </p>
       )

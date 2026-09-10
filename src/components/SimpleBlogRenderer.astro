@@ -53,17 +53,20 @@ const posts = allBlogs
         `max-w-none` inside `proseBase` is there so typography does not impose
         its own width, and two max-width utilities on one element resolve by
         stylesheet order rather than by which one you meant. */}
-    <div class="mt-8 max-w-2xl">
+    <div class="mt-8 max-w-2xl" data-reveal style="--reveal-delay: 90ms">
       <div class={proseBase}><slot /></div>
     </div>
 
     <div class="mt-14 grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
       {
-        posts.map(({ id, data }) => (
-          <article class="group relative flex flex-col overflow-hidden rounded-2xl border border-hairline bg-surface shadow-sm transition duration-200 hover:-translate-y-1 hover:border-primary-200 hover:shadow-md focus-within:ring-2 focus-within:ring-primary-600 focus-within:ring-offset-2 focus-within:ring-offset-background">
+        posts.map(({ id, data }, i) => (
+          <article
+            data-reveal
+            style={`--reveal-delay: ${i * 110}ms`}
+            class="group relative flex flex-col overflow-hidden rounded-2xl border border-hairline bg-surface shadow-sm transition duration-200 hover:-translate-y-1 hover:border-primary-200 hover:shadow-md focus-within:ring-2 focus-within:ring-primary-600 focus-within:ring-offset-2 focus-within:ring-offset-background">
             <CustomPicture
               alt={data.description}
-              classes="aspect-[16/9] w-full"
+              classes="aspect-[16/9] w-full transition-transform duration-500 ease-out group-hover:scale-[1.04]"
               sizes="(min-width: 1040px) 368px, (min-width: 640px) 45vw, calc(100vw - 3rem)"
               srcImagePath={data.imageItem.image}
               loading="lazy"

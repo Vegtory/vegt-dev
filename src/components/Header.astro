@@ -38,7 +38,14 @@ export interface Props {
 const { wordmark = "", links = [], cta } = Astro.props;
 ---
 
-<header class="sticky top-0 z-50 border-b border-white/10 bg-ink-950/85 backdrop-blur-md">
+{/* Given a real 1px height and pulled back out of flow with -mb-px: a
+   zero-area target is not reliably reported as intersecting. */}
+<div id="header-sentinel" class="h-px -mb-px" aria-hidden="true"></div>
+
+<header
+  id="site-header"
+  class="sticky top-0 z-50 border-b border-white/10 bg-ink-950/85 backdrop-blur-md transition-shadow duration-300"
+>
   <nav
     class="mx-auto flex max-w-6xl items-center justify-between gap-6 px-6 py-4 lg:px-8"
     aria-label="Hoofdnavigatie"
@@ -47,7 +54,9 @@ const { wordmark = "", links = [], cta } = Astro.props;
       href="/"
       class="font-mono text-sm font-semibold text-whiteText no-underline transition-colors hover:text-accent-300"
     >
-      <span class="text-ink-300" aria-hidden="true">~/</span><TextRender>{wordmark}</TextRender>
+      <span class="text-ink-300" aria-hidden="true">~/</span><TextRender>{wordmark}</TextRender><span
+        class="ml-0.5 inline-block h-[0.9em] w-[0.45em] translate-y-[0.1em] bg-accent-400/70 motion-safe:animate-blink"
+        aria-hidden="true"></span>
     </a>
 
     <div class="hidden items-center gap-8 lg:flex">
@@ -55,9 +64,13 @@ const { wordmark = "", links = [], cta } = Astro.props;
         links.map((t) => (
           <a
             href={t.link}
-            class="text-sm font-medium text-ink-200 no-underline transition-colors hover:text-whiteText"
+            class="group relative text-sm font-medium text-ink-200 no-underline transition-colors hover:text-whiteText"
           >
             <TextRender>{t.label}</TextRender>
+            <span
+              class="absolute -bottom-1.5 left-0 h-px w-full origin-left scale-x-0 bg-accent-400 transition-transform duration-300 ease-out group-hover:scale-x-100"
+              aria-hidden="true"
+            />
           </a>
         ))
       }
@@ -136,6 +149,22 @@ const { wordmark = "", links = [], cta } = Astro.props;
 </div>
 
 <script>
+  // Lift the header off the page once anything has scrolled under it. A
+  // sentinel is cheaper than a scroll listener: no handler runs per frame,
+  // the browser just reports the two crossings.
+  const sentinel = document.getElementById("header-sentinel");
+  const siteHeader = document.getElementById("site-header");
+
+  if (sentinel && siteHeader && "IntersectionObserver" in window) {
+    new IntersectionObserver(
+      ([entry]) => {
+        siteHeader.classList.toggle("shadow-lg", !entry.isIntersecting);
+        siteHeader.classList.toggle("shadow-ink-950/40", !entry.isIntersecting);
+      },
+      { threshold: 0 },
+    ).observe(sentinel);
+  }
+
   const openBtn = document.getElementById("open-menu-btn");
   const menu = document.getElementById("mobile-menu");
 

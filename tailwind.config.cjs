@@ -109,6 +109,66 @@ module.exports = {
         xl: "0.75rem",
         "2xl": "1rem",
       },
+
+      /**
+       * Motion.
+       *
+       * Every one of these animates `transform` or `opacity` only. Those are
+       * the two properties a browser can hand to the compositor without a
+       * layout or a repaint, which is what keeps a permanently-running
+       * background from costing anything measurable — this site's own copy
+       * links to its PageSpeed score.
+       *
+       * Reach for these through Tailwind's `motion-safe:` variant
+       * (`motion-safe:animate-drift-slow`), never bare. That compiles to
+       * `@media (prefers-reduced-motion: no-preference)`, so someone who has
+       * asked their OS for less movement gets a completely still page rather
+       * than a page that merely moves less.
+       */
+      keyframes: {
+        /** Terminal caret. `step-end` in the timing keeps it snapping, not fading. */
+        blink: {
+          "0%, 100%": { opacity: "1" },
+          "50%": { opacity: "0" },
+        },
+
+        // The two hero glows. Different durations and directions, both prime-ish,
+        // so the pair never visibly returns to the same arrangement.
+        "drift-slow": {
+          "0%, 100%": { transform: "translate3d(0, 0, 0) scale(1)" },
+          "50%": { transform: "translate3d(7%, 9%, 0) scale(1.15)" },
+        },
+        "drift-slower": {
+          "0%, 100%": { transform: "translate3d(0, 0, 0) scale(1.1)" },
+          "50%": { transform: "translate3d(-9%, -7%, 0) scale(0.92)" },
+        },
+
+        /**
+         * The dot grid, panning by exactly one 22px tile. Landing on the tile
+         * size is what makes the loop seamless — any other distance and the
+         * pattern visibly jumps when the animation restarts.
+         */
+        "grid-pan": {
+          from: { transform: "translate3d(0, 0, 0)" },
+          to: { transform: "translate3d(-22px, -22px, 0)" },
+        },
+
+        /** Hero entrance. Section reveals use a CSS transition, not this. */
+        "rise-in": {
+          from: { opacity: "0", transform: "translate3d(0, 14px, 0)" },
+          to: { opacity: "1", transform: "none" },
+        },
+      },
+
+      animation: {
+        blink: "blink 1.05s step-end infinite",
+        "drift-slow": "drift-slow 19s ease-in-out infinite",
+        "drift-slower": "drift-slower 26s ease-in-out infinite",
+        "grid-pan": "grid-pan 24s linear infinite",
+        // `backwards` holds the opening frame during the delay, so a staggered
+        // element stays invisible until its turn instead of flashing first.
+        "rise-in": "rise-in 0.6s cubic-bezier(0.22, 1, 0.36, 1) backwards",
+      },
     },
   },
 };
