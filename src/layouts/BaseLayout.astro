@@ -1,0 +1,75 @@
+---
+/**
+ * @component BaseLayout
+ * @version   1.0.0
+ * @updated   2026-09-10
+ * @source    astro-template@10c3958
+ * @copied    2026-09-10
+ * @modified  false
+ */
+export interface Props {
+  title?: string;
+  description?: string;
+  keywords?: string;
+  ogImage?: string;
+  /** Document language, e.g. "nl" or "en". */
+  lang?: string;
+  /** Open Graph locale, e.g. "nl_NL". */
+  locale?: string;
+  /** Umami website id. Omit to ship no analytics at all. */
+  umamiId?: string;
+  /** Self-hosted Umami host, if you are not on Umami Cloud. */
+  umamiHost?: string;
+}
+
+const {
+  title = "",
+  description = "",
+  keywords = "",
+  ogImage,
+  lang = "nl",
+  locale = "nl_NL",
+  umamiId,
+  umamiHost = "https://eu.umami.is",
+} = Astro.props;
+---
+
+<html lang={lang} class="w-full h-full">
+  <head>
+    <meta charset="utf-8" />
+
+    <meta name="description" content={description} />
+    <meta name="keywords" content={keywords} />
+
+    <link rel="icon" type="image/png" href="/favicon.png" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="mask-icon" href="favicon.svg" color="#000000" />
+    <link rel="apple-touch-icon" href="apple-favicon.png" />
+
+    <link rel="sitemap" href="/sitemap-index.xml" />
+
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content={locale} />
+    <meta property="og:image" content={ogImage} />
+    <meta property="twitter:image" content={ogImage} />
+
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    {
+      umamiId && (
+        <script
+          defer
+          is:inline
+          src={`${umamiHost}/script.js`}
+          data-website-id={umamiId}
+        />
+      )
+    }
+  </head>
+
+  <body class="w-full h-full bg-background">
+    <slot />
+  </body>
+</html>

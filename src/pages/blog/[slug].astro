@@ -1,19 +1,24 @@
 ---
-import { getCollection } from 'astro:content';
-import { allMarkdownComponents } from '#template/mdx-components/';
+import { getCollection, render } from "astro:content";
+
+import BlogLayout from "../../layouts/BlogLayout.astro";
+import { mdxComponents } from "../../components/mdxComponents";
+import { site } from "../../site";
 
 export async function getStaticPaths() {
-  const slugName = 'blog';
-  const blogEntries = await getCollection(slugName);
-  const blogPaths = blogEntries?.filter(entry => !entry.data.ishidden).map(entry => ({
-    params: { slug: entry.slug },
-    props: { entry },
-  }));
-
-  return blogPaths ?? [];
+  const entries = await getCollection("blog");
+  return entries
+    .filter((entry) => !entry.data.ishidden)
+    .map((entry) => ({
+      params: { slug: entry.id },
+      props: { entry },
+    }));
 }
 
 const { entry } = Astro.props;
-const { Content } = await entry.render();
+const { Content } = await render(entry);
 ---
-<Content components={allMarkdownComponents} />
+
+<BlogLayout {...entry.data} umamiId={site.umamiId}>
+  <Content components={mdxComponents} />
+</BlogLayout>

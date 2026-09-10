@@ -1,0 +1,30 @@
+---
+/**
+ * @component TextRender
+ * @version   1.0.0
+ * @updated   2026-09-10
+ * @source    astro-template@10c3958
+ * @copied    2026-09-10
+ * @modified  false
+ */
+const slot = await Astro.slots.render('default');
+
+function formatString(input: string) {
+  if (!input) return '';
+
+  // Replace *text* with <b>text</b>
+  let formatted = input.replace(/\*(.*?)\*/g, '<b>$1</b>');
+
+  // Replace _text_ with <i>text</i>
+  formatted = formatted.replace(/_(.*?)_/g, '<i>$1</i>');
+
+  // Replace \n with <br />
+  formatted = formatted.replace(/\\n/g, '<br />');
+
+  return formatted;
+}
+
+const formattedString = formatString(slot);
+---
+
+<span set:html={formattedString}></span>

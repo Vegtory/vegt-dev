@@ -1,0 +1,28 @@
+---
+/**
+ * @component MdxCustomPicture
+ * @version   1.0.0
+ * @updated   2026-09-10
+ * @source    astro-template@10c3958
+ * @copied    2026-09-10
+ * @modified  false
+ */
+import type { ImageMetadata } from "astro";
+import CustomPicture from "@ui/CustomPicture.astro";
+
+export interface Props {
+  image: ImageMetadata | string;
+  description?: string;
+  subText?: string;
+}
+
+const { subText, image, description } = Astro.props;
+---
+
+<CustomPicture
+  alt={description}
+  classes="rounded-2xl"
+  sizes=""
+  subText={subText}
+  srcImagePath={image}
+/>

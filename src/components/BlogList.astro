@@ -1,0 +1,57 @@
+---
+/**
+ * @component BlogList
+ * @version   1.0.0
+ * @updated   2026-09-10
+ * @source    astro-template@10c3958
+ * @copied    2026-09-10
+ * @modified  false
+ */
+import { getCollection } from "astro:content";
+import CustomPicture from "@ui/CustomPicture.astro";
+import TextRender from "@ui/TextRender.astro";
+
+const allBlogs = await getCollection("blog");
+const blogs = allBlogs
+  .filter(({ data }: any) => !data.ishidden)
+  .sort(
+    (a: any, b: any) =>
+      new Date(b.data.date).getTime() - new Date(a.data.date).getTime(),
+  );
+---
+
+<ul class="divide-y divide-gray-200">
+  {
+    blogs.map(({ id, data }: any) => (
+      <li class="py-8">
+        <a href={`/blog/${id}`} class="group flex gap-6 items-start">
+          <div class="shrink-0 w-28 sm:w-36 rounded-xl overflow-hidden shadow-md">
+            <CustomPicture
+              alt={data.description}
+              classes="aspect-[4/3] w-full object-cover"
+              sizes="(min-width: 640px) 144px, 112px"
+              srcImagePath={data.imageItem.image}
+              loading="lazy"
+            />
+          </div>
+          <div class="flex-1 min-w-0">
+            <div class="flex items-center gap-1.5 text-sm text-gray-500 mb-1">
+              <svg class="w-3.5 h-3.5 text-primary-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+              <time datetime={data.date}>
+                {new Date(data.date).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })}
+              </time>
+            </div>
+            <h2 class="text-lg font-bold text-primaryText group-hover:text-primary-500 transition-colors leading-snug line-clamp-2">
+              <TextRender>{data.title}</TextRender>
+            </h2>
+            <p class="mt-2 text-sm text-gray-600 line-clamp-2">
+              <TextRender>{data.description}</TextRender>
+            </p>
+          </div>
+        </a>
+      </li>
+    ))
+  }
+</ul>

@@ -1,0 +1,33 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import BlogList from "@ui/BlogList.astro";
+import { site } from "../../site";
+---
+
+<BaseLayout
+  title="Blog"
+  description="Alle blog artikelen"
+  keywords="blog"
+  lang={site.lang}
+  locale={site.locale}
+  umamiId={site.umamiId}
+>
+  <main class="min-h-screen bg-background">
+    <div class="max-w-3xl mx-auto px-4 sm:px-8 lg:px-0 pt-10 pb-24">
+      <a
+        href="/"
+        class="inline-flex items-center gap-1.5 text-xs font-medium tracking-widest uppercase text-primary-500 hover:text-primary-400 transition-colors mb-8"
+      >
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7" />
+        </svg>
+        Home
+      </a>
+
+      <h1 class="text-3xl sm:text-4xl font-bold text-primaryText leading-tight mb-10">
+        Blog
+      </h1>
+      <BlogList />
+    </div>
+  </main>
+</BaseLayout>

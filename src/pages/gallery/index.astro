@@ -1,0 +1,225 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import GalleryLightbox from '@ui/GalleryLightbox.astro';
+import CustomPicture from '@ui/CustomPicture.astro';
+import { site } from '../../site';
+import type { ImageMetadata } from 'astro';
+
+const albums = await getCollection('gallery');
+const sortedAlbums = albums.sort(
+  (a, b) => b.data.date.getTime() - a.data.date.getTime()
+);
+
+const allImages = import.meta.glob<{ default: ImageMetadata }>(
+  '/src/assets/gallery/**/*.{jpg,jpeg,png,webp,avif,JPG,JPEG,PNG,WEBP,AVIF}',
+  { eager: true }
+);
+
+const albumData = sortedAlbums.map((album) => {
+  const slug = album.id;
+  const images = Object.entries(allImages)
+    .filter(([path]) => path.startsWith(`/src/assets/gallery/${slug}/`))
+    .map(([path, mod]) => ({
+      metadata: mod.default,
+      alt: `${album.data.title} foto`,
+      filename: path.split('/').pop() ?? '',
+    }))
+    .sort((a, b) => a.filename.localeCompare(b.filename));
+  return { album, images };
+});
+---
+
+<BaseLayout
+  title="Foto's — William van der Vegt"
+  description="Fotogallerij"
+  keywords="foto, gallerij, fotografie, albums"
+  lang={site.lang}
+  locale={site.locale}
+  umamiId={site.umamiId}
+>
+  <main class="min-h-screen bg-background">
+    <!-- Top nav bar -->
+    <div class="border-b border-gray-200 bg-background/80 backdrop-blur-sm sticky top-0 z-40">
+      <div class="max-w-7xl mx-auto px-4 sm:px-8 py-3 flex items-center gap-4">
+        <a
+          href="/"
+          class="inline-flex items-center gap-1.5 text-xs font-medium tracking-widest uppercase text-primary-500 hover:text-primary-400 transition-colors shrink-0"
+        >
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7" />
+          </svg>
+          Home
+        </a>
+        <h1 class="text-sm font-bold text-primaryText">Foto's</h1>
+
+        <!-- Mobile album picker -->
+        <div class="ml-auto lg:hidden">
+          <select
+            id="mobile-album-select"
+            class="text-xs border border-gray-300 rounded-lg px-2 py-1.5 bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary-500"
+          >
+            {albumData.map(({ album }) => (
+              <option value={album.id}>
+                {album.data.title} — {album.data.date.toLocaleDateString('nl-NL', { month: '2-digit', year: 'numeric' }).replace(' ', '-')}
+              </option>
+            ))}
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div class="max-w-7xl mx-auto flex gap-8 px-4 sm:px-8 pt-8">
+      <!-- Sticky sidebar (desktop) -->
+      <aside class="hidden lg:block w-52 shrink-0">
+        <div class="sticky top-16 pt-2">
+          <p class="text-[10px] font-semibold tracking-widest uppercase text-gray-400 mb-3 px-3">
+            Albums
+          </p>
+          <nav class="space-y-0.5" id="album-nav">
+            {albumData.map(({ album, images }) => (
+              <a
+                href={`#${album.id}`}
+                class="album-nav-link group flex items-center justify-between px-3 py-2 rounded-lg text-sm text-gray-600 hover:bg-gray-100 hover:text-primaryText transition-colors"
+                data-album={album.id}
+              >
+                <span class="flex flex-col min-w-0">
+                  <span class="truncate font-medium">{album.data.title}</span>
+                  <span class="text-[10px] text-gray-400 group-hover:text-gray-500 tabular-nums">
+                    {album.data.date.toLocaleDateString('nl-NL', { month: '2-digit', year: 'numeric' }).replace(' ', '-')}
+                  </span>
+                </span>
+                <span class="text-xs text-gray-400 group-hover:text-gray-500 shrink-0 ml-1">
+                  {images.length}
+                </span>
+              </a>
+            ))}
+          </nav>
+        </div>
+      </aside>
+
+      <!-- Main scroll content -->
+      <div class="flex-1 min-w-0 pb-24">
+        {albumData.map(({ album, images }) => (
+          <section id={album.id} class="mb-24 scroll-mt-16">
+            <!-- Album header -->
+            <div class="flex items-start justify-between gap-4 mb-5 pb-4 border-b border-gray-200">
+              <div>
+                <h2 class="text-xl sm:text-2xl font-bold text-primaryText leading-tight">
+                  {album.data.title}
+                </h2>
+                <div class="flex flex-wrap items-center gap-2 mt-1.5 text-sm text-gray-500">
+                  <time datetime={album.data.date.toISOString()}>
+                    {album.data.date.toLocaleDateString('nl-NL', {
+                      day: 'numeric',
+                      month: 'long',
+                      year: 'numeric',
+                    })}
+                  </time>
+                  <span aria-hidden="true">·</span>
+                  <span>{images.length} foto{images.length !== 1 ? "'s" : ''}</span>
+                  {album.data.description && (
+                    <>
+                      <span aria-hidden="true">·</span>
+                      <span>{album.data.description}</span>
+                    </>
+                  )}
+                </div>
+              </div>
+              <a
+                href={`/gallery/${album.id}`}
+                class="text-xs font-medium text-primary-500 hover:text-primary-400 transition-colors shrink-0 mt-1"
+              >
+                Bekijk album →
+              </a>
+            </div>
+
+            <!-- Masonry grid -->
+            {images.length > 0 ? (
+              <div class="columns-2 lg:columns-3 gap-2">
+                {images.map((img, idx) => (
+                  <button
+                    class="break-inside-avoid mb-2 w-full block focus:outline-none focus:ring-2 focus:ring-primary-500 rounded-md overflow-hidden group"
+                    data-lightbox-trigger
+                    data-album={album.id}
+                    data-index={String(idx)}
+                    aria-label={`Open foto ${idx + 1} van ${album.data.title}`}
+                    type="button"
+                  >
+                    <div class="group-hover:opacity-90 transition-opacity duration-200">
+                      <CustomPicture
+                        srcImagePath={img.metadata}
+                        alt={img.alt}
+                        classes="w-full rounded-md"
+                        sizes="(min-width: 1024px) 33vw, 50vw"
+                        loading="lazy"
+                      />
+                    </div>
+                  </button>
+                ))}
+              </div>
+            ) : (
+              <p class="text-gray-400 text-sm italic py-8 text-center">
+                Geen foto's gevonden voor dit album.
+                <br />
+                <span class="text-xs">
+                  Voeg foto's toe aan{' '}
+                  <code class="bg-gray-100 px-1 rounded">
+                    src/assets/gallery/{album.id}/
+                  </code>
+                </span>
+              </p>
+            )}
+          </section>
+        ))}
+
+        {albumData.length === 0 && (
+          <div class="text-center py-24 text-gray-400">
+            <svg class="w-16 h-16 mx-auto mb-4 opacity-30" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg>
+            <p class="text-sm">Geen albums gevonden.</p>
+          </div>
+        )}
+      </div>
+    </div>
+  </main>
+
+  <GalleryLightbox albums={albumData.map(({ album, images }) => ({ slug: album.id, images }))} />
+</BaseLayout>
+
+<script>
+  document.querySelectorAll<HTMLButtonElement>('[data-lightbox-trigger]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const albumSlug = btn.dataset.album!;
+      const index = parseInt(btn.dataset.index ?? '0', 10);
+      window.dispatchEvent(new CustomEvent('gallery:open', { detail: { albumSlug, index } }));
+    });
+  });
+
+  document.getElementById('mobile-album-select')?.addEventListener('change', (e) => {
+    const slug = (e.target as HTMLSelectElement).value;
+    document.getElementById(slug)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
+
+  const navLinks = document.querySelectorAll<HTMLAnchorElement>('.album-nav-link');
+  if (navLinks.length > 0) {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) {
+            const slug = entry.target.id;
+            navLinks.forEach((link) => {
+              const isActive = link.dataset.album === slug;
+              link.classList.toggle('bg-gray-100', isActive);
+              link.classList.toggle('text-primaryText', isActive);
+              link.classList.toggle('font-semibold', isActive);
+            });
+          }
+        }
+      },
+      { threshold: 0.15, rootMargin: '-10% 0px -75% 0px' }
+    );
+    document.querySelectorAll<HTMLElement>('section[id]').forEach((s) => observer.observe(s));
+  }
+</script>
