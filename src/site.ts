@@ -53,7 +53,6 @@ export const site = {
     { label: "Projecten", link: "/#bouwen" },
     { label: "Notities", link: "/blog" },
     { label: "Foto's", link: "/gallery" },
-    { label: "Nu", link: "/now" },
   ],
 } as const;
 

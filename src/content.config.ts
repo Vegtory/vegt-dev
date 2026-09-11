@@ -112,8 +112,6 @@ const sections = defineCollection({
                   live: z.boolean().default(false),
                 })
                 .optional(),
-              /** Faint package-style tags, e.g. "astro@cloud". */
-              tags: z.array(z.string()).default([]),
             }),
           )
           .default([]),

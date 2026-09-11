@@ -1,7 +1,7 @@
 ---
 /**
  * @component ToolsShowcase
- * @version   2.0.0
+ * @version   2.1.0
  * @updated   2026-09-11
  * @source    astro-template@0ad4fd0
  * @copied    2026-09-10
@@ -15,10 +15,11 @@
  * same height, and the grid is a 5-column one they sit across unevenly, so the
  * row reads as arranged rather than as generated.
  *
- * The tags are the small joke: they render like package coordinates
- * (`astro@cloud`, `home-assistant@thuis`) rather than like blog categories.
- * Rationed — this is one of three or four places on the site where something
- * is dressed as code, and past that it stops being a wink and becomes a theme.
+ * Each card carried a row of faint package-style tags under the status chip
+ * (`hillchart@web`, `shape-up@methode`). They are gone: the card already says
+ * what the thing is in a full sentence, and a second, terser restatement of it
+ * in a code voice was the joke told twice. The status chip is the one place
+ * here still dressed as code, which is about the right ration.
  */
 import TextRender from "@ui/TextRender.astro";
 import SectionHeading from "@ui/SectionHeading.astro";
@@ -41,7 +42,6 @@ export interface ToolItem {
   /** Key into `iconPaths` below; anything unknown falls back to a star. */
   icon: string;
   status?: ToolStatus;
-  tags?: string[];
 }
 
 export interface Props {
@@ -153,17 +153,6 @@ const edges = ["border-t-cobalt", "border-t-tomato", "border-t-violet", "border-
                   live={tool.status.live}
                 />
               </div>
-            )}
-
-            {tool.tags && tool.tags.length > 0 && (
-              <ul class="mt-4 flex flex-wrap gap-x-3 gap-y-1.5">
-                {/* Literal, not `TextRender`: these are package-style
-                    coordinates, and `TextRender` would read an underscore in
-                    one as markdown emphasis. */}
-                {tool.tags.map((tag) => (
-                  <li class="font-mono text-[0.6875rem] text-mutedText">{tag}</li>
-                ))}
-              </ul>
             )}
 
             <span class="mt-6 inline-flex items-center gap-1.5 border-t border-hairline pt-4 text-sm font-semibold text-cobalt-ink transition-colors group-hover:text-ink-950">

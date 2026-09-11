@@ -2,8 +2,8 @@
  * The site's vocabulary: five things William does.
  *
  * This is the taxonomy, and it deliberately is not five homepage sections.
- * It is a set of labels — used on section eyebrows, blog tags, project cards
- * and the /now page — so that cloud work reads as one part of the picture
+ * It is a set of labels — used on section eyebrows, blog tags and project
+ * cards — so that cloud work reads as one part of the picture
  * rather than as the whole identity. The old structure (Over / Tools /
  * Fotografie / Blog) sorted content by what kind of object it was; this sorts
  * it by what he was doing, which is the thing the content actually has in

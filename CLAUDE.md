@@ -13,7 +13,7 @@ src/
     blog/             blog posts
     gallery/          photo albums
   content.config.ts   zod schemas — READ THIS BEFORE EDITING FRONTMATTER
-  pages/              routes (incl. /now and a 404 built from a failed print)
+  pages/              routes (incl. a 404 built from a failed print)
   components/         this site's components; yours to change freely
   layouts/            BaseLayout, BlogLayout
   assets/             images
