@@ -29,9 +29,28 @@
  * HOW THE CUT-OUT WORKS — read this before touching the portrait or the layout.
  *
  * There is no masking, no transparent PNG and no background removal. The
- * portrait is a studio headshot on a pure white backdrop (every edge of
- * `image.jpeg` samples 255,255,255, and 51% of the frame is near-white), and
- * the figure is composited with `mix-blend-mode: multiply`.
+ * portrait is a studio headshot on a white backdrop, composited with
+ * `mix-blend-mode: multiply`.
+ *
+ * `portrait-bw.jpg` did NOT arrive with a white backdrop, and this is the part
+ * to repeat when the high-resolution version lands. The delivered file had a
+ * smooth vertical lighting gradient behind the subject, running from 231 at the
+ * top of the frame to 251 at the bottom — invisible as a photograph, fatal as a
+ * multiply source, because anything below 255 multiplies into a visibly darker
+ * rectangle on the page. Thresholding it out was not an option either: the
+ * light polo shirt sits at 208-235, straight through the backdrop's own range,
+ * so no cut-off separates them.
+ *
+ * What fixed it was a flat-field correction, which is exact here because the
+ * gradient is purely vertical and the subject never reaches either side of the
+ * frame. For each row, take the median of the ten leftmost and ten rightmost
+ * pixels as that row's background level, smooth it over a few rows to keep JPEG
+ * noise from banding, then scale the whole row so that level becomes 255. The
+ * backdrop goes to 254-255 everywhere and the subject keeps its tones relative
+ * to white — the chest band moved by about one level, from 228 to 229.
+ *
+ * If a replacement photo shows a grey box behind the figure, that is this, and
+ * that is the fix.
  *
  * Multiply keeps the darker of the two layers. White over paper leaves paper,
  * so the backdrop disappears completely; the person is darker than the page
@@ -54,24 +73,24 @@
  *      Absolute positioning is fine; it only isolates once `z-index` is set.
  *   2. The page under it must stay light. On a dark surface multiply eats the
  *      figure instead of the backdrop.
- *   3. The portrait's backdrop must stay white-ish. A grey or coloured studio
- *      background shows up as a grey rectangle.
+ *   3. The portrait's backdrop must stay white. Not "light" — white. See the
+ *      flat-field note above; a backdrop at 231 is already a visible box.
  *   4. `showPlaceholder={false}` is not optional. CustomPicture otherwise
  *      paints a blurred, 1.15x-scaled copy of the same photo behind the image;
  *      that copy multiplies too and rings the figure in grey.
  *
- * `grayscale` is applied here in CSS as well. It is deliberately belt-and-
- * braces: it makes the current colour file match the intended look now, and it
- * is a no-op once the black-and-white portrait replaces it. Delete the one
- * class if the colour version is ever wanted back. (It sits on the image
- * itself, not on an ancestor — see point 1.)
+ * `grayscale` is applied here in CSS as well, and is now a genuine no-op:
+ * `portrait-bw.jpg` measures a mean chroma spread of 0.0, i.e. it is already
+ * true greyscale. It stays as a guard, because the obvious way to break the
+ * look later is to drop a colour photograph in and not notice. (It sits on the
+ * image itself, not on an ancestor — see point 1.)
  * ---------------------------------------------------------------------------
  *
  * ---------------------------------------------------------------------------
  * ONE NUMBER TO KNOW: `FIGURE_WIDTH`.
  *
- * `src/assets/image.jpeg` is 400x400 and `CustomPicture` never upscales, so
- * 400px of real detail is all there is. The subject fills 93% x 97% of that
+ * `src/assets/portrait-bw.jpg` is 400x400 and `CustomPicture` never upscales,
+ * so 400px of real detail is all there is. The subject fills 97% x 96% of that
  * frame, so there is no margin to crop away and nothing to reclaim — the only
  * lever is how far the file gets stretched.
  *
