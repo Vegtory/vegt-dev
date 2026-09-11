@@ -1,0 +1,193 @@
+---
+/**
+ * @component Header
+ * @version   1.0.1
+ * @updated   2026-09-10
+ * @source    astro-template@0ad4fd0
+ * @copied    2026-09-10
+ * @modified  true
+ *
+ * Copied from the template and rewritten for this site:
+ *
+ * - Ink bar on every page instead of a background-coloured one. It merges
+ *   into the hero at the top of the homepage and becomes a floating dark bar
+ *   once you scroll, which is what ties the pages together.
+ * - Mono wordmark rather than a logo image; this site has no logo.
+ * - The CTA goes through `@ui/Button.astro`. The template's own button turned
+ *   its label black-on-blue (3.2:1) on hover.
+ * - The drawer is wired up with `aria-expanded`/`aria-controls`, closes on
+ *   Escape and on outside click, and its close buttons use a class rather
+ *   than a repeated `id` (the template emitted `id="close-menu-btn"` once per
+ *   link, so the document had a dozen duplicate ids).
+ */
+import TextRender from "@ui/TextRender.astro";
+import Button from "@ui/Button.astro";
+
+export interface HeaderLink {
+  label: string;
+  link: string;
+}
+
+export interface Props {
+  wordmark?: string;
+  links?: readonly HeaderLink[];
+  /** The one call to action, rendered as a button. Omit for none. */
+  cta?: { label: string; link: string };
+}
+
+const { wordmark = "", links = [], cta } = Astro.props;
+---
+
+{/* Given a real 1px height and pulled back out of flow with -mb-px: a
+   zero-area target is not reliably reported as intersecting. */}
+<div id="header-sentinel" class="h-px -mb-px" aria-hidden="true"></div>
+
+<header
+  id="site-header"
+  class="sticky top-0 z-50 border-b border-white/10 bg-ink-950/85 backdrop-blur-md transition-shadow duration-300"
+>
+  <nav
+    class="mx-auto flex max-w-6xl items-center justify-between gap-6 px-6 py-4 lg:px-8"
+    aria-label="Hoofdnavigatie"
+  >
+    <a
+      href="/"
+      class="font-mono text-sm font-semibold text-whiteText no-underline transition-colors hover:text-accent-300"
+    >
+      <span class="text-ink-300" aria-hidden="true">~/</span><TextRender>{wordmark}</TextRender><span
+        class="ml-0.5 inline-block h-[0.9em] w-[0.45em] translate-y-[0.1em] bg-accent-400/70 motion-safe:animate-blink"
+        aria-hidden="true"></span>
+    </a>
+
+    <div class="hidden items-center gap-8 lg:flex">
+      {
+        links.map((t) => (
+          <a
+            href={t.link}
+            class="group relative text-sm font-medium text-ink-200 no-underline transition-colors hover:text-whiteText"
+          >
+            <TextRender>{t.label}</TextRender>
+            <span
+              class="absolute -bottom-1.5 left-0 h-px w-full origin-left scale-x-0 bg-accent-400 transition-transform duration-300 ease-out group-hover:scale-x-100"
+              aria-hidden="true"
+            />
+          </a>
+        ))
+      }
+      {
+        cta && (
+          <Button href={cta.link} variant="secondary" tone="dark">
+            <TextRender>{cta.label}</TextRender>
+          </Button>
+        )
+      }
+    </div>
+
+    <button
+      type="button"
+      class="-m-2.5 inline-flex items-center justify-center rounded-lg p-2.5 text-ink-200 transition-colors hover:text-whiteText lg:hidden"
+      id="open-menu-btn"
+      aria-controls="mobile-menu"
+      aria-expanded="false"
+    >
+      <span class="sr-only">Open menu</span>
+      <svg class="size-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"></path>
+      </svg>
+    </button>
+  </nav>
+
+</header>
+
+<!-- Mobile drawer. The homepage previously had no mobile navigation at all:
+   the old hero's nav was `hidden md:block` and no header was rendered.
+   It is a SIBLING of <header>, not a child, and must stay one: the header
+   carries `backdrop-blur-md`, and a backdrop-filter makes an element the
+   containing block for `position: fixed` descendants. Nested inside, the
+   drawer's `inset-y-0` panel resolved against the 56px header instead of
+   the viewport, so it opened as a letterbox with its links clipped. -->
+<div class="hidden lg:hidden" role="dialog" aria-modal="true" aria-label="Menu" id="mobile-menu">
+  <div class="fixed inset-0 z-40 bg-ink-950/60 backdrop-blur-sm" data-menu-close></div>
+  <div class="fixed inset-y-0 right-0 z-50 w-full max-w-sm overflow-y-auto border-l border-white/10 bg-ink-950 px-6 py-4">
+    <div class="flex items-center justify-between">
+      <span class="font-mono text-sm font-semibold text-whiteText">
+        <span class="text-ink-300" aria-hidden="true">~/</span><TextRender>{wordmark}</TextRender>
+      </span>
+      <button
+        type="button"
+        class="-m-2.5 rounded-lg p-2.5 text-ink-200 transition-colors hover:text-whiteText"
+        data-menu-close
+      >
+        <span class="sr-only">Sluit menu</span>
+        <svg class="size-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12"></path>
+        </svg>
+      </button>
+    </div>
+
+    <div class="mt-8 flex flex-col gap-1">
+      {
+        links.map((t) => (
+          <a
+            href={t.link}
+            data-menu-close
+            class="rounded-lg px-3 py-3 text-base font-medium text-ink-200 no-underline transition-colors hover:bg-white/5 hover:text-whiteText"
+          >
+            <TextRender>{t.label}</TextRender>
+          </a>
+        ))
+      }
+      {
+        cta && (
+          <Button href={cta.link} variant="primary" tone="dark" class="mt-4 justify-center" data-menu-close>
+            <TextRender>{cta.label}</TextRender>
+          </Button>
+        )
+      }
+    </div>
+  </div>
+</div>
+
+<script>
+  // Lift the header off the page once anything has scrolled under it. A
+  // sentinel is cheaper than a scroll listener: no handler runs per frame,
+  // the browser just reports the two crossings.
+  const sentinel = document.getElementById("header-sentinel");
+  const siteHeader = document.getElementById("site-header");
+
+  if (sentinel && siteHeader && "IntersectionObserver" in window) {
+    new IntersectionObserver(
+      ([entry]) => {
+        siteHeader.classList.toggle("shadow-lg", !entry.isIntersecting);
+        siteHeader.classList.toggle("shadow-ink-950/40", !entry.isIntersecting);
+      },
+      { threshold: 0 },
+    ).observe(sentinel);
+  }
+
+  const openBtn = document.getElementById("open-menu-btn");
+  const menu = document.getElementById("mobile-menu");
+
+  // A page may render the header without the drawer; bail rather than
+  // throwing and taking every other inline script on the page down with us.
+  if (openBtn && menu) {
+    const setOpen = (isOpen: boolean) => {
+      menu.classList.toggle("hidden", !isOpen);
+      openBtn.setAttribute("aria-expanded", String(isOpen));
+      // Stops the page behind the drawer from scrolling with it.
+      document.documentElement.classList.toggle("overflow-hidden", isOpen);
+    };
+
+    openBtn.addEventListener("click", () => setOpen(true));
+
+    // Covers the close button, the backdrop, and every link in the drawer, so
+    // an in-page anchor does not leave the menu covering what it jumped to.
+    menu.querySelectorAll("[data-menu-close]").forEach((el) =>
+      el.addEventListener("click", () => setOpen(false)),
+    );
+
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && !menu.classList.contains("hidden")) setOpen(false);
+    });
+  }
+</script>

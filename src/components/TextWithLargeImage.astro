@@ -1,0 +1,94 @@
+---
+/**
+ * @component TextWithLargeImage
+ * @version   1.0.1
+ * @updated   2026-09-10
+ * @source    astro-template@0ad4fd0
+ * @copied    2026-09-10
+ * @modified  true
+ *
+ * Copied from the template and restyled onto this site's tokens.
+ *
+ * - Heading pair comes from `@ui/SectionHeading.astro`, so it matches every
+ *   other section. The template emitted an `<h3>` above its `<h2>` and
+ *   coloured the `<h2>` cyan at 2.15:1.
+ * - The prose is left-aligned rather than centred. This is the longest body
+ *   of text on the site, and centred paragraphs make every line start in a
+ *   different place.
+ * - Bullet icons sit in a tinted tile instead of floating loose over the text.
+ */
+import type { ImageMetadata } from "astro";
+import { Icon } from "astro-icon/components";
+import CustomPicture from "@ui/CustomPicture.astro";
+import SectionHeading from "@ui/SectionHeading.astro";
+import { proseBase } from "@ui/prose";
+
+export interface ImageItem {
+  image: ImageMetadata | string;
+  description?: string;
+  subText?: string;
+}
+
+export interface IconComponent {
+  title: string;
+  text: string;
+  /** Icon name resolved against the astro-icon `iconDir`. */
+  icon: string;
+}
+
+export interface Props {
+  title?: string;
+  subtitle?: string;
+  imageItem?: ImageItem;
+  bulletPoints?: IconComponent[];
+}
+
+const { title = "", subtitle = "", imageItem, bulletPoints = [] } = Astro.props;
+---
+
+<section class="bg-background py-20 sm:py-28">
+  <div class="mx-auto max-w-6xl px-6 lg:px-8">
+    <SectionHeading eyebrow={subtitle} title={title} align="left" />
+
+    {/* The measure lives on this wrapper, not on the prose element: the
+        `max-w-none` inside `proseBase` is there so typography does not impose
+        its own width, and two max-width utilities on one element resolve by
+        stylesheet order rather than by which one you meant. */}
+    <div class="mt-8 max-w-2xl" data-reveal style="--reveal-delay: 90ms">
+      <div class={proseBase}><slot /></div>
+    </div>
+
+    {
+      imageItem?.image && (
+        <div class="mt-14" data-reveal>
+          <CustomPicture
+            alt={imageItem.description}
+            classes="w-full rounded-2xl ring-1 ring-hairline shadow-sm"
+            sizes="(min-width: 1280px) 1152px, (min-width: 1040px) 960px, (min-width: 780px) 720px, calc(94.44vw - 31px)"
+            srcImagePath={imageItem.image}
+            loading="lazy"
+            subText={imageItem.subText}
+          />
+        </div>
+      )
+    }
+
+    {
+      bulletPoints.length > 0 && (
+        <dl class="mt-16 grid grid-cols-1 gap-x-8 gap-y-10 sm:grid-cols-2 lg:grid-cols-3">
+          {bulletPoints.map((bulletPoint, i) => (
+            <div data-reveal style={`--reveal-delay: ${i * 80}ms`}>
+              <dt class="flex items-center gap-3 font-semibold text-primaryText">
+                <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-surfaceMuted text-accentText ring-1 ring-hairline">
+                  <Icon name={bulletPoint.icon} class="h-4 w-4" />
+                </span>
+                {bulletPoint.title}
+              </dt>
+              <dd class="mt-3 leading-relaxed text-mutedText">{bulletPoint.text}</dd>
+            </div>
+          ))}
+        </dl>
+      )
+    }
+  </div>
+</section>

@@ -1,0 +1,93 @@
+---
+/**
+ * @component Button
+ * @version   1.0.0
+ * @updated   2026-09-10
+ *
+ * The site's whole button and call-to-action vocabulary, in one file.
+ *
+ * Before this existed the homepage had five unrelated treatments — a solid
+ * blue pill, a bare blue text link, a bare cyan text link, an uppercase
+ * tracked back-link, and a header button whose hover turned the label black
+ * on dark blue (3.2:1). Everything that invites a click now comes from here,
+ * so "which blue is a link?" has exactly one answer.
+ *
+ * `variant` is the emphasis, `tone` is the background it sits on. Every class
+ * string below is a complete literal, because Tailwind's scanner cannot see a
+ * name that was assembled at runtime.
+ */
+import type { HTMLAttributes } from "astro/types";
+
+/** Extends the anchor attributes so callers can pass `data-*`, `aria-*` etc. */
+export interface Props extends Omit<HTMLAttributes<"a">, "class"> {
+  href: string;
+  /** Emphasis. One `primary` per section, at most. */
+  variant?: "primary" | "secondary" | "inline";
+  /** Which band it sits on. `dark` is for the ink hero and footer. */
+  tone?: "light" | "dark";
+  /** Draws a `→` that slides on hover. Off for plain navigation. */
+  arrow?: boolean;
+  external?: boolean;
+  class?: string;
+}
+
+const {
+  href,
+  variant = "primary",
+  tone = "light",
+  arrow = false,
+  external = false,
+  class: extraClass = "",
+  ...rest
+} = Astro.props;
+
+const base =
+  "group inline-flex items-center gap-2 no-underline transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2";
+
+/** Solid and outlined variants share this box; `inline` deliberately does not. */
+const box = "rounded-xl px-5 py-2.5 text-sm font-semibold";
+
+const styles: Record<string, string> = {
+  // Solid. 6.1:1 white-on-blue, and the hover darkens to 7.5:1 rather than
+  // dropping contrast the way the old header button did.
+  "primary-light": `${box} bg-primary-600 text-whiteText shadow-sm hover:bg-primary-700 focus-visible:ring-primary-600 focus-visible:ring-offset-background`,
+  "primary-dark": `${box} bg-whiteText text-ink-950 shadow-sm hover:bg-ink-100 focus-visible:ring-whiteText focus-visible:ring-offset-ink-950`,
+
+  // Outlined. Reads as the second choice without becoming invisible.
+  "secondary-light": `${box} border border-hairline bg-surface text-primaryText hover:border-ink-300 hover:text-primary-700 focus-visible:ring-primary-600 focus-visible:ring-offset-background`,
+  "secondary-dark": `${box} border border-white/20 text-whiteText hover:border-white/50 hover:bg-white/5 focus-visible:ring-whiteText focus-visible:ring-offset-ink-950`,
+
+  // Inline text link. The old "read more" links; now one colour, everywhere.
+  "inline-light":
+    "text-sm font-semibold text-primary-600 hover:text-primary-700 focus-visible:ring-primary-600 focus-visible:ring-offset-background rounded-lg",
+  "inline-dark":
+    "text-sm font-semibold text-ink-200 hover:text-whiteText focus-visible:ring-whiteText focus-visible:ring-offset-ink-950 rounded-lg",
+};
+
+const externalAttrs = external
+  ? { target: "_blank", rel: "noopener noreferrer" }
+  : {};
+---
+
+<a
+  href={href}
+  class:list={[base, styles[`${variant}-${tone}`], extraClass]}
+  {...externalAttrs}
+  {...rest}
+>
+  <slot />
+  {
+    arrow && (
+      <svg
+        class="h-4 w-4 shrink-0 transition-transform duration-200 group-hover:translate-x-0.5"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        viewBox="0 0 24 24"
+        aria-hidden="true"
+      >
+        <path stroke-linecap="round" stroke-linejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+      </svg>
+    )
+  }
+</a>

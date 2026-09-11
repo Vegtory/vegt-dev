@@ -3,50 +3,59 @@
  * @component BlogList
  * @version   1.0.0
  * @updated   2026-09-10
- * @source    astro-template@10c3958
+ * @source    astro-template@0ad4fd0
  * @copied    2026-09-10
- * @modified  false
+ * @modified  true
+ *
+ * Copied from the template and restyled onto this site's tokens.
+ *
+ * - `text-gray-500`/`text-gray-600` and the `divide-gray-200` rules become
+ *   `mutedText` and `hairline`, so the list sits on the same warm neutral as
+ *   the rest of the page instead of a cooler grey.
+ * - Hover moves the title to `primary-700`, the one link colour, rather than
+ *   `primary-500` (3.7:1 on the page background).
+ * - Dates go through `@ui/date`, which is what makes this list and the
+ *   homepage agree about the same post.
  */
 import { getCollection } from "astro:content";
 import CustomPicture from "@ui/CustomPicture.astro";
 import TextRender from "@ui/TextRender.astro";
+import { formatDate } from "@ui/date";
 
 const allBlogs = await getCollection("blog");
 const blogs = allBlogs
-  .filter(({ data }: any) => !data.ishidden)
-  .sort(
-    (a: any, b: any) =>
-      new Date(b.data.date).getTime() - new Date(a.data.date).getTime(),
-  );
+  .filter(({ data }) => !data.ishidden)
+  .sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
 ---
 
-<ul class="divide-y divide-gray-200">
+<ul class="divide-y divide-hairline border-y border-hairline">
   {
-    blogs.map(({ id, data }: any) => (
-      <li class="py-8">
-        <a href={`/blog/${id}`} class="group flex gap-6 items-start">
-          <div class="shrink-0 w-28 sm:w-36 rounded-xl overflow-hidden shadow-md">
+    blogs.map(({ id, data }, i) => (
+      <li data-reveal style={`--reveal-delay: ${Math.min(i, 5) * 80}ms`}>
+        <a
+          href={`/blog/${id}`}
+          class="group flex items-start gap-5 py-7 no-underline sm:gap-6 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-4 focus-visible:ring-offset-background rounded-lg"
+        >
+          <div class="w-28 shrink-0 overflow-hidden rounded-xl border border-hairline shadow-sm sm:w-36">
             <CustomPicture
               alt={data.description}
-              classes="aspect-[4/3] w-full object-cover"
+              classes="aspect-[4/3] w-full transition-transform duration-500 ease-out group-hover:scale-[1.06]"
               sizes="(min-width: 640px) 144px, 112px"
               srcImagePath={data.imageItem.image}
               loading="lazy"
             />
           </div>
-          <div class="flex-1 min-w-0">
-            <div class="flex items-center gap-1.5 text-sm text-gray-500 mb-1">
-              <svg class="w-3.5 h-3.5 text-primary-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-              </svg>
-              <time datetime={data.date}>
-                {new Date(data.date).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })}
-              </time>
-            </div>
-            <h2 class="text-lg font-bold text-primaryText group-hover:text-primary-500 transition-colors leading-snug line-clamp-2">
+
+          <div class="min-w-0 flex-1">
+            <time datetime={data.date.toISOString()} class="font-mono text-xs text-mutedText">
+              {formatDate(data.date)}
+            </time>
+
+            <h2 class="mt-1.5 line-clamp-2 text-lg font-semibold leading-snug text-primaryText transition-colors group-hover:text-primary-700">
               <TextRender>{data.title}</TextRender>
             </h2>
-            <p class="mt-2 text-sm text-gray-600 line-clamp-2">
+
+            <p class="mt-2 line-clamp-2 text-sm leading-relaxed text-mutedText">
               <TextRender>{data.description}</TextRender>
             </p>
           </div>

@@ -5,10 +5,22 @@
  * @updated   2026-09-10
  * @source    astro-template@10c3958
  * @copied    2026-09-10
- * @modified  false
+ * @modified  true
+ *
+ * Modified for this site:
+ * - Wrapped in the shared header and footer, so an article is not a dead end.
+ * - The long inline `prose-*` modifier list moved to `@ui/prose`, which is
+ *   what makes an article's links, code and quotes match the homepage.
+ * - The uppercase tracked back-link became a normal one; it was the site's
+ *   fourth distinct link treatment.
+ * - Dates go through `@ui/date` (this hardcoded `en-GB` on a `lang="nl"` site).
  */
 import type { ImageMetadata } from "astro";
 import CustomPicture from "@ui/CustomPicture.astro";
+import SiteHeader from "@ui/SiteHeader.astro";
+import SiteFooter from "@ui/SiteFooter.astro";
+import { formatDate } from "@ui/date";
+import { proseArticle } from "@ui/prose";
 import BaseLayout from "./BaseLayout.astro";
 
 export interface ImageItem {
@@ -22,7 +34,7 @@ export interface Props {
   description?: string;
   keywords?: string;
   imageItem?: ImageItem;
-  date?: Date | string;
+  date?: Date;
   umamiId?: string;
 }
 
@@ -34,14 +46,6 @@ const {
   date,
   umamiId,
 } = Astro.props;
-
-const formattedDate = date
-  ? new Date(date).toLocaleDateString("en-GB", {
-      day: "numeric",
-      month: "long",
-      year: "numeric",
-    })
-  : null;
 ---
 
 <BaseLayout
@@ -50,65 +54,58 @@ const formattedDate = date
   keywords={keywords}
   umamiId={umamiId}
 >
-  <main class="min-h-screen bg-background">
-    <div class="max-w-3xl mx-auto px-4 sm:px-8 lg:px-0 pt-10 pb-24">
+  <SiteHeader />
 
-      <!-- Back link -->
+  <main class="bg-background">
+    <div class="mx-auto max-w-3xl px-6 pb-24 pt-12 sm:px-8">
       <a
         href="/blog"
-        class="inline-flex items-center gap-1.5 text-xs font-medium tracking-widest uppercase text-primary-500 hover:text-primary-400 transition-colors mb-8"
+        class="group inline-flex items-center gap-1.5 text-sm font-semibold text-primary-600 no-underline transition-colors hover:text-primary-700"
       >
-        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7" />
+        <svg
+          class="h-4 w-4 transition-transform duration-200 group-hover:-translate-x-0.5"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          aria-hidden="true"
+        >
+          <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"></path>
         </svg>
-        Blog
+        Alle artikelen
       </a>
 
-      <!-- Title -->
-      <h1 class="text-3xl sm:text-4xl font-bold text-primaryText leading-tight">
+      <h1 class="mt-8 text-pretty text-3xl font-bold leading-tight tracking-tight text-primaryText sm:text-4xl">
         {title}
       </h1>
 
-      <!-- Meta -->
-      <div class="flex flex-wrap items-center gap-2 mt-4 text-sm text-gray-500">
-        {formattedDate && (
-          <span class="flex items-center gap-1.5">
-            <svg class="w-3.5 h-3.5 text-primary-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-            </svg>
-            {formattedDate}
-          </span>
-        )}
-      </div>
+      {
+        date && (
+          <time datetime={date.toISOString()} class="mt-4 block font-mono text-xs text-mutedText">
+            {formatDate(date)}
+          </time>
+        )
+      }
 
-      <!-- Hero image -->
-      {imageItem?.image && (
-        <div class="mt-8 mb-10 rounded-2xl overflow-hidden shadow-md">
-          <CustomPicture
-            alt={imageItem.description}
-            classes="w-full aspect-[16/7] object-cover"
-            sizes="(min-width: 1040px) 768px, (min-width: 640px) calc(100vw - 4rem), calc(100vw - 2rem)"
-            srcImagePath={imageItem.image}
-            loading="eager"
-          />
-        </div>
-      )}
+      {
+        imageItem?.image && (
+          <div class="mb-12 mt-8 overflow-hidden rounded-2xl border border-hairline shadow-sm">
+            <CustomPicture
+              alt={imageItem.description}
+              classes="aspect-[16/7] w-full"
+              sizes="(min-width: 1040px) 768px, calc(100vw - 3rem)"
+              srcImagePath={imageItem.image}
+              loading="eager"
+            />
+          </div>
+        )
+      }
 
-      <!-- Article body -->
-      <article class="prose prose-gray max-w-none
-        prose-headings:font-bold prose-headings:text-primaryText
-        prose-h2:mt-12 prose-h2:text-2xl prose-h2:border-b prose-h2:border-gray-200 prose-h2:pb-2
-        prose-a:text-primary-500 prose-a:no-underline hover:prose-a:underline
-        prose-code:text-primary-600 prose-code:bg-primary-50 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:text-sm prose-code:font-mono prose-code:before:content-none prose-code:after:content-none
-        prose-pre:bg-gray-900 prose-pre:text-gray-100 prose-pre:rounded-xl prose-pre:shadow-lg
-        [&_pre_code]:bg-transparent [&_pre_code]:p-0 [&_pre_code]:text-inherit [&_pre_code]:rounded-none
-        prose-img:rounded-xl prose-img:shadow-md
-        prose-blockquote:border-l-primary-400 prose-blockquote:text-gray-600
-      ">
+      <article class:list={["mt-10", proseArticle]}>
         <slot />
       </article>
-
     </div>
   </main>
 
+  <SiteFooter />
 </BaseLayout>

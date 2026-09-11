@@ -1,0 +1,27 @@
+---
+/**
+ * @component SiteFooter
+ * @version   1.0.0
+ * @updated   2026-09-10
+ *
+ * `Footer` wired to `src/site.ts`. See `SiteHeader` for why this wrapper
+ * exists. The `#Contact` id lives here so the header's CTA has somewhere to
+ * land on every page, not just the homepage.
+ */
+import Footer from "@ui/Footer.astro";
+import { site } from "../site";
+---
+
+<div id="Contact">
+  <Footer
+    wordmark={site.wordmark}
+    email={site.email}
+    contactTitle="Contact"
+    contactText="Een vraag, een idee, of gewoon zin om ergens over te sparren? Mail me gerust — ik lees alles."
+    links={site.nav}
+    githubLink={site.social.github}
+    linkedinLink={site.social.linkedin}
+    instagramLink={site.social.instagram}
+    copyrightText={site.name}
+  />
+</div>

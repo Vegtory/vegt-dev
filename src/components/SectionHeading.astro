@@ -1,0 +1,65 @@
+---
+/**
+ * @component SectionHeading
+ * @version   1.0.0
+ * @updated   2026-09-10
+ *
+ * The eyebrow + title pair every light section opens with.
+ *
+ * Previously each section rolled its own, and they disagreed on both markup
+ * and hierarchy: some emitted `<h3>` above `<h2>`, and the title was always
+ * cyan `accentText` — 2.15:1 on the page background. Here the eyebrow is a
+ * small mono label (the developer signal, and it doubles as the section's
+ * kicker for a skim-reader) and the title is ink, so the largest text on the
+ * page is also the most readable.
+ */
+import TextRender from "@ui/TextRender.astro";
+
+export interface Props {
+  /** Small mono label above the title, e.g. "Over". */
+  eyebrow?: string;
+  title?: string;
+  /** `center` for short sections, `left` for anything with prose under it. */
+  align?: "center" | "left";
+  /**
+   * Heading level. Sections on a page that already has an `<h1>` want `h2`
+   * (the default); a page whose main title this *is* — /blog, /gallery —
+   * passes `h1`, so the document is not left without one. Size is set by the
+   * classes below either way, so this changes the outline, not the look.
+   */
+  as?: "h1" | "h2";
+  class?: string;
+}
+
+const {
+  eyebrow = "",
+  title = "",
+  align = "center",
+  as: Heading = "h2",
+  class: extraClass = "",
+} = Astro.props;
+
+const alignment =
+  align === "center" ? "mx-auto max-w-2xl text-center items-center" : "max-w-3xl items-start";
+---
+
+<div class:list={["flex flex-col", alignment, extraClass]} data-reveal>
+  {
+    eyebrow && (
+      <p class="flex items-center gap-2.5 font-mono text-xs font-medium uppercase tracking-[0.18em] text-accentText">
+        {/* Draws itself out from the mark as the heading arrives; the states live
+            in ScrollReveal's global sheet, keyed off `data-reveal-rule`. */}
+        <span class="h-px w-6 origin-left bg-accentText/40" data-reveal-rule aria-hidden="true" />
+        <TextRender>{eyebrow}</TextRender>
+      </p>
+    )
+  }
+  {
+    title && (
+      <Heading class="mt-4 text-pretty text-3xl font-bold tracking-tight text-primaryText sm:text-4xl">
+        <TextRender>{title}</TextRender>
+      </Heading>
+    )
+  }
+  <slot />
+</div>

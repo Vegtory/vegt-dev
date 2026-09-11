@@ -1,0 +1,19 @@
+---
+/**
+ * @component SiteHeader
+ * @version   1.0.0
+ * @updated   2026-09-10
+ *
+ * `Header` wired to `src/site.ts`. Pages render `<SiteHeader />` and get the
+ * same navigation everywhere, so adding a link is a one-line change in
+ * site.ts rather than an edit to five pages that will drift apart.
+ */
+import Header from "@ui/Header.astro";
+import { site } from "../site";
+---
+
+<Header
+  wordmark={site.wordmark}
+  links={site.nav}
+  cta={{ label: "Contact", link: "/#Contact" }}
+/>
