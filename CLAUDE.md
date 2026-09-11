@@ -21,6 +21,7 @@ src/
   buildInfo.ts        rev / commit / build time — the footer's metadata is real
 astro-template/       submodule: shared components, imported as @template/*
 contact-worker/       Cloudflare Worker serving /api/contact
+scripts/              one-off tools, run by hand, not part of the build
 ```
 
 ## Editing content
@@ -147,10 +148,11 @@ becoming a gradient background: it is always behind something, it never carries
 meaning or sits under body copy at strength, and it moves on a scale of minutes
 (83s / 107s / 131s, transform-only, behind `motion-safe:`).
 
-It also **tints the hero portrait**, deliberately — the cut-out is a `multiply`
-composite, so it takes the colour of whatever is behind it. Keep the washes
-light: a darker wash makes a darker figure and a saturated one makes a stained
-one.
+It used to **tint the hero portrait**, back when that was a `multiply`
+composite taking the colour of whatever was behind it. The portrait is a real
+cut-out now and keeps its own black and white, so the wash is simply light
+behind the figure. Keep the layers light anyway: at strength they stop reading
+as light on paper and start reading as a coloured background.
 
 ### The five verbs
 
@@ -223,35 +225,40 @@ pnpm run deploy      # astro build && wrangler deploy
 
   **Two assets are currently the limiting factor on the design**, and both are
   a drop-in fix:
-  - `src/assets/portrait-bw.jpg` (hero portrait) is 400x400, and the subject
+  - `src/assets/portrait-bw.png` (hero portrait) is 400x400, and the subject
     fills 97% x 96% of it, so there is no margin to crop and nothing to
     reclaim. The
-    hero stretches it about 1.25x at `lg` — which a blended black-and-white
+    hero stretches it about 1.25x at `lg` — which a soft-edged black-and-white
     figure carries and a crisp framed photo would not — and downscales it on
-    phone and tablet. A ~1400px version on the same white backdrop opens the
-    hero up to the full reference proportions: one constant and one `sizes`
-    string, both named in `Hero.astro`'s header comment.
+    phone and tablet. A ~1400px version on the same white backdrop, run through
+    `scripts/cutout-portrait.py`, opens the hero up to the full reference
+    proportions: one constant and one `sizes` string, both named in
+    `Hero.astro`'s header comment.
   - `src/assets/speaking-nimma-codes.jpg` is 356x200. `SpeakingFeature` is
     drawn for a near-full-bleed photograph but caps the frame at `max-w-2xl`
     for the same reason. A ~1600px original lets it run full width.
 
-- **The hero portrait is a CSS cut-out, and it is fragile in one specific way.**
-  There is no transparent PNG: the studio photo has a white backdrop and is
-  composited with `mix-blend-mode: multiply`, so white becomes page and the
-  figure stays. **The backdrop must be white, not merely light** — the delivered
-  portrait had a vertical lighting gradient from 231 to 251 and rendered as a
-  visible grey box, and the light polo shirt overlaps that same range so no
-  threshold separates them. It was fixed with a flat-field correction (per-row
-  median of the outer ten columns as the background level, scaled to 255);
-  `Hero.astro`'s header comment has the full recipe, which is worth repeating
-  on any replacement photo. An element only blends with the backdrop inside the nearest
-  *isolating* ancestor, so a `z-index`, a `transform`, an `opacity` below 1, a
-  `filter` or a `will-change` **anywhere above the image** silently turns the
-  cut-out back into a plain white box. That is why the hero layers with DOM
-  order alone and carries no `z-index` at all, why the figure has no entrance
-  animation, and why it passes `showPlaceholder={false}` to `CustomPicture`.
-  The full explanation is in `Hero.astro`'s header comment — read it before
-  restructuring that section.
+- **The hero portrait is a real cut-out — an alpha PNG, not a blend mode.**
+  It was a `mix-blend-mode: multiply` composite of a white-backdrop JPEG until
+  the matte was baked into the file, and that is worth knowing because the hero
+  still carries the shape of it: DOM-order layering, no `z-index` anywhere, no
+  entrance animation on the figure. Those are now choices rather than
+  requirements — an isolating ancestor no longer turns the figure into a white
+  box, and the page underneath no longer has to be light.
+
+  Two things about it are still load-bearing. It passes
+  `showPlaceholder={false}` to `CustomPicture`, because the blur-up layer is
+  painted *behind* the image and an image you can see through shows it. And
+  **the fallback format must carry alpha** — JPEG cannot, so `CustomPicture`
+  serves PNG under the WebP for any source with an alpha channel.
+
+  Replacing the photo means re-cutting it: `scripts/cutout-portrait.py` does
+  that, and its docstring is the recipe. **A delivered photo's backdrop must be
+  flat white, not merely light** — this one arrived with a vertical lighting
+  gradient from 231 to 251, the light polo shirt sits in that same range so no
+  threshold separates them, and the fix is a flat-field correction (per-row
+  median of the outer ten columns as the background level, scaled to 255). Read
+  `Hero.astro`'s header comment before restructuring that section.
 
 - **Never put `h-full` on `<html>` or `<body>`.** It reads as harmless and it
   silently breaks the sticky header. `height: 100%` on a ten-thousand-pixel

@@ -1,7 +1,7 @@
 ---
 /**
  * @component AmbientWash
- * @version   1.0.0
+ * @version   1.1.0
  * @updated   2026-09-11
  *
  * Soft colour drifting behind a section, like light falling across the page.
@@ -27,21 +27,21 @@
  *     itself so the animation is never declared in the first place.
  *
  * ---------------------------------------------------------------------------
- * IT ALSO TINTS THE HERO PORTRAIT, AND THAT IS DELIBERATE.
+ * IT NO LONGER TINTS THE HERO PORTRAIT.
  *
- * The portrait is composited with `mix-blend-mode: multiply`, so it takes the
- * colour of whatever is behind it: neutral silver where the wash is absent,
- * warm where the wash is strong. That is why the figure goes peach around the
- * shoulders and stays grey at the head — the same thing happening in the
- * reference this was drawn from, and it comes for free rather than being
- * painted into the asset.
+ * It used to, and the note that said so was right at the time: the portrait
+ * was a JPEG on a white backdrop composited with `mix-blend-mode: multiply`,
+ * which meant it took the colour of whatever was behind it — peach around the
+ * shoulders, grey at the head. The portrait is now a real cut-out with an
+ * alpha channel and no blend mode, so it keeps its own black and white and the
+ * wash is what it always claimed to be: light behind the figure.
  *
- * Two consequences worth knowing. Keep the washes light: multiply means a
- * darker wash makes a darker figure, and a saturated one makes a stained one.
- * And keep them as SIBLINGS painted before the figure, never as ancestors of
- * it — an ancestor with a `filter` (which every blurred layer here has) forms
- * a stacking context and the cut-out collapses into a white box. Siblings are
- * safe no matter what they carry.
+ * That removes the trap this section used to carry (a blurred ancestor formed
+ * a stacking context and collapsed the cut-out into a white box) and it
+ * removes the ceiling on how dark a wash could go before it stained him. The
+ * layers below are still deliberately light, but now for the ordinary reason:
+ * at strength they stop reading as light on paper and start reading as a
+ * coloured background with a photograph on it.
  * ---------------------------------------------------------------------------
  */
 
@@ -76,18 +76,18 @@ const strong = intensity === "strong";
 const layers = strong
   ? [
       // Amber, wide and LOW. Deliberately an ellipse rather than a circle and
-      // wide enough to run the full width of the band: the warmth has to reach
-      // under the figure, not stop beside it, or the portrait stays grey while
-      // the empty half of the hero glows.
+      // wide enough to run the full width of the band: the warmth has to carry
+      // on behind the figure, not stop beside it, or only the empty half of
+      // the hero is lit and the light reads as a shape rather than as light.
       //
       // It sits low because the silver has to win the top two-thirds. The band
       // should read as light gathering at the foot of the page, not as a
       // coloured background with a photograph on it.
       "left-[-8%] top-[52%] h-[46rem] w-[85%] bg-amber/[0.17] motion-safe:animate-wash-a",
-      // Tomato, centred under the figure. This is the layer doing the tinting —
-      // it is what turns the shoulders warm where they cross it. Kept lighter
-      // than the amber: multiply means a dark shirt through a strong warm wash
-      // goes sepia, and sepia is a different decade's design.
+      // Tomato, centred behind the figure, where it warms the page around his
+      // shoulders — which is where the eye already is. Kept lighter than the
+      // amber: two warm layers at strength stop being two light sources and
+      // become one flat orange field.
       "left-[34%] top-[58%] h-[42rem] w-[60%] bg-tomato/[0.12] motion-safe:animate-wash-b",
       // Cobalt, high and right. A cool counterweight; without it the band
       // slides into a sunset, which is a different and much cheaper look.
