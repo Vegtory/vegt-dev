@@ -7,7 +7,6 @@ import { site } from "../site";
 
 import SiteHeader from "@ui/SiteHeader.astro";
 import Hero from "@ui/Hero.astro";
-import TopicStrip from "@ui/TopicStrip.astro";
 import TextWithLargeImage from "@ui/TextWithLargeImage.astro";
 import ToolsShowcase from "@ui/ToolsShowcase.astro";
 import TinkerGrid from "@ui/TinkerGrid.astro";
@@ -87,8 +86,6 @@ const { Content: BlogBody } = blog;
       The wrapper ids are the in-page anchor targets used by src/site.ts.
     */}
     <div id="hero"><Hero {...hero.data} /></div>
-
-    <TopicStrip />
 
     <div id="over">
       <TextWithLargeImage {...over.data}>

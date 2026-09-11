@@ -31,8 +31,6 @@ export interface Topic {
   rule: string;
   /** `border-*` for a card's marked edge. */
   edge: string;
-  /** One line, for the /now page and the topic strip. */
-  blurb: string;
 }
 
 export const topics = {
@@ -42,7 +40,6 @@ export const topics = {
     mark: "bg-cobalt",
     rule: "bg-cobalt/40",
     edge: "border-t-cobalt",
-    blurb: "Software, cloud-experimenten en kleine tools die ik zelf gebruik.",
   },
   tinker: {
     id: "knutselen",
@@ -50,8 +47,6 @@ export const topics = {
     mark: "bg-amber",
     rule: "bg-amber/50",
     edge: "border-t-amber",
-    blurb:
-      "Raspberry Pi's, Home Assistant, 3D-printen, elektronica en meten aan energie.",
   },
   write: {
     id: "schrijven",
@@ -59,7 +54,6 @@ export const topics = {
     mark: "bg-violet",
     rule: "bg-violet/40",
     edge: "border-t-violet",
-    blurb: "Langere technische stukken over wat ik onderweg tegenkwam.",
   },
   shoot: {
     id: "fotograferen",
@@ -67,7 +61,6 @@ export const topics = {
     mark: "bg-tomato",
     rule: "bg-tomato/40",
     edge: "border-t-tomato",
-    blurb: "Stadsreizen, festivals en af en toe een berg.",
   },
   talk: {
     id: "vertellen",
@@ -75,20 +68,10 @@ export const topics = {
     mark: "bg-acid",
     rule: "bg-acid/60",
     edge: "border-t-acid",
-    blurb: "Praatjes en sessies over praktische techniek.",
   },
 } as const satisfies Record<string, Topic>;
 
 export type TopicKey = keyof typeof topics;
-
-/** The order they are introduced in, and the order the homepage follows. */
-export const topicOrder = [
-  "build",
-  "tinker",
-  "write",
-  "shoot",
-  "talk",
-] as const satisfies readonly TopicKey[];
 
 /**
  * Look up a topic by key, falling back rather than throwing.

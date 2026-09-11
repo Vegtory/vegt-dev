@@ -1,7 +1,7 @@
 ---
 /**
  * @component TinkerGrid
- * @version   1.0.0
+ * @version   1.1.0
  * @updated   2026-09-11
  *
  * "Dingen in mijn huis die eigenlijk niet aan het netwerk zouden moeten
@@ -57,6 +57,34 @@ const {
   note = "",
   items = [],
 } = Astro.props;
+
+/**
+ * How many columns the parts table runs in, chosen so the last row comes out
+ * full.
+ *
+ * The lattice is drawn by the gaps: the list carries `bg-hairline` and the
+ * cards sit on top of it with a 1px gutter between them. That means an empty
+ * cell is not empty — it is a solid hairline-coloured rectangle the width of a
+ * card. Three columns were hard-coded here while the section happened to have
+ * three items, and dropping one to two left exactly that: a grey block beside
+ * the last card, which reads as a card that failed to render.
+ *
+ * So the count follows the data. A number divisible by three runs in three
+ * columns, an even number in two, one item in one. A count that divides by
+ * neither (five, seven) has no arrangement without a hole — it falls back to
+ * three, and the answer is to add or drop an item rather than to fix it here.
+ *
+ * Complete literals, because Tailwind cannot see a class name assembled at
+ * runtime.
+ */
+const columns =
+  items.length === 1
+    ? ""
+    : items.length % 3 === 0
+      ? "sm:grid-cols-2 lg:grid-cols-3"
+      : items.length % 2 === 0
+        ? "sm:grid-cols-2"
+        : "sm:grid-cols-2 lg:grid-cols-3";
 ---
 
 {/* Graph paper behind the whole band, at a low enough opacity to read as the
@@ -93,7 +121,7 @@ const {
       <div class={proseBase}><slot /></div>
     </div>
 
-    <ul class="mt-12 grid grid-cols-1 gap-px border border-hairline bg-hairline sm:grid-cols-2 lg:grid-cols-3">
+    <ul class:list={["mt-12 grid grid-cols-1 gap-px border border-hairline bg-hairline", columns]}>
       {
         /* A hairline lattice rather than detached cards: one border, with the
            gap showing through as the rule. It reads like a parts table, which

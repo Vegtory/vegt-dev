@@ -156,9 +156,15 @@ one.
 
 `src/components/topics.ts` holds the site's vocabulary — bouwen, knutselen,
 schrijven, fotograferen, vertellen — with each one's label and mark colour.
-Section headings, blog tags and the topic strip all read from it, which is what
-makes cloud work land as one part of the picture rather than as the identity.
-A blog post opts in with `topic:` in its frontmatter.
+Section headings, blog tags and the project cards all read from it, which is
+what makes cloud work land as one part of the picture rather than as the
+identity. A blog post opts in with `topic:` in its frontmatter.
+
+There is no longer a strip on the homepage that spells the five out with a
+line of copy each. It was the one place the taxonomy explained itself instead
+of just being used, which made it read as a nav for sections that do not
+exist. The labels still do their work everywhere they are attached to
+something.
 
 ### Motion
 
