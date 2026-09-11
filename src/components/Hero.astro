@@ -150,7 +150,7 @@ const {
 const portrait = imageItems[0];
 
 /** See the long note above before changing this. */
-const FIGURE_WIDTH = "w-72 sm:w-[22rem] lg:w-[33rem]";
+const FIGURE_WIDTH = "w-full sm:w-[22rem] lg:w-[33rem]";
 /**
  * Pulls the figure back over the text column so the two overlap. It has to be
  * a margin rather than a transform: a transform on an ancestor of the blended
@@ -227,8 +227,8 @@ const family = space > -1 ? title.slice(space + 1) : "";
         Note the complete absence of `z-index`: paint order is DOM order (text
         column first, figure second, so the figure wins), and adding one
         anywhere would isolate the figure and kill the blend. */}
-    <div class="mt-8 flex flex-col lg:mt-4 lg:flex-row lg:items-end lg:gap-4">
-      <div class="min-w-0 pb-14 lg:flex-1">
+    <div class="mt-6 flex flex-col gap-6 lg:mt-4 lg:flex-row lg:items-end lg:gap-4">
+      <div class="min-w-0 pb-12 lg:flex-1">
         {/* Deliberately wider than the column it sits in, so the longest line
             runs on under the figure rather than stopping short of it. The
             section's `overflow-hidden` is what keeps that from widening the
@@ -239,7 +239,7 @@ const family = space > -1 ? title.slice(space + 1) : "";
         >
           {/* The given name: the loud half. Capitals, heavy, tracked in tight
               enough that the letters nearly touch. */}
-          <span class="block text-[clamp(2.5rem,11vw,7.5rem)] font-semibold uppercase leading-[0.82] tracking-[-0.04em] text-primaryText">
+          <span class="block text-[clamp(3rem,14vw,7.5rem)] font-semibold uppercase leading-[0.82] tracking-[-0.04em] text-primaryText">
             <TextRender>{given}</TextRender>
           </span>
 
@@ -258,7 +258,7 @@ const family = space > -1 ? title.slice(space + 1) : "";
               like one headline in two weights. */}
           {
             family && (
-              <span class="mt-2 block text-[clamp(1.5rem,5.6vw,3.9rem)] font-light leading-[1] tracking-[0.01em] text-mutedText sm:mt-3">
+              <span class="mt-2 block text-[clamp(1.75rem,7.2vw,3.9rem)] font-light leading-[1] tracking-[0.01em] text-mutedText sm:mt-3">
                 <TextRender>{family}</TextRender>
               </span>
             )
@@ -291,10 +291,14 @@ const family = space > -1 ? title.slice(space + 1) : "";
           )
         }
 
+        {/* Stacked and full width on a phone, inline from `sm` up. Left to
+            wrap, the two buttons sat at their own content widths in a ragged
+            column; equal blocks read as a deliberate pair and give a thumb
+            something to aim at. */}
         {
           ctas.length > 0 && (
             <div
-              class="mt-9 flex flex-wrap gap-3 motion-safe:animate-rise-in"
+              class="mt-9 flex flex-col gap-3 motion-safe:animate-rise-in sm:flex-row sm:flex-wrap"
               style="animation-delay: 360ms;"
             >
               {ctas.map((cta, i) => (
@@ -302,6 +306,7 @@ const family = space > -1 ? title.slice(space + 1) : "";
                   href={cta.link}
                   variant={i === 0 ? "primary" : "secondary"}
                   arrow={i === 0}
+                  class="justify-center sm:justify-start"
                 >
                   <TextRender>{cta.label}</TextRender>
                 </Button>
@@ -311,18 +316,37 @@ const family = space > -1 ? title.slice(space + 1) : "";
         }
       </div>
 
+      {/* `order-first` below `lg`: in source order the figure follows the text
+          column, which put it after the buttons on a phone — the headshot
+          arrived last, as an afterthought, when it is supposed to be the thing
+          you land on. `order` is safe here where a transform would not be: it
+          does not form a stacking context, so the multiply cut-out survives
+          it. */}
       {
         portrait?.image && (
-          <div class:list={["mx-auto shrink-0 lg:mx-0", FIGURE_WIDTH, FIGURE_OVERLAP]}>
+          <div class:list={["order-first shrink-0 lg:order-none lg:mx-0", FIGURE_WIDTH, FIGURE_OVERLAP]}>
             {/* Quality is high on purpose: the file is a few hundred pixels
                 square, so this costs single-digit KB, and it is the only
                 photograph of a face above the fold. `showPlaceholder` must
                 stay false and the filter must stay on the image — see the
                 header note. */}
+            {/* The bottom fade is mobile-only, and it earns its place.
+                The source frame cuts the shoulders off square. On desktop that
+                never shows, because the figure bleeds past the section's bottom
+                edge — but with the figure moved up the page on a phone, the cut
+                lands mid-scroll as a hard horizontal slice across his chest.
+                Dissolving the last quarter into the page hides an arbitrary
+                crop and suits a cut-out better than a straight edge does.
+
+                The mask sits on the SAME element as the blend, which is why it
+                is safe: a mask does form a stacking context, but the blending
+                element's own stacking context is the thing being composited,
+                not a boundary. Only an ANCESTOR with one breaks the cut-out.
+                Verified at 390 / 768 / 1440. */}
             <CustomPicture
               alt={portrait.description}
-              classes="aspect-square w-full grayscale mix-blend-multiply"
-              sizes="(max-width: 639px) 288px, (max-width: 1023px) 352px, 528px"
+              classes="aspect-square w-full grayscale mix-blend-multiply [mask-image:linear-gradient(to_bottom,black_74%,transparent_100%)] lg:[mask-image:none]"
+              sizes="(max-width: 639px) 100vw, (max-width: 1023px) 352px, 528px"
               srcImagePath={portrait.image}
               priority={true}
               qualityOverride={86}

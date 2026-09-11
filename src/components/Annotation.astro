@@ -57,31 +57,45 @@ const toneClass: Record<string, string> = {
  * off — a curve that resolves too cleanly reads as a UI chevron, which is the
  * opposite of the intent. `vector-effect` keeps the stroke a true 1.5px
  * however the SVG is scaled by its container.
+ *
+ * Every head is built from its own curve rather than drawn by eye, because
+ * drawing them by eye is how the first version got all five wrong: each head
+ * pointed about 129 degrees away from the direction its line actually
+ * travelled, which rendered as a small tick crossing the stroke instead of an
+ * arrowhead. It reads as a hand-drawn flourish at a glance, so it survived
+ * several passes before anyone looked straight at it.
+ *
+ * The construction, for anyone adding a sixth: take the curve's end point E
+ * and its end tangent (for a cubic, `end - secondControlPoint`); put the
+ * vertex exactly on E; run both arms backwards from E at roughly 30 degrees
+ * either side of that tangent. The two arms are given unequal lengths and
+ * spreads (10.5 at 27 degrees, 8.5 at 34) on purpose — a symmetric head is a
+ * UI chevron again.
  */
 const arrows: Record<string, { d: string; head: string; box: string }> = {
   "left-down": {
     d: "M46 4C30 7 14 13 7 27",
-    head: "M4 33l3-8 8 3",
+    head: "M6.9 16.5L7 27L14.4 22.8",
     box: "0 0 50 38",
   },
   "right-down": {
     d: "M4 4c16 3 32 9 39 23",
-    head: "M46 33l-3-8-8 3",
+    head: "M34.6 20.8L43 27L44.1 18.6",
     box: "0 0 50 38",
   },
   "left-up": {
     d: "M46 34C30 31 14 25 7 11",
-    head: "M4 5l3 8 8-3",
+    head: "M15.4 17.2L7 11L5.9 19.4",
     box: "0 0 50 38",
   },
   "right-up": {
     d: "M4 34c16-3 32-9 39-23",
-    head: "M46 5l-3 8-8-3",
+    head: "M43.1 21.5L43 11L35.6 15.2",
     box: "0 0 50 38",
   },
   down: {
     d: "M12 3c-4 10-3 19 1 27",
-    head: "M13 32l-5-7 9-2",
+    head: "M4.6 23.8L13 30L14.1 21.6",
     box: "0 0 26 38",
   },
 };

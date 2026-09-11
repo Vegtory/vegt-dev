@@ -115,12 +115,17 @@ const tail = dot > -1 ? wordmark.slice(dot + 1) : "";
             <p class="font-mono text-[0.6875rem] font-medium uppercase tracking-[0.22em] text-mutedText">
               Navigatie
             </p>
-            <ul class="mt-5 flex flex-col gap-3">
+            {/* `gap-1` rather than the `gap-3` this looked like on paper: the
+                links carry their own vertical padding so each one is a 28px
+                touch target, and the padding supplies most of the rhythm the
+                gap used to. An inline anchor reports a 16px box however much
+                line-height sits around it, so the padding has to be real. */}
+            <ul class="mt-5 flex flex-col gap-1">
               {links.map((l) => (
                 <li>
                   <a
                     href={l.link}
-                    class="text-sm text-mutedText no-underline transition-colors hover:text-primaryText"
+                    class="inline-block py-1.5 text-sm text-mutedText no-underline transition-colors hover:text-primaryText"
                   >
                     <TextRender>{l.label}</TextRender>
                   </a>
@@ -137,33 +142,49 @@ const tail = dot > -1 ? wordmark.slice(dot + 1) : "";
     {/* --- Build metadata ------------------------------------------------
         All of this is real. See src/buildInfo.ts. */}
     <div class="mt-8 flex flex-col-reverse items-start gap-6 sm:flex-row sm:items-center sm:justify-between">
+      {/* Each slash travels with the item it introduces, inside one
+          `whitespace-nowrap` flex child. Left as separate children the strip
+          wraps between a separator and its value, and a line ends on a
+          dangling `/` — which on a 390px screen it reliably did. */}
       <div class="flex flex-wrap items-center gap-x-3 gap-y-2 font-mono text-[0.6875rem] text-mutedText">
-        <span class="text-mutedText">
+        <span class="whitespace-nowrap text-mutedText">
           <TextRender>{head}</TextRender>{tail && (<><span class="text-cobalt-ink">.</span><TextRender>{tail}</TextRender></>)}
         </span>
-        <span aria-hidden="true">/</span>
-        <span>rev. {rev}</span>
-        {commit && (<><span aria-hidden="true">/</span><span>{commit}</span></>)}
-        <span aria-hidden="true">/</span>
+        <span class="flex items-center gap-x-3 whitespace-nowrap">
+          <span aria-hidden="true">/</span><span>rev. {rev}</span>
+        </span>
+        {commit && (
+          <span class="flex items-center gap-x-3 whitespace-nowrap">
+            <span aria-hidden="true">/</span><span>{commit}</span>
+          </span>
+        )}
         {/* Filled in by the script below. Ships with the build date already in
             it, so a reader with JavaScript off sees a real fact rather than an
             empty slot or a dash. */}
-        <span>
-          up <time id="site-uptime" datetime={builtAt}>sinds {new Date(builtAt).toISOString().slice(0, 10)}</time>
+        <span class="flex items-center gap-x-3 whitespace-nowrap">
+          <span aria-hidden="true">/</span>
+          <span>
+            up <time id="site-uptime" datetime={builtAt}>sinds {new Date(builtAt).toISOString().slice(0, 10)}</time>
+          </span>
         </span>
-        <span aria-hidden="true">/</span>
-        <span>&copy; {new Date().getFullYear()} <TextRender>{copyrightText || wordmark}</TextRender></span>
+        <span class="flex items-center gap-x-3">
+          <span aria-hidden="true">/</span>
+          <span>&copy; {new Date().getFullYear()} <TextRender>{copyrightText || wordmark}</TextRender></span>
+        </span>
       </div>
 
       {
         socials.length > 0 && (
           <div class="flex gap-5">
+            {/* The icons are 20px, so each anchor pads out to a 32px target and
+                pulls the padding back off with a matching negative margin —
+                the row still reads as a 20px gap. */}
             {socials.map((s) => (
               <a
                 href={s.href}
                 target="_blank"
                 rel="noopener noreferrer"
-                class="text-mutedText transition-colors duration-200 hover:text-primaryText"
+                class="-m-1.5 inline-flex p-1.5 text-mutedText transition-colors duration-200 hover:text-primaryText"
               >
                 <span class="sr-only">{s.label}</span>
                 <svg class="size-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
@@ -229,9 +250,9 @@ const tail = dot > -1 ? wordmark.slice(dot + 1) : "";
       │                                                          │
       │   Astro, Tailwind, statisch gebouwd, op Cloudflare.      │
       │   Geen CMS — alles is markdown in een git repo.          │
-      │   Geen webfont: het lettertype komt van je eigen         │
-      │   systeem, want deze pagina linkt naar z'n eigen         │
-      │   PageSpeed-score en dat zou flauw zijn anders.          │
+      │   Bijna alle tekst staat in het lettertype van je        │
+      │   eigen systeem. Eén uitzondering: het handschrift,      │
+      │   18 kB, en de pagina werkt prima zonder.                │
       │                                                          │
       │   De foto's hebben geen EXIF meer na het exporteren,     │
       │   dus je vindt hier nergens een sluitertijd. Leek me     │

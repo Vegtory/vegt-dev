@@ -62,10 +62,16 @@ const styles: Record<string, string> = {
   "secondary-dark": `${box} border border-white/25 text-whiteText hover:border-white/60 hover:bg-white/5 focus-visible:ring-background focus-visible:ring-offset-ink-950`,
 
   // Inline text link. Cobalt, and the only place cobalt sets type.
+  //
+  // `py-1.5` despite the name: this variant is a standalone call to action
+  // sitting beside a heading, not a link inside a sentence, so it gets no
+  // benefit from WCAG's inline exception and needs a real touch target. The
+  // drawn rule is positioned against the inner span, so the padding does not
+  // push it away from the text.
   "inline-light":
-    "rounded text-sm font-semibold text-cobalt-ink hover:text-ink-950 focus-visible:ring-cobalt focus-visible:ring-offset-background",
+    "rounded py-1.5 text-sm font-semibold text-cobalt-ink hover:text-ink-950 focus-visible:ring-cobalt focus-visible:ring-offset-background",
   "inline-dark":
-    "rounded text-sm font-semibold text-ink-200 hover:text-whiteText focus-visible:ring-background focus-visible:ring-offset-ink-950",
+    "rounded py-1.5 text-sm font-semibold text-ink-200 hover:text-whiteText focus-visible:ring-background focus-visible:ring-offset-ink-950",
 };
 
 const externalAttrs = external

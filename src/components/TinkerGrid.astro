@@ -74,7 +74,10 @@ const {
       {/* `group` here is what the branch connector's hover states key off. */}
       <div class="group">
         <SectionHeading topic={topic} eyebrow={subtitle} title={title} index={index} />
-        <Connector variant="branch" tone="amber" class="mt-6" />
+        {/* Desktop only. It is a hover reveal, and without a pointer it just
+            sits at partial opacity looking like a rendering fault rather than
+            a diagram — which is exactly how it read on a phone. */}
+        <Connector variant="branch" tone="amber" class="mt-6 hidden lg:block" />
       </div>
 
       {

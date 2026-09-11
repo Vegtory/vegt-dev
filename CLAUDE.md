@@ -246,6 +246,19 @@ pnpm run deploy      # astro build && wrangler deploy
   pairing it with a `motion-safe:[animation-play-state:running]` utility fixes
   nothing, because `running` is already the default.
 
+- **An inline `<a>` reports a ~16px box, whatever the line-height around it.**
+  A `text-sm` link in a list measures 16px tall, not 20, so a vertical stack of
+  links fails the 24px touch-target minimum even though it looks roomy. Give
+  standalone links real padding (`inline-block py-1.5`) and take the rhythm back
+  out of the gap. Links *inside a sentence* are exempt — padding those makes
+  neighbouring lines overlap, which is worse than the small target.
+
+- **A separator and the item it introduces must be one flex child.** A strip
+  built as `<span>/</span><span>rev. …</span>` wraps between the two, and a line
+  ends on a dangling `/`. Group them in a single `whitespace-nowrap` child so
+  the slash travels with its value — this bit both `MetaLine` and the footer's
+  build-metadata strip.
+
 - **`TextRender` treats `_x_` as markdown emphasis.** Anything passed through it
   that contains underscores gets mangled — `works_on_my_machine` came out as
   `works<i>on</i>my_machine`. Identifiers (status chips, package-style tags)
