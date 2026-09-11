@@ -54,6 +54,23 @@ const {
 
     <link rel="sitemap" href="/sitemap-index.xml" />
 
+    {/* The site's only webfont: Caveat, for the pencilled annotations and the
+        hero's opening line. Self-hosted, subset, 18 kB.
+
+        The preload and the @font-face belong together and must stay together —
+        a preload without a matching rule downloads a file nothing uses, and a
+        @font-face without the preload is discovered only after the CSS has
+        parsed, which is exactly when it is too late for text above the fold.
+        `crossorigin` is required on a font preload even same-origin; without
+        it the browser fetches the file twice. */}
+    <link
+      rel="preload"
+      href="/fonts/caveat-400-latin.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:type" content="website" />
@@ -63,6 +80,19 @@ const {
 
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{title}</title>
+
+    <style is:global>
+      /* `swap` rather than `block`: the line is readable in the system sans
+         from the first paint, and the handwriting arrives when it arrives.
+         Nothing on the page depends on this font having loaded. */
+      @font-face {
+        font-family: "Caveat";
+        src: url("/fonts/caveat-400-latin.woff2") format("woff2");
+        font-weight: 400;
+        font-style: normal;
+        font-display: swap;
+      }
+    </style>
 
     <ScrollReveal />
     {

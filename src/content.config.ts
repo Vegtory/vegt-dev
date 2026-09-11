@@ -60,9 +60,6 @@ const sections = defineCollection({
         /** The numbered list over the portrait. Three is the right number —
          *  it scans in one glance and leaves the photograph room. */
         roles: z.array(z.string()).default([]),
-        /** A real, specific, slightly daft status line. Keep it current or
-         *  delete it — a stale "op dit moment" is worse than none. */
-        currently: z.string().default(""),
         /** First renders solid, the rest outlined. Two is plenty. */
         ctas: z.array(link).default([]),
         imageItems: z.array(imageItem(image)).default([]),

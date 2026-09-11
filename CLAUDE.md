@@ -110,6 +110,35 @@ section is the SaaS-landing-page move this design exists to avoid.
 Never hardcode a hex value, and never build a class name by string
 concatenation: Tailwind only sees complete literals.
 
+### Typography, and the one webfont
+
+Body, headings and metadata are **system stacks** — no webfont, no network cost,
+no layout shift. That is deliberate: the About copy links to the site's own
+PageSpeed score, so a render-blocking font on the body text would undercut the
+one claim the page makes.
+
+`font-hand` is the single exception: **Caveat**, for the pencilled annotations
+(`Annotation.astro`) and the hero's opening line. It is self-hosted from
+`public/fonts`, subset to Latin plus the accents and punctuation Dutch uses, and
+built **without the `calt`/`liga` tables** — in a handwriting face those carry a
+pile of connecting alternates, and dropping them took the file from 48 kB to
+18 kB with no visible difference (the two were compared side by side).
+
+It is preloaded in `BaseLayout` and set `font-display: swap`, which measures
+0.000 CLS even on a throttled 400 kbps link. **The preload and the `@font-face`
+belong together** — a preload with no matching rule downloads a file nothing
+uses, and a `@font-face` with no preload is discovered only after the CSS
+parses, which is too late for text above the fold. `crossorigin` is required on
+a font preload even same-origin, or the browser fetches it twice.
+
+Never put `font-hand` on body copy. It is a display face; at paragraph length it
+is slower to read than the sans. Set it larger than the surrounding text when
+you do use it — Caveat has a small x-height, and at body size a script face
+stops being informal and starts being a squint.
+
+The font ships with its SIL Open Font License at
+`public/fonts/Caveat-OFL.txt`; keep that file alongside it.
+
 ### Ambient washes
 
 `AmbientWash.astro` is soft colour drifting behind a section — the hero at

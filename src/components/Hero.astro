@@ -12,7 +12,7 @@
  * The composition is a single idea — the name set as large as the measure
  * allows, and a cut-out figure standing beside and slightly over it, so the two
  * read as one image rather than as a picture next to a heading. Everything else
- * (the mono strip, the numbered roles, the intro, the status line) is small,
+ * (the mono strip, the numbered roles, the handwritten opening line) is small,
  * which is what leaves the page to the name and the photograph.
  *
  * WHY THE FIGURE IS BESIDE THE NAME AND NOT CENTRED ON IT. The reference for
@@ -133,8 +133,6 @@ export interface Props {
   meta?: string[];
   /** The numbered list beside the figure. Three. */
   roles?: string[];
-  /** Honest, specific, slightly daft. Delete it rather than let it go stale. */
-  currently?: string;
   /** First is rendered solid, the rest outlined. Two is plenty. */
   ctas?: HeroLink[];
   imageItems?: ImageItem[];
@@ -145,7 +143,6 @@ const {
   intro = "",
   meta = [],
   roles = [],
-  currently = "",
   ctas = [],
   imageItems = [],
 } = Astro.props;
@@ -198,11 +195,19 @@ const family = space > -1 ? title.slice(space + 1) : "";
         <MetaLine items={meta} shape="dots" size="sm" />
       </div>
 
-      <div class="flex max-w-sm flex-col gap-5 sm:max-w-xs sm:items-end">
+      <div class="flex max-w-sm flex-col gap-5 sm:max-w-sm sm:items-end">
+        {/* The opening line, in the handwriting face — the one sentence on the
+            page that should read as written rather than set.
+
+            It runs larger than the body copy because it has to: Caveat's
+            x-height is small, and at body size a script face stops being
+            informal and starts being hard to read. `leading-snug` pulls the
+            lines back in, since the larger size would otherwise open the block
+            up more than a note should be. */}
         {
           intro && (
             <p
-              class="text-pretty leading-relaxed text-blackText motion-safe:animate-rise-in sm:text-right"
+              class="text-pretty font-hand text-[1.4rem] leading-snug text-blackText motion-safe:animate-rise-in sm:text-right sm:text-[1.55rem]"
               style="animation-delay: 90ms;"
             >
               <TextRender>{intro}</TextRender>
@@ -210,18 +215,6 @@ const family = space > -1 ? title.slice(space + 1) : "";
           )
         }
 
-        {
-          currently && (
-            <p
-              class="border-l-2 border-acid pl-4 font-mono text-[0.8125rem] leading-relaxed text-mutedText motion-safe:animate-rise-in sm:border-l-0 sm:border-r-2 sm:pl-0 sm:pr-4 sm:text-right"
-              style="animation-delay: 150ms;"
-            >
-              <span class="text-primaryText">op dit moment</span>
-              <span class="text-hairlineStrong" aria-hidden="true"> : </span>
-              <TextRender>{currently}</TextRender>
-            </p>
-          )
-        }
       </div>
     </div>
 

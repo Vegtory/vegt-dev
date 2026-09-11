@@ -7,11 +7,11 @@
  * A pencilled margin note — the thing that makes a page look like someone's
  * notebook rather than a layout.
  *
- * Set in italic rather than in a handwriting face on purpose: the About copy
- * links to this site's own PageSpeed score, so a decorative webfont would cost
- * the page the one claim it makes. The "written by hand" reading comes from the
- * arrow instead, which is a deliberately wobbly bezier rather than a geometric
- * one.
+ * Set in Caveat, the site's one webfont — self-hosted, subset, 18 kB, and
+ * preloaded because the hero uses it too. These notes were italic sans until
+ * that font existed, which was a reasonable stand-in and never actually looked
+ * handwritten. The wobbly-bezier arrows now agree with the lettering instead of
+ * carrying the whole idea on their own.
  *
  * These are decoration and are `aria-hidden` by default — a screen reader
  * working through the page does not want an aside about a bracket between a
@@ -92,7 +92,10 @@ const style = tilt ? `transform: rotate(${tilt}deg);` : undefined;
 
 <div
   class:list={[
-    "pointer-events-none flex max-w-[15rem] flex-col gap-1 font-sans text-[0.8125rem] italic leading-snug",
+    // Larger than the body copy it sits beside: Caveat has a small x-height,
+    // and a script face set at note size stops being informal and starts being
+    // a squint.
+    "pointer-events-none flex max-w-[16rem] flex-col gap-1 font-hand text-[1.15rem] leading-tight",
     toneClass[tone],
     extraClass,
   ]}
