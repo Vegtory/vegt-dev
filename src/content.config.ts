@@ -53,10 +53,11 @@ const sections = defineCollection({
         /** The name. This is the headline; there is no job-title field, on
          *  purpose — see the note at the top of `Hero.astro`. */
         title: z.string(),
-        /** One sentence that sounds like a person wrote it. */
+        /** One sentence that sounds like a person wrote it. This is the only
+         *  prose in the hero — there was a mono strip of keywords beside it
+         *  and it went, because it said the same thing in the voice this
+         *  sentence exists to avoid. */
         intro: z.string().default(""),
-        /** The mono strip under the name. Four or five words, lowercase. */
-        meta: z.array(z.string()).default([]),
         /** The numbered list over the portrait. Three is the right number —
          *  it scans in one glance and leaves the photograph room. */
         roles: z.array(z.string()).default([]),

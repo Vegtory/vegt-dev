@@ -12,8 +12,8 @@
  * The composition is a single idea — the name set as large as the measure
  * allows, and a cut-out figure standing beside and slightly over it, so the two
  * read as one image rather than as a picture next to a heading. Everything else
- * (the mono strip, the numbered roles, the handwritten opening line) is small,
- * which is what leaves the page to the name and the photograph.
+ * (the numbered roles, the handwritten opening line) is small, which is what
+ * leaves the page to the name and the photograph.
  *
  * WHY THE FIGURE IS BESIDE THE NAME AND NOT CENTRED ON IT. The reference for
  * this hero centres the figure over the name, and it works there because the
@@ -115,7 +115,6 @@ import type { ImageMetadata } from "astro";
 import CustomPicture from "@ui/CustomPicture.astro";
 import TextRender from "@ui/TextRender.astro";
 import Button from "@ui/Button.astro";
-import MetaLine from "@ui/MetaLine.astro";
 import AmbientWash from "@ui/AmbientWash.astro";
 
 export interface ImageItem {
@@ -134,8 +133,6 @@ export interface Props {
   title?: string;
   /** One sentence that sounds like a person wrote it. */
   intro?: string;
-  /** The mono strip: "software · cloud · homelab · maken · fotografie". */
-  meta?: string[];
   /** The numbered list beside the figure. Three. */
   roles?: string[];
   /** First is rendered solid, the rest outlined. Two is plenty. */
@@ -146,7 +143,6 @@ export interface Props {
 const {
   title = "",
   intro = "",
-  meta = [],
   roles = [],
   ctas = [],
   imageItems = [],
@@ -194,34 +190,29 @@ const family = space > -1 ? title.slice(space + 1) : "";
   <AmbientWash intensity="strong" />
 
   <div class="relative mx-auto max-w-6xl px-6 lg:px-8">
-    {/* --- Top strip: what he does, and one sentence on it ---------------- */}
-    <div class="flex flex-col gap-6 pt-10 sm:flex-row sm:items-start sm:justify-between sm:gap-10">
-      <div class="motion-safe:animate-rise-in">
-        <MetaLine items={meta} shape="dots" size="sm" />
-      </div>
+    {/* --- The opening line ------------------------------------------------
+        In the handwriting face: the one sentence on the page that should read
+        as written rather than set.
 
-      <div class="flex max-w-sm flex-col gap-5 sm:max-w-sm sm:items-end">
-        {/* The opening line, in the handwriting face — the one sentence on the
-            page that should read as written rather than set.
+        It runs larger than the body copy because it has to — Caveat's x-height
+        is small, and at body size a script face stops being informal and
+        starts being hard to read. `leading-snug` pulls the lines back in,
+        since the larger size would otherwise open the block up more than a
+        note should be.
 
-            It runs larger than the body copy because it has to: Caveat's
-            x-height is small, and at body size a script face stops being
-            informal and starts being hard to read. `leading-snug` pulls the
-            lines back in, since the larger size would otherwise open the block
-            up more than a note should be. */}
-        {
-          intro && (
-            <p
-              class="text-pretty font-hand text-[1.4rem] leading-snug text-blackText motion-safe:animate-rise-in sm:text-right sm:text-[1.55rem]"
-              style="animation-delay: 90ms;"
-            >
-              <TextRender>{intro}</TextRender>
-            </p>
-          )
-        }
-
-      </div>
-    </div>
+        It sits alone up here now. There used to be a mono strip of keywords
+        opposite it (software / cloud / homelab / maken / fotografie), which
+        said in five nouns what this sentence already says in one sentence, in
+        a voice the sentence is there to avoid. `sm:ml-auto` is what holds the
+        line to the right-hand column without a flex row to justify it, so it
+        still lands above the portrait. */}
+    {
+      intro && (
+        <p class="max-w-sm text-pretty pt-10 font-hand text-[1.4rem] leading-snug text-blackText motion-safe:animate-rise-in sm:ml-auto sm:text-right sm:text-[1.55rem]">
+          <TextRender>{intro}</TextRender>
+        </p>
+      )
+    }
 
     {/* --- Name and figure ------------------------------------------------
         Two columns, bottom-aligned, so the figure lands on the section's
