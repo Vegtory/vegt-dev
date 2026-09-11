@@ -1,26 +1,24 @@
 ---
 /**
  * @component BlogList
- * @version   1.0.0
- * @updated   2026-09-10
+ * @version   2.0.0
+ * @updated   2026-09-11
  * @source    astro-template@0ad4fd0
  * @copied    2026-09-10
  * @modified  true
  *
- * Copied from the template and restyled onto this site's tokens.
+ * The full index of posts, on /blog.
  *
- * - `text-gray-500`/`text-gray-600` and the `divide-gray-200` rules become
- *   `mutedText` and `hairline`, so the list sits on the same warm neutral as
- *   the rest of the page instead of a cooler grey.
- * - Hover moves the title to `primary-700`, the one link colour, rather than
- *   `primary-500` (3.7:1 on the page background).
- * - Dates go through `@ui/date`, which is what makes this list and the
- *   homepage agree about the same post.
+ * Restyled to match the homepage's SCHRIJVEN section entry-for-entry: the same
+ * hairline lattice, the same mono date line, the same topic pad. The two lists
+ * link to each other, so a reader who follows "Alle notities" should land on
+ * something they recognise rather than on a second design.
  */
 import { getCollection } from "astro:content";
 import CustomPicture from "@ui/CustomPicture.astro";
 import TextRender from "@ui/TextRender.astro";
 import { formatDate } from "@ui/date";
+import { topicFor } from "@ui/topics";
 
 const allBlogs = await getCollection("blog");
 const blogs = allBlogs
@@ -28,39 +26,60 @@ const blogs = allBlogs
   .sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
 ---
 
-<ul class="divide-y divide-hairline border-y border-hairline">
+<ul class="border-t border-hairline">
   {
-    blogs.map(({ id, data }, i) => (
-      <li data-reveal style={`--reveal-delay: ${Math.min(i, 5) * 80}ms`}>
-        <a
-          href={`/blog/${id}`}
-          class="group flex items-start gap-5 py-7 no-underline sm:gap-6 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-4 focus-visible:ring-offset-background rounded-lg"
-        >
-          <div class="w-28 shrink-0 overflow-hidden rounded-xl border border-hairline shadow-sm sm:w-36">
-            <CustomPicture
-              alt={data.description}
-              classes="aspect-[4/3] w-full transition-transform duration-500 ease-out group-hover:scale-[1.06]"
-              sizes="(min-width: 640px) 144px, 112px"
-              srcImagePath={data.imageItem.image}
-              loading="lazy"
-            />
-          </div>
+    blogs.map(({ id, data }, i) => {
+      const topic = topicFor(data.topic);
+      return (
+        <li data-reveal style={`--reveal-delay: ${Math.min(i, 5) * 80}ms`}>
+          <a
+            href={`/blog/${id}`}
+            class="group flex items-start gap-5 border-b border-hairline py-7 no-underline transition-colors hover:bg-surfaceMuted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ink-950 sm:gap-6"
+          >
+            <div class="w-28 shrink-0 overflow-hidden sm:w-36">
+              <CustomPicture
+                alt={data.description}
+                classes="aspect-[4/3] w-full transition-transform duration-500 ease-out group-hover:scale-[1.04]"
+                sizes="(min-width: 640px) 144px, 112px"
+                srcImagePath={data.imageItem.image}
+                loading="lazy"
+              />
+            </div>
 
-          <div class="min-w-0 flex-1">
-            <time datetime={data.date.toISOString()} class="font-mono text-xs text-mutedText">
-              {formatDate(data.date)}
-            </time>
+            <div class="min-w-0 flex-1">
+              <div class="flex flex-wrap items-center gap-x-3 gap-y-1.5 font-mono text-[0.6875rem] text-mutedText">
+                <time datetime={data.date.toISOString()}>{formatDate(data.date)}</time>
+                {topic && (
+                  <>
+                    <span class="text-hairlineStrong" aria-hidden="true">·</span>
+                    <span class="inline-flex items-center gap-1.5">
+                      {/* Pad carries the colour, label stays ink — two of the
+                          five marks are too light to set type in. */}
+                      <span class:list={["h-1.5 w-1.5", topic.mark]} aria-hidden="true" />
+                      {topic.id}
+                    </span>
+                  </>
+                )}
+              </div>
 
-            <h2 class="mt-1.5 line-clamp-2 text-lg font-semibold leading-snug text-primaryText transition-colors group-hover:text-primary-700">
-              <TextRender>{data.title}</TextRender>
-            </h2>
+              <h2 class="mt-2.5 line-clamp-2 text-lg font-semibold leading-snug tracking-[-0.01em] text-primaryText">
+                <TextRender>{data.title}</TextRender>
+              </h2>
 
-            <p class="mt-2 line-clamp-2 text-sm leading-relaxed text-mutedText">
-              <TextRender>{data.description}</TextRender>
-            </p>
-          </div>
-        </a>
-      </li>
-    ))
+              <p class="mt-2 line-clamp-2 text-sm leading-relaxed text-mutedText">
+                <TextRender>{data.description}</TextRender>
+              </p>
+            </div>
+
+            <span
+              class="hidden shrink-0 self-center text-hairlineStrong transition-transform duration-200 group-hover:translate-x-0.5 group-hover:text-primaryText sm:block"
+              aria-hidden="true"
+            >
+              →
+            </span>
+          </a>
+        </li>
+      );
+    })
   }
 </ul>

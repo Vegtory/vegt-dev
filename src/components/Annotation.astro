@@ -1,0 +1,143 @@
+---
+/**
+ * @component Annotation
+ * @version   1.0.0
+ * @updated   2026-09-11
+ *
+ * A pencilled margin note — the thing that makes a page look like someone's
+ * notebook rather than a layout.
+ *
+ * Set in Caveat, the site's one webfont — self-hosted, subset, 18 kB, and
+ * preloaded because the hero uses it too. These notes were italic sans until
+ * that font existed, which was a reasonable stand-in and never actually looked
+ * handwritten. The wobbly-bezier arrows now agree with the lettering instead of
+ * carrying the whole idea on their own.
+ *
+ * These are decoration and are `aria-hidden` by default — a screen reader
+ * working through the page does not want an aside about a bracket between a
+ * heading and its body. Pass `decorative={false}` for the rare note that
+ * carries information the page does not say anywhere else.
+ *
+ * Use sparingly. Three or four per page is the whole effect; a dozen is a
+ * theme, and the point of these is that they read as incidental.
+ */
+
+export interface Props {
+  /** Which way the arrow leaves the text, or `none` for a bare note. */
+  arrow?: "none" | "left-down" | "right-down" | "left-up" | "right-up" | "down";
+  /** Mark colour. These are decorative strokes, so the light ones are fine. */
+  tone?: "note" | "cobalt" | "tomato" | "acid" | "violet" | "amber";
+  /** Set false when the note says something the page does not say elsewhere. */
+  decorative?: boolean;
+  /** Rotation in degrees. A degree or two stops it sitting on the grid. */
+  tilt?: number;
+  class?: string;
+}
+
+const {
+  arrow = "none",
+  tone = "note",
+  decorative = true,
+  tilt = 0,
+  class: extraClass = "",
+} = Astro.props;
+
+// Complete literals: Tailwind cannot see a class name built at runtime.
+const toneClass: Record<string, string> = {
+  note: "text-noteText",
+  cobalt: "text-cobalt-ink",
+  tomato: "text-tomato-ink",
+  acid: "text-acid-ink",
+  violet: "text-violet-ink",
+  amber: "text-amber-ink",
+};
+
+/**
+ * Hand-drawn arrows. Each is a bezier whose control points are deliberately
+ * off — a curve that resolves too cleanly reads as a UI chevron, which is the
+ * opposite of the intent. `vector-effect` keeps the stroke a true 1.5px
+ * however the SVG is scaled by its container.
+ *
+ * Every head is built from its own curve rather than drawn by eye, because
+ * drawing them by eye is how the first version got all five wrong: each head
+ * pointed about 129 degrees away from the direction its line actually
+ * travelled, which rendered as a small tick crossing the stroke instead of an
+ * arrowhead. It reads as a hand-drawn flourish at a glance, so it survived
+ * several passes before anyone looked straight at it.
+ *
+ * The construction, for anyone adding a sixth: take the curve's end point E
+ * and its end tangent (for a cubic, `end - secondControlPoint`); put the
+ * vertex exactly on E; run both arms backwards from E at roughly 30 degrees
+ * either side of that tangent. The two arms are given unequal lengths and
+ * spreads (10.5 at 27 degrees, 8.5 at 34) on purpose — a symmetric head is a
+ * UI chevron again.
+ */
+const arrows: Record<string, { d: string; head: string; box: string }> = {
+  "left-down": {
+    d: "M46 4C30 7 14 13 7 27",
+    head: "M6.9 16.5L7 27L14.4 22.8",
+    box: "0 0 50 38",
+  },
+  "right-down": {
+    d: "M4 4c16 3 32 9 39 23",
+    head: "M34.6 20.8L43 27L44.1 18.6",
+    box: "0 0 50 38",
+  },
+  "left-up": {
+    d: "M46 34C30 31 14 25 7 11",
+    head: "M15.4 17.2L7 11L5.9 19.4",
+    box: "0 0 50 38",
+  },
+  "right-up": {
+    d: "M4 34c16-3 32-9 39-23",
+    head: "M43.1 21.5L43 11L35.6 15.2",
+    box: "0 0 50 38",
+  },
+  down: {
+    d: "M12 3c-4 10-3 19 1 27",
+    head: "M4.6 23.8L13 30L14.1 21.6",
+    box: "0 0 26 38",
+  },
+};
+
+const mark = arrows[arrow];
+const style = tilt ? `transform: rotate(${tilt}deg);` : undefined;
+---
+
+<div
+  class:list={[
+    // Larger than the body copy it sits beside: Caveat has a small x-height,
+    // and a script face set at note size stops being informal and starts being
+    // a squint.
+    "pointer-events-none flex max-w-[16rem] flex-col gap-1 font-hand text-[1.15rem] leading-tight",
+    toneClass[tone],
+    extraClass,
+  ]}
+  style={style}
+  aria-hidden={decorative ? "true" : undefined}
+>
+  <span><slot /></span>
+
+  {
+    mark && (
+      <svg
+        class:list={[
+          "h-9 w-12 shrink-0",
+          // `down` is drawn in a narrower box, so it would otherwise stretch.
+          arrow === "down" && "w-6",
+        ]}
+        viewBox={mark.box}
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.5"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        vector-effect="non-scaling-stroke"
+        aria-hidden="true"
+      >
+        <path d={mark.d} />
+        <path d={mark.head} />
+      </svg>
+    )
+  }
+</div>

@@ -1,0 +1,178 @@
+---
+/**
+ * @component TinkerGrid
+ * @version   1.1.0
+ * @updated   2026-09-11
+ *
+ * "Dingen in mijn huis die eigenlijk niet aan het netwerk zouden moeten
+ * hangen" — the homelab, the sensors, the printed brackets.
+ *
+ * Its own component rather than a second `ToolsShowcase`, because these
+ * entries are objects in a house rather than products with a landing page:
+ * no URL of their own, but a location and a state that are worth showing. The
+ * cards are correspondingly plainer — no icon, no call to action, just what it
+ * is, where it lives, and whether it is currently doing anything.
+ *
+ * This is where the section heading earns its `branch` connector: hovering the
+ * heading runs three traces out to three pads, which is the only overtly
+ * playful interaction on the page. It is decoration, behind `motion-safe:`,
+ * and the pads sit at full opacity for anyone who asked for reduced motion, so
+ * nothing is communicated by the animation that the still frame does not say.
+ */
+import TextRender from "@ui/TextRender.astro";
+import SectionHeading from "@ui/SectionHeading.astro";
+import StatusChip from "@ui/StatusChip.astro";
+import Connector from "@ui/Connector.astro";
+import Annotation from "@ui/Annotation.astro";
+import MetaLine from "@ui/MetaLine.astro";
+import { proseBase } from "@ui/prose";
+
+export interface TinkerItem {
+  title: string;
+  text: string;
+  where?: string;
+  status?: {
+    label: string;
+    value: string;
+    state?: "neutral" | "ok" | "wip" | "off";
+    live?: boolean;
+  };
+  link?: string;
+}
+
+export interface Props {
+  title?: string;
+  subtitle?: string;
+  topic?: string;
+  index?: string;
+  note?: string;
+  items?: TinkerItem[];
+}
+
+const {
+  title = "",
+  subtitle = "",
+  topic,
+  index = "",
+  note = "",
+  items = [],
+} = Astro.props;
+
+/**
+ * How many columns the parts table runs in, chosen so the last row comes out
+ * full.
+ *
+ * The lattice is drawn by the gaps: the list carries `bg-hairline` and the
+ * cards sit on top of it with a 1px gutter between them. That means an empty
+ * cell is not empty — it is a solid hairline-coloured rectangle the width of a
+ * card. Three columns were hard-coded here while the section happened to have
+ * three items, and dropping one to two left exactly that: a grey block beside
+ * the last card, which reads as a card that failed to render.
+ *
+ * So the count follows the data. A number divisible by three runs in three
+ * columns, an even number in two, one item in one. A count that divides by
+ * neither (five, seven) has no arrangement without a hole — it falls back to
+ * three, and the answer is to add or drop an item rather than to fix it here.
+ *
+ * Complete literals, because Tailwind cannot see a class name assembled at
+ * runtime.
+ */
+const columns =
+  items.length === 1
+    ? ""
+    : items.length % 3 === 0
+      ? "sm:grid-cols-2 lg:grid-cols-3"
+      : items.length % 2 === 0
+        ? "sm:grid-cols-2"
+        : "sm:grid-cols-2 lg:grid-cols-3";
+---
+
+{/* Graph paper behind the whole band, at a low enough opacity to read as the
+    pad this was sketched on rather than as a pattern. This is the only
+    full-width ruled section on the page. */}
+<section class="relative border-y border-hairline bg-surfaceMuted py-20 sm:py-28">
+  <div
+    class="pointer-events-none absolute inset-0 bg-graph bg-[length:22px_22px] opacity-[0.22]"
+    aria-hidden="true"
+  >
+  </div>
+
+  <div class="relative mx-auto max-w-6xl px-6 lg:px-8">
+    <div class="flex flex-col gap-8 md:flex-row md:items-start md:justify-between">
+      {/* `group` here is what the branch connector's hover states key off. */}
+      <div class="group">
+        <SectionHeading topic={topic} eyebrow={subtitle} title={title} index={index} />
+        {/* Desktop only. It is a hover reveal, and without a pointer it just
+            sits at partial opacity looking like a rendering fault rather than
+            a diagram — which is exactly how it read on a phone. */}
+        <Connector variant="branch" tone="amber" class="mt-6 hidden lg:block" />
+      </div>
+
+      {
+        note && (
+          <Annotation arrow="left-down" tone="amber" tilt={-1} class="shrink-0 md:mt-4">
+            {note}
+          </Annotation>
+        )
+      }
+    </div>
+
+    <div class="mt-8 max-w-2xl" data-reveal style="--reveal-delay: 90ms">
+      <div class={proseBase}><slot /></div>
+    </div>
+
+    <ul class:list={["mt-12 grid grid-cols-1 gap-px border border-hairline bg-hairline", columns]}>
+      {
+        /* A hairline lattice rather than detached cards: one border, with the
+           gap showing through as the rule. It reads like a parts table, which
+           is what this section is. */
+        items.map((item, i) => {
+          const Wrapper = item.link ? "a" : "div";
+          return (
+            <li class="bg-background" data-reveal style={`--reveal-delay: ${i * 70}ms`}>
+              <Wrapper
+                href={item.link || undefined}
+                class:list={[
+                  "flex h-full flex-col p-6 no-underline",
+                  item.link &&
+                    "group transition-colors hover:bg-surfaceMuted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ink-950",
+                ]}
+              >
+                <h3 class="text-base font-semibold leading-snug text-primaryText">
+                  <TextRender>{item.title}</TextRender>
+                  {item.link && (
+                    <span
+                      class="ml-1 inline-block text-hairlineStrong transition-transform duration-200 group-hover:translate-x-0.5 group-hover:text-primaryText"
+                      aria-hidden="true"
+                    >
+                      →
+                    </span>
+                  )}
+                </h3>
+
+                {item.where && (
+                  <MetaLine items={[item.where]} shape="dots" class="mt-2" />
+                )}
+
+                <p class="mt-3 flex-1 text-sm leading-relaxed text-mutedText">
+                  <TextRender>{item.text}</TextRender>
+                </p>
+
+                {item.status && (
+                  <div class="mt-5">
+                    <StatusChip
+                      label={item.status.label}
+                      value={item.status.value}
+                      state={item.status.state}
+                      live={item.status.live}
+                    />
+                  </div>
+                )}
+              </Wrapper>
+            </li>
+          );
+        })
+      }
+    </ul>
+  </div>
+</section>

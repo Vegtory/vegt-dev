@@ -11,6 +11,32 @@
  * page inherits them, sets `scroll-padding-top` so an in-page anchor does not
  * land underneath the sticky header, and mounts `ScrollReveal` — which has to
  * be in <head> to take effect before the first paint.
+ *
+ * NOTHING MAY GO BEFORE `<html>`, not even a comment. An Astro expression
+ * ahead of the opening tag stops Astro treating that element as the document
+ * root, and it emits the page with no `<html>`, `<head>` or `<body>` at all —
+ * the browser rebuilds them, so the page still renders and no error is raised,
+ * but every attribute on those three tags is gone: `lang`, the body's font and
+ * background, `scroll-padding-top`, the lot. A note explaining the root
+ * classes was enough to do it. Hence this paragraph, up here, where it is
+ * safe.
+ *
+ * THE ROOT CLASSES, since they can no longer be annotated in place:
+ *
+ *   No `h-full` on either `<html>` or `<body>`. On a document ten thousand
+ *   pixels long, `height: 100%` gives the body an 844px box that every section
+ *   then overflows — `clientHeight` and `scrollHeight` disagreeing by an order
+ *   of magnitude — and on a phone the percentage resolves against the viewport
+ *   as it is while the URL bar is showing, so the box is wrong again the
+ *   moment the bar collapses. Nothing here needs it; the pages that want to
+ *   fill a short viewport say `min-h-screen`.
+ *
+ *   `scroll-smooth` sits behind `motion-safe:`, for the same reason every
+ *   `animate-*` on this site does. Smooth scrolling is motion, and it is the
+ *   kind a reader who asked for less of it most wants gone. It also
+ *   interpolates against momentum scrolling on iOS, which can absorb a flick
+ *   towards the top of the page. In-page anchors work either way; without it
+ *   they jump.
  */
 import ScrollReveal from "@ui/ScrollReveal.astro";
 export interface Props {
@@ -40,7 +66,7 @@ const {
 } = Astro.props;
 ---
 
-<html lang={lang} class="h-full w-full scroll-smooth [scroll-padding-top:5rem]">
+<html lang={lang} class="w-full motion-safe:scroll-smooth [scroll-padding-top:5rem]">
   <head>
     <meta charset="utf-8" />
 
@@ -54,6 +80,23 @@ const {
 
     <link rel="sitemap" href="/sitemap-index.xml" />
 
+    {/* The site's only webfont: Caveat, for the pencilled annotations and the
+        hero's opening line. Self-hosted, subset, 18 kB.
+
+        The preload and the @font-face belong together and must stay together —
+        a preload without a matching rule downloads a file nothing uses, and a
+        @font-face without the preload is discovered only after the CSS has
+        parsed, which is exactly when it is too late for text above the fold.
+        `crossorigin` is required on a font preload even same-origin; without
+        it the browser fetches the file twice. */}
+    <link
+      rel="preload"
+      href="/fonts/caveat-400-latin.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:type" content="website" />
@@ -63,6 +106,19 @@ const {
 
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{title}</title>
+
+    <style is:global>
+      /* `swap` rather than `block`: the line is readable in the system sans
+         from the first paint, and the handwriting arrives when it arrives.
+         Nothing on the page depends on this font having loaded. */
+      @font-face {
+        font-family: "Caveat";
+        src: url("/fonts/caveat-400-latin.woff2") format("woff2");
+        font-weight: 400;
+        font-style: normal;
+        font-display: swap;
+      }
+    </style>
 
     <ScrollReveal />
     {
@@ -77,7 +133,7 @@ const {
     }
   </head>
 
-  <body class="h-full w-full bg-background font-sans text-blackText antialiased">
+  <body class="w-full bg-background font-sans text-blackText antialiased">
     <slot />
   </body>
 </html>

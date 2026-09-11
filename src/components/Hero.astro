@@ -1,38 +1,150 @@
 ---
 /**
  * @component Hero
- * @version   1.0.0
- * @updated   2026-09-10
+ * @version   3.0.0
+ * @updated   2026-09-11
  * @source    astro-template@0ad4fd0
  * @copied    2026-09-10
  * @modified  true
  *
- * Copied from the template and rebuilt as this site's brand anchor.
+ * The opening screen: a cut-out figure standing in the name.
  *
- * What changed and why:
- * - The blue gradient and the animated wave SVG are gone. The wave alone ate
- *   ~200px of the viewport and forced the tag pills into an absolutely
- *   positioned strip at `top-3/4`, where they clipped through it.
- * - The nav moved out to `@ui/Header.astro`. It lived here as `hidden md:block`,
- *   which is why the site had no mobile navigation whatsoever.
- * - Added a real value proposition and calls to action. The old hero stated a
- *   name and a job title and offered nowhere to go.
- * - Tags are mono chips in the ink band rather than cyan pills; the cyan was
- *   2.15:1 against its own background.
+ * The composition is a single idea — the name set as large as the measure
+ * allows, and a cut-out figure standing beside and slightly over it, so the two
+ * read as one image rather than as a picture next to a heading. Everything else
+ * (the numbered roles, the handwritten opening line) is small, which is what
+ * leaves the page to the name and the photograph.
+ *
+ * WHY THE FIGURE IS BESIDE THE NAME AND NOT CENTRED ON IT. The reference for
+ * this hero centres the figure over the name, and it works there because the
+ * name is ghosted to a pale tint — so the face, being darker, wins. Multiply
+ * keeps the darker layer, and that cuts both ways: with the name in ink it is
+ * darker than a face, so "WILLIAM" prints straight across his eyes. The only
+ * way to centre it is to drop the name to a tint pale enough for skin to beat,
+ * which lands far under 3:1 — and this is the page's `h1`. So the name keeps
+ * its contrast and the figure moves off to the side, overlapping only where it
+ * is the dark shirt doing the occluding.
+ *
+ * On a phone there is no room to put anything beside anything, so the figure
+ * goes above the name and the name is pulled back up into the bottom of it.
+ * That is the same rule, applied vertically: the overlap lands on the chest,
+ * well below the collar, and the face is never underneath type.
+ *
+ * ---------------------------------------------------------------------------
+ * HOW THE CUT-OUT WORKS — read this before touching the portrait or the layout.
+ *
+ * There is no masking, no transparent PNG and no background removal. The
+ * portrait is a studio headshot on a white backdrop, composited with
+ * `mix-blend-mode: multiply`.
+ *
+ * `portrait-bw.jpg` did NOT arrive with a white backdrop, and this is the part
+ * to repeat when the high-resolution version lands. The delivered file had a
+ * smooth vertical lighting gradient behind the subject, running from 231 at the
+ * top of the frame to 251 at the bottom — invisible as a photograph, fatal as a
+ * multiply source, because anything below 255 multiplies into a visibly darker
+ * rectangle on the page. Thresholding it out was not an option either: the
+ * light polo shirt sits at 208-235, straight through the backdrop's own range,
+ * so no cut-off separates them.
+ *
+ * What fixed it was a flat-field correction, which is exact here because the
+ * gradient is purely vertical and the subject never reaches either side of the
+ * frame. For each row, take the median of the ten leftmost and ten rightmost
+ * pixels as that row's background level, smooth it over a few rows to keep JPEG
+ * noise from banding, then scale the whole row so that level becomes 255. The
+ * backdrop goes to 254-255 everywhere and the subject keeps its tones relative
+ * to white — the chest band moved by about one level, from 228 to 229.
+ *
+ * If a replacement photo shows a grey box behind the figure, that is this, and
+ * that is the fix.
+ *
+ * Multiply keeps the darker of the two layers. White over paper leaves paper,
+ * so the backdrop disappears completely; the person is darker than the page
+ * everywhere, so the person stays. The result is a true cut-out that costs one
+ * CSS property, and it gets *better* with a black-and-white source, not worse.
+ *
+ * Four things this depends on, every one of which silently breaks it:
+ *
+ *   1. NO ANCESTOR OF THE IMAGE MAY FORM A STACKING CONTEXT. An element only
+ *      blends with the backdrop inside the nearest isolating ancestor, so a
+ *      `z-10`, an `opacity` below 1, a `transform`, a `filter` or a
+ *      `will-change` anywhere up the tree leaves the figure blending against
+ *      nothing and rendering as a plain white box. This is exactly what
+ *      happened on the first attempt, with a `relative z-10` wrapper.
+ *      It is also why the figure has no entrance animation: `rise-in` animates
+ *      `transform`, which would isolate the image for the duration and flash
+ *      the white box before popping.
+ *      Layering here is therefore done with DOM order alone — h1, then the
+ *      figure, then the corner text — and deliberately no `z-index` at all.
+ *      Absolute positioning is fine; it only isolates once `z-index` is set.
+ *   2. The page under it must stay light. On a dark surface multiply eats the
+ *      figure instead of the backdrop.
+ *   3. The portrait's backdrop must stay white. Not "light" — white. See the
+ *      flat-field note above; a backdrop at 231 is already a visible box.
+ *   4. `showPlaceholder={false}` is not optional. CustomPicture otherwise
+ *      paints a blurred, 1.15x-scaled copy of the same photo behind the image;
+ *      that copy multiplies too and rings the figure in grey.
+ *
+ * `grayscale` is applied here in CSS as well, and is now a genuine no-op:
+ * `portrait-bw.jpg` measures a mean chroma spread of 0.0, i.e. it is already
+ * true greyscale. It stays as a guard, because the obvious way to break the
+ * look later is to drop a colour photograph in and not notice. (It sits on the
+ * image itself, not on an ancestor — see point 1.)
+ * ---------------------------------------------------------------------------
+ *
+ * ---------------------------------------------------------------------------
+ * THE ENTRANCE.
+ *
+ * One cascade, in reading order: the opening line, the given name, the
+ * surname, the three roles, then the buttons. The delays below are a sequence
+ * and are meant to stay one — they drifted out of order once already, with the
+ * buttons arriving in the middle of the roles list, which reads as a page
+ * assembling itself rather than as a page being laid out.
+ *
+ * The opening line gets its own animation rather than `rise-in`: a mask sweeps
+ * across it left to right, so the one line on the site set in handwriting
+ * arrives as though it were being written. See `write-in` in the Tailwind
+ * config for the geometry, which the mask utilities on that paragraph have to
+ * agree with.
+ *
+ * The mask's resting position is the one that shows the whole line. That is
+ * deliberate and load-bearing: `motion-safe:` removes the animation, not the
+ * mask, so a resting position of "hidden" would leave a reader who asked for
+ * less movement looking at a permanently half-masked sentence.
+ *
+ * The figure is still not in the cascade, and still cannot be — see point 1
+ * above.
+ * ---------------------------------------------------------------------------
+ *
+ * ---------------------------------------------------------------------------
+ * ONE NUMBER TO KNOW: `FIGURE_WIDTH`.
+ *
+ * `src/assets/portrait-bw.jpg` is 400x400 and `CustomPicture` never upscales,
+ * so 400px of real detail is all there is. The subject fills 97% x 96% of that
+ * frame, so there is no margin to crop away and nothing to reclaim — the only
+ * lever is how far the file gets stretched.
+ *
+ * It is set below to a size that stretches it about 1.25x, which a blended
+ * black-and-white figure carries but a crisp framed colour photo would not.
+ * That is why this hero is as large as it is and no larger.
+ *
+ * Note the phone and tablet sizes are DOWNscales of the same file, so they are
+ * pin sharp; only the `lg` size stretches it.
+ *
+ * A ~1400px portrait on the same white backdrop lets this go to the full
+ * reference proportions: raise the `lg` step of `FIGURE_WIDTH` and update
+ * `sizes` to match. Nothing else in this file needs to change.
+ * ---------------------------------------------------------------------------
  */
 import type { ImageMetadata } from "astro";
 import CustomPicture from "@ui/CustomPicture.astro";
 import TextRender from "@ui/TextRender.astro";
 import Button from "@ui/Button.astro";
+import AmbientWash from "@ui/AmbientWash.astro";
 
 export interface ImageItem {
   image: ImageMetadata | string;
   description?: string;
   subText?: string;
-}
-
-export interface HeroTag {
-  label: string;
 }
 
 export interface HeroLink {
@@ -41,138 +153,207 @@ export interface HeroLink {
 }
 
 export interface Props {
+  /** The name. This is the headline — not a job title. */
   title?: string;
-  subtitle?: string;
-  /** One or two sentences saying what you actually do. */
+  /** One sentence that sounds like a person wrote it. */
   intro?: string;
-  /** Small mono line above the name, e.g. a location or availability note. */
-  kicker?: string;
-  tags?: HeroTag[];
-  /** First is rendered solid, the rest outlined. */
+  /** The numbered list beside the figure. Three. */
+  roles?: string[];
+  /** First is rendered solid, the rest outlined. Two is plenty. */
   ctas?: HeroLink[];
   imageItems?: ImageItem[];
 }
 
 const {
   title = "",
-  subtitle = "",
   intro = "",
-  kicker = "",
-  tags = [],
+  roles = [],
   ctas = [],
   imageItems = [],
 } = Astro.props;
 
 const portrait = imageItems[0];
+
+/** See the long note above before changing this. */
+const FIGURE_WIDTH = "w-full sm:w-[22rem] lg:w-[33rem]";
+/**
+ * Pulls the figure back over the text column so the two overlap. It has to be
+ * a margin rather than a transform: a transform on an ancestor of the blended
+ * image forms a stacking context and the cut-out reverts to a white box.
+ */
+const FIGURE_OVERLAP = "lg:-ml-16";
+
+/**
+ * The name, split into the given name and everything after it.
+ *
+ * Set on two lines rather than left to wrap: at this size the column would
+ * break "William van der Vegt" wherever it happened to run out, and a name is
+ * not a paragraph. The split is on the first space, so any given name plus any
+ * remainder works and a single-word name degrades to one line.
+ *
+ * The two halves are then set as a deliberate pair rather than as one long
+ * headline — see the markup. The given name is the loud one; the surname is
+ * quieter, lighter and in its own case, which is also why the tussenvoegsels
+ * are left alone: "van der Vegt" is how the name is actually written, and
+ * shouting it in capitals throws away that detail.
+ */
+const space = title.indexOf(" ");
+const given = space > -1 ? title.slice(0, space) : title;
+const family = space > -1 ? title.slice(space + 1) : "";
 ---
 
-<script>
-  // Park the background animations while the hero is off-screen. They are
-  // cheap, but "cheap and permanent" still means a compositor frame every
-  // 16ms on a page the reader has scrolled past — and on a laptop that is
-  // battery. Purely an optimisation: if this never runs, the animations
-  // simply keep playing, which is the behaviour without it anyway.
-  const hero = document.querySelector("[data-hero]");
-  const layers = document.querySelectorAll<HTMLElement>("[data-hero-motion]");
+<section class="relative overflow-hidden border-b border-hairline bg-background">
+  {/* The washes. A SIBLING painted before the content, never an ancestor of
+      it — every layer in here carries a `blur()`, and a filter on an ancestor
+      of the portrait would form a stacking context and collapse the cut-out
+      into a white box. See AmbientWash's header note.
 
-  if (hero && layers.length && "IntersectionObserver" in window) {
-    const io = new IntersectionObserver(
-      ([entry]) => {
-        layers.forEach((el) => {
-          el.style.animationPlayState = entry.isIntersecting ? "" : "paused";
-        });
-      },
-      { threshold: 0 },
-    );
-    io.observe(hero);
-  }
-</script>
+      The graph paper that used to sit in this corner is gone: the washes do
+      the atmosphere here now, and the ruled pad reads as far more purposeful
+      where it was kept, behind the homelab parts table. */}
+  <AmbientWash intensity="strong" />
 
-<section class="relative overflow-hidden bg-ink-950" data-hero>
-  <!-- Background, in three layers. All of it is `aria-hidden` decoration, and
-       all of it animates transform only, so the permanent motion is composited
-       rather than repainted. `data-hero-motion` lets the script below park the
-       animations whenever the band is off-screen. -->
+  <div class="relative mx-auto max-w-6xl px-6 lg:px-8">
+    {/* --- The opening line ------------------------------------------------
+        In the handwriting face: the one sentence on the page that should read
+        as written rather than set.
 
-  <!-- A faint dot grid, panning one tile diagonally. It is the one "developer"
-       flourish in the band, and it sits at 4% so it reads as texture rather
-       than as a pattern. The layer is oversized by a tile in each direction so
-       the pan never exposes an edge. -->
-  <div class="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden="true">
-    <div
-      class="absolute -inset-8 opacity-[0.04] motion-safe:animate-grid-pan"
-      style="background-image: radial-gradient(#ffffff 1px, transparent 1px); background-size: 22px 22px;"
-      data-hero-motion
-    >
-    </div>
-  </div>
+        It runs larger than the body copy because it has to — Caveat's x-height
+        is small, and at body size a script face stops being informal and
+        starts being hard to read. `leading-snug` pulls the lines back in,
+        since the larger size would otherwise open the block up more than a
+        note should be.
 
-  <!-- Two slow glows on different cycles. Together they keep the band feeling
-       lit rather than flat, without ever resolving into a pattern you notice. -->
-  <div
-    class="pointer-events-none absolute -left-40 -top-40 h-[30rem] w-[30rem] rounded-full bg-primary-600/25 blur-3xl motion-safe:animate-drift-slow"
-    aria-hidden="true"
-    data-hero-motion
-  >
-  </div>
-  <div
-    class="pointer-events-none absolute -bottom-56 right-[-12rem] h-[26rem] w-[26rem] rounded-full bg-accent-500/10 blur-3xl motion-safe:animate-drift-slower"
-    aria-hidden="true"
-    data-hero-motion
-  >
-  </div>
+        It sits alone up here now. There used to be a mono strip of keywords
+        opposite it (software / cloud / homelab / maken / fotografie), which
+        said in five nouns what this sentence already says in one sentence, in
+        a voice the sentence is there to avoid. `sm:ml-auto` is what holds the
+        line to the right-hand column without a flex row to justify it, so it
+        still lands above the portrait. */}
+    {
+      intro && (
+        <p
+          class="max-w-sm text-pretty pt-10 font-hand text-[1.4rem] leading-snug text-blackText [mask-image:linear-gradient(90deg,black_33.3%,transparent_43.3%)] [mask-position:0%_0] [mask-repeat:no-repeat] [mask-size:300%_100%] motion-safe:animate-write-in sm:ml-auto sm:text-right sm:text-[1.55rem]"
+          style="animation-delay: 60ms;"
+        >
+          <TextRender>{intro}</TextRender>
+        </p>
+      )
+    }
 
-  <div class="relative mx-auto max-w-6xl px-6 py-20 sm:py-28 lg:px-8">
-    <div class="flex flex-col-reverse items-center gap-12 md:flex-row md:justify-between md:gap-16">
-      <div class="w-full max-w-xl text-center md:text-left">
-        {
-          kicker && (
-            <p class="flex items-center justify-center gap-2.5 font-mono text-xs font-medium uppercase tracking-[0.18em] text-accent-300 motion-safe:animate-rise-in md:justify-start">
-              <span class="relative flex h-1.5 w-1.5" aria-hidden="true">
-                <span class="absolute inline-flex h-full w-full rounded-full bg-accent-400 opacity-75 motion-safe:animate-ping" />
-                <span class="relative inline-flex h-1.5 w-1.5 rounded-full bg-accent-400" />
+    {/* --- Name and figure ------------------------------------------------
+        Two columns, bottom-aligned, so the figure lands on the section's
+        bottom edge and bleeds off it while the text column stops short. The
+        figure carries a negative left margin so it encroaches on the name
+        rather than sitting politely next to it.
+
+        Note the complete absence of `z-index`: paint order is DOM order (text
+        column first, figure second, so the figure wins), and adding one
+        anywhere would isolate the figure and kill the blend. */}
+    <div class="mt-6 flex flex-col lg:mt-4 lg:flex-row lg:items-end lg:gap-4">
+      {/* Below `lg` the name is pulled up INTO the bottom of the portrait. Set
+          flush underneath it the name read as a caption hanging off the photo
+          rather than as part of it; the two have to touch for the hero to be
+          one composition, which is exactly what the `lg:-ml-16` does on
+          desktop. There is no column gap on a phone for the same reason — the
+          negative margin is the whole spacing decision, stated once.
+
+          How far up is a real constraint, not taste. It must clear the face:
+          multiply keeps the darker layer, so ink type wins over skin and
+          "WILLIAM" would print straight across his eyes (see the note at the
+          top of this file). Crossing the SHIRT is fine and is the intent — the
+          shirt is light, so the name stays near-black on near-white and reads
+          as a printed overlay. These values put the cap line on the chest,
+          below the collar, at every width from 320 up.
+
+          Margins are safe here where a transform would not be; see point 1 of
+          the header note. Paint order is on our side too: `order-first` moves
+          the figure in the flex order, and flex items paint in order-modified
+          order, so the name is drawn over the figure on a phone and under it
+          at `lg`. Both are what the layout wants, and neither needs a
+          `z-index` — which would break the cut-out. */}
+      <div class="-mt-11 min-w-0 pb-12 sm:-mt-14 lg:mt-0 lg:flex-1">
+        {/* Deliberately wider than the column it sits in, so the longest line
+            runs on under the figure rather than stopping short of it. The
+            section's `overflow-hidden` is what keeps that from widening the
+            page. */}
+        <h1 class="lg:w-[42rem]">
+          {/* The given name: the loud half. Capitals, heavy, tracked in tight
+              enough that the letters nearly touch. */}
+          <span
+            class="block text-[clamp(3rem,14vw,7.5rem)] font-semibold uppercase leading-[0.82] tracking-[-0.04em] text-primaryText motion-safe:animate-rise-in"
+            style="animation-delay: 170ms;"
+          >
+            <TextRender>{given}</TextRender>
+          </span>
+
+          {/* The surname: the quiet half, and deliberately a different voice
+              rather than the same one turned down. Three things change at once
+              — weight (semibold to light), case (capitals to the name as it is
+              actually written), and colour (ink to muted) — because changing
+              only one reads as an accident, and changing all three reads as a
+              pair.
+
+              It keeps roughly half the given name's size, which is small enough
+              to be clearly subordinate and large enough to still hold the
+              bottom of the block. The tracking goes the other way too: the
+              given name is tightened to -0.04em, this is opened slightly, so
+              the two halves sit differently on the line rather than looking
+              like one headline in two weights. */}
+          {
+            family && (
+              <span
+                class="mt-2 block text-[clamp(1.75rem,7.2vw,3.9rem)] font-light leading-[1] tracking-[0.01em] text-mutedText motion-safe:animate-rise-in sm:mt-3"
+                style="animation-delay: 280ms;"
+              >
+                <TextRender>{family}</TextRender>
               </span>
-              <TextRender>{kicker}</TextRender>
-            </p>
-          )
-        }
-
-        <h1 class="mt-5 text-pretty text-4xl font-bold tracking-tight text-whiteText motion-safe:animate-rise-in sm:text-5xl" style="animation-delay: 80ms;">
-          <TextRender>{title}</TextRender>
+            )
+          }
         </h1>
 
         {
-          subtitle && (
-            <p class="mt-3 font-mono text-sm text-accent-300 motion-safe:animate-rise-in sm:text-base" style="animation-delay: 160ms;">
-              <TextRender>{subtitle}</TextRender>
-              {/* Terminal caret. Purely decorative, so it is hidden from
-                  assistive tech; a screen reader announcing a blinking block
-                  after the job title would be noise. */}
-              <span
-                class="ml-1 inline-block h-[1.05em] w-[0.5em] translate-y-[0.15em] bg-accent-400 motion-safe:animate-blink"
-                aria-hidden="true"
-              />
-            </p>
+          roles.length > 0 && (
+            <ol class="mt-9 flex flex-col gap-1.5">
+              {roles.map((role, i) => (
+                <li
+                  class="flex items-baseline gap-3 motion-safe:animate-rise-in"
+                  style={`animation-delay: ${400 + i * 85}ms`}
+                >
+                  {/* The index is furniture, so it is hidden from assistive
+                      tech — an ordered list already announces position, and
+                      "zero one" read before each role is noise. */}
+                  <span
+                    class="font-mono text-xs tabular-nums text-mutedText"
+                    aria-hidden="true"
+                  >
+                    ({String(i + 1).padStart(2, "0")})
+                  </span>
+                  <span class="text-xl font-medium italic tracking-tight text-primaryText sm:text-2xl">
+                    <TextRender>{role}</TextRender>
+                  </span>
+                </li>
+              ))}
+            </ol>
           )
         }
 
-        {
-          intro && (
-            <p class="mt-6 text-pretty text-lg leading-relaxed text-ink-200 motion-safe:animate-rise-in" style="animation-delay: 240ms;">
-              <TextRender>{intro}</TextRender>
-            </p>
-          )
-        }
-
+        {/* Stacked and full width on a phone, inline from `sm` up. Left to
+            wrap, the two buttons sat at their own content widths in a ragged
+            column; equal blocks read as a deliberate pair and give a thumb
+            something to aim at. */}
         {
           ctas.length > 0 && (
-            <div class="mt-9 flex flex-wrap justify-center gap-3 motion-safe:animate-rise-in md:justify-start" style="animation-delay: 320ms;">
+            <div
+              class="mt-9 flex flex-col gap-3 motion-safe:animate-rise-in sm:flex-row sm:flex-wrap"
+              style="animation-delay: 700ms;"
+            >
               {ctas.map((cta, i) => (
                 <Button
                   href={cta.link}
-                  tone="dark"
                   variant={i === 0 ? "primary" : "secondary"}
                   arrow={i === 0}
+                  class="justify-center sm:justify-start"
                 >
                   <TextRender>{cta.label}</TextRender>
                 </Button>
@@ -180,41 +361,44 @@ const portrait = imageItems[0];
             </div>
           )
         }
-
-        {
-          tags.length > 0 && (
-            <ul class="mt-10 flex flex-wrap justify-center gap-2 md:justify-start">
-              {tags.map((t, i) => (
-                <li
-                  class="rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 font-mono text-xs text-ink-300 transition-colors duration-200 hover:border-accent-400/40 hover:text-whiteText motion-safe:animate-rise-in"
-                  style={`animation-delay: ${400 + i * 70}ms`}
-                >
-                  <TextRender>{t.label}</TextRender>
-                </li>
-              ))}
-            </ul>
-          )
-        }
       </div>
 
+      {/* `order-first` below `lg`: in source order the figure follows the text
+          column, which put it after the buttons on a phone — the headshot
+          arrived last, as an afterthought, when it is supposed to be the thing
+          you land on. `order` is safe here where a transform would not be: it
+          does not form a stacking context, so the multiply cut-out survives
+          it. */}
       {
         portrait?.image && (
-          <div class="shrink-0 motion-safe:animate-rise-in" style="animation-delay: 200ms;">
-            {/* Quality is set high here on purpose: the portrait is a few
-                hundred pixels square, so the bytes are single-digit KB, and it
-                is the only photo of a face on the page and sits above the
-                fold. What caps its sharpness is the source asset, which is
-                400x400 — see "Things that will bite" in CLAUDE.md. */}
-            <div class="rounded-2xl border border-white/10 bg-white/5 p-2 shadow-2xl">
-              <CustomPicture
-                alt={portrait.description}
-                classes="w-44 rounded-xl sm:w-56 md:w-64"
-                sizes="(max-width: 639px) 176px, (max-width: 767px) 224px, 256px"
-                srcImagePath={portrait.image}
-                priority={true}
-                qualityOverride={82}
-              />
-            </div>
+          <div class:list={["order-first shrink-0 lg:order-none lg:mx-0", FIGURE_WIDTH, FIGURE_OVERLAP]}>
+            {/* Quality is high on purpose: the file is a few hundred pixels
+                square, so this costs single-digit KB, and it is the only
+                photograph of a face above the fold. `showPlaceholder` must
+                stay false and the filter must stay on the image — see the
+                header note. */}
+            {/* The bottom fade is mobile-only, and it earns its place.
+                The source frame cuts the shoulders off square. On desktop that
+                never shows, because the figure bleeds past the section's bottom
+                edge — but with the figure moved up the page on a phone, the cut
+                lands mid-scroll as a hard horizontal slice across his chest.
+                Dissolving the last quarter into the page hides an arbitrary
+                crop and suits a cut-out better than a straight edge does.
+
+                The mask sits on the SAME element as the blend, which is why it
+                is safe: a mask does form a stacking context, but the blending
+                element's own stacking context is the thing being composited,
+                not a boundary. Only an ANCESTOR with one breaks the cut-out.
+                Verified at 390 / 768 / 1440. */}
+            <CustomPicture
+              alt={portrait.description}
+              classes="aspect-square w-full grayscale mix-blend-multiply [mask-image:linear-gradient(to_bottom,black_74%,transparent_100%)] lg:[mask-image:none]"
+              sizes="(max-width: 639px) 100vw, (max-width: 1023px) 352px, 528px"
+              srcImagePath={portrait.image}
+              priority={true}
+              qualityOverride={86}
+              showPlaceholder={false}
+            />
           </div>
         )
       }

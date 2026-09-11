@@ -1,20 +1,24 @@
 ---
 /**
  * @component Button
- * @version   1.0.0
- * @updated   2026-09-10
+ * @version   2.0.0
+ * @updated   2026-09-11
  *
- * The site's whole button and call-to-action vocabulary, in one file.
+ * The site's whole button and call-to-action vocabulary, in one file, so that
+ * "which thing is clickable?" has exactly one answer.
  *
- * Before this existed the homepage had five unrelated treatments — a solid
- * blue pill, a bare blue text link, a bare cyan text link, an uppercase
- * tracked back-link, and a header button whose hover turned the label black
- * on dark blue (3.2:1). Everything that invites a click now comes from here,
- * so "which blue is a link?" has exactly one answer.
+ * Restyled for the field-journal look: ink rather than blue for the solid
+ * variant, near-square corners, and a drawn rule under the inline links
+ * instead of `hover:underline` — an underline that pops in is the one bit of
+ * motion on this page that would be doing UI work rather than decoration.
  *
- * `variant` is the emphasis, `tone` is the background it sits on. Every class
- * string below is a complete literal, because Tailwind's scanner cannot see a
- * name that was assembled at runtime.
+ * The solid button is ink-on-paper (17.1:1) rather than cobalt, which leaves
+ * cobalt free to mean "link" everywhere without competing with itself. `tone`
+ * survives for the few places that sit on a dark plate — the 404 and code
+ * blocks are the only dark surfaces left since the ink hero band was dropped.
+ *
+ * Every class string is a complete literal, because Tailwind's scanner cannot
+ * see a name that was assembled at runtime.
  */
 import type { HTMLAttributes } from "astro/types";
 
@@ -23,7 +27,7 @@ export interface Props extends Omit<HTMLAttributes<"a">, "class"> {
   href: string;
   /** Emphasis. One `primary` per section, at most. */
   variant?: "primary" | "secondary" | "inline";
-  /** Which band it sits on. `dark` is for the ink hero and footer. */
+  /** Which surface it sits on. `dark` is for the 404 plate. */
   tone?: "light" | "dark";
   /** Draws a `→` that slides on hover. Off for plain navigation. */
   arrow?: boolean;
@@ -44,24 +48,30 @@ const {
 const base =
   "group inline-flex items-center gap-2 no-underline transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2";
 
-/** Solid and outlined variants share this box; `inline` deliberately does not. */
-const box = "rounded-xl px-5 py-2.5 text-sm font-semibold";
+/** Solid and outlined share this box; `inline` deliberately does not. */
+const box = "rounded px-5 py-2.5 text-sm font-semibold";
 
 const styles: Record<string, string> = {
-  // Solid. 6.1:1 white-on-blue, and the hover darkens to 7.5:1 rather than
-  // dropping contrast the way the old header button did.
-  "primary-light": `${box} bg-primary-600 text-whiteText shadow-sm hover:bg-primary-700 focus-visible:ring-primary-600 focus-visible:ring-offset-background`,
-  "primary-dark": `${box} bg-whiteText text-ink-950 shadow-sm hover:bg-ink-100 focus-visible:ring-whiteText focus-visible:ring-offset-ink-950`,
+  // Ink on paper. 16.5:1 for the label, and the hover lightens the plate
+  // rather than dropping the label's contrast.
+  "primary-light": `${box} bg-ink-950 text-whiteText hover:bg-ink-800 focus-visible:ring-ink-950 focus-visible:ring-offset-background`,
+  "primary-dark": `${box} bg-background text-ink-950 hover:bg-ink-100 focus-visible:ring-background focus-visible:ring-offset-ink-950`,
 
-  // Outlined. Reads as the second choice without becoming invisible.
-  "secondary-light": `${box} border border-hairline bg-surface text-primaryText hover:border-ink-300 hover:text-primary-700 focus-visible:ring-primary-600 focus-visible:ring-offset-background`,
-  "secondary-dark": `${box} border border-white/20 text-whiteText hover:border-white/50 hover:bg-white/5 focus-visible:ring-whiteText focus-visible:ring-offset-ink-950`,
+  // Outlined: a drawn box. Reads as the second choice without going invisible.
+  "secondary-light": `${box} border border-hairlineStrong bg-transparent text-primaryText hover:border-ink-950 hover:bg-surfaceMuted focus-visible:ring-ink-950 focus-visible:ring-offset-background`,
+  "secondary-dark": `${box} border border-white/25 text-whiteText hover:border-white/60 hover:bg-white/5 focus-visible:ring-background focus-visible:ring-offset-ink-950`,
 
-  // Inline text link. The old "read more" links; now one colour, everywhere.
+  // Inline text link. Cobalt, and the only place cobalt sets type.
+  //
+  // `py-1.5` despite the name: this variant is a standalone call to action
+  // sitting beside a heading, not a link inside a sentence, so it gets no
+  // benefit from WCAG's inline exception and needs a real touch target. The
+  // drawn rule is positioned against the inner span, so the padding does not
+  // push it away from the text.
   "inline-light":
-    "text-sm font-semibold text-primary-600 hover:text-primary-700 focus-visible:ring-primary-600 focus-visible:ring-offset-background rounded-lg",
+    "rounded py-1.5 text-sm font-semibold text-cobalt-ink hover:text-ink-950 focus-visible:ring-cobalt focus-visible:ring-offset-background",
   "inline-dark":
-    "text-sm font-semibold text-ink-200 hover:text-whiteText focus-visible:ring-whiteText focus-visible:ring-offset-ink-950 rounded-lg",
+    "rounded py-1.5 text-sm font-semibold text-ink-200 hover:text-whiteText focus-visible:ring-background focus-visible:ring-offset-ink-950",
 };
 
 const externalAttrs = external
@@ -75,14 +85,28 @@ const externalAttrs = external
   {...externalAttrs}
   {...rest}
 >
-  <slot />
+  {
+    variant === "inline" ? (
+      <span class="relative">
+        <slot />
+        {/* Drawn, not `hover:underline`: it grows from the left edge, which
+            matches the rules beside every section label. */}
+        <span
+          class="absolute -bottom-0.5 left-0 h-px w-full origin-left scale-x-0 bg-current transition-transform duration-200 ease-out group-hover:scale-x-100"
+          aria-hidden="true"
+        />
+      </span>
+    ) : (
+      <slot />
+    )
+  }
   {
     arrow && (
       <svg
         class="h-4 w-4 shrink-0 transition-transform duration-200 group-hover:translate-x-0.5"
         fill="none"
         stroke="currentColor"
-        stroke-width="2"
+        stroke-width="1.75"
         viewBox="0 0 24 24"
         aria-hidden="true"
       >

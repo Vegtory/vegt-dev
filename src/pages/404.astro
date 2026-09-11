@@ -1,0 +1,129 @@
+---
+/**
+ * 404.
+ *
+ * The illustration is a failed print — the first few layers laid down fine,
+ * then the part came loose and the nozzle spent the rest of the job drawing
+ * spaghetti in mid-air. Anyone who has run a printer overnight recognises it
+ * immediately, and it says the thing a generic broken-robot graphic cannot:
+ * something came unstuck, it was not your fault, start again.
+ *
+ * Drawn inline as SVG rather than shipped as an asset. It is a few hundred
+ * bytes of paths, it inherits the page's colours, and a 404 is exactly the
+ * page where you do not want to depend on a second request succeeding.
+ *
+ * The spaghetti path is deliberately hand-drawn — a plotted sine wave reads as
+ * a graph, which is the wrong joke entirely.
+ */
+import BaseLayout from "../layouts/BaseLayout.astro";
+import SiteHeader from "@ui/SiteHeader.astro";
+import SiteFooter from "@ui/SiteFooter.astro";
+import Button from "@ui/Button.astro";
+import StatusChip from "@ui/StatusChip.astro";
+import Annotation from "@ui/Annotation.astro";
+import { site } from "../site";
+---
+
+<BaseLayout
+  title="404 — William van der Vegt"
+  description="Deze pagina bestaat niet (meer)."
+  lang={site.lang}
+  locale={site.locale}
+  umamiId={site.umamiId}
+>
+  <SiteHeader />
+
+  <main class="bg-background">
+    <div class="mx-auto max-w-3xl px-6 pb-24 pt-16 sm:px-8">
+      <div class="grid grid-cols-1 items-start gap-12 sm:grid-cols-5 sm:gap-10">
+        <div class="sm:col-span-2">
+          <svg
+            class="w-full max-w-[13rem]"
+            viewBox="0 0 160 150"
+            fill="none"
+            role="img"
+            aria-label="Een mislukte 3D-print: een paar nette lagen, en daarboven een wirwar van draden."
+          >
+            {/* Build plate */}
+            <line x1="12" y1="132" x2="148" y2="132" stroke="currentColor" stroke-width="2" class="text-ink-950" />
+            <line x1="24" y1="138" x2="34" y2="132" stroke="currentColor" stroke-width="1.5" class="text-hairlineStrong" />
+            <line x1="126" y1="138" x2="136" y2="132" stroke="currentColor" stroke-width="1.5" class="text-hairlineStrong" />
+
+            {/* The layers that went fine. Narrowing slightly, as a print does
+                when the first wall starts pulling away from the bed.
+
+                Opacities are bracketed because Tailwind only generates a
+                slash-opacity utility for values on its opacity scale; `/65`
+                and `/35` are not on it and silently produced no rule at all,
+                which left two of these four layers unstyled. */}
+            <rect x="54" y="124" width="52" height="7" class="fill-cobalt/80" />
+            <rect x="55" y="116" width="50" height="7" class="fill-cobalt/[0.65]" />
+            <rect x="57" y="108" width="46" height="7" class="fill-cobalt/50" />
+            <rect x="61" y="100" width="38" height="7" class="fill-cobalt/[0.35]" />
+
+            {/* Where it let go. */}
+            <path
+              d="M61 100c-3-6 4-9 9-6"
+              stroke="currentColor"
+              stroke-width="1.5"
+              stroke-linecap="round"
+              class="text-tomato"
+            />
+
+            {/* Spaghetti. */}
+            <path
+              d="M70 94c14 5 26-6 18-14-7-7-24 2-19 13 6 13 33 9 36-4 2-9-13-14-20-8-9 7 1 20 12 18 9-2 14-11 10-18-4-6-14-5-17 1"
+              stroke="currentColor"
+              stroke-width="1.75"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              class="text-ink-400"
+            />
+            <path
+              d="M84 52c9-6 21 1 18 10-2 8-15 9-19 2-4-8 5-16 14-13"
+              stroke="currentColor"
+              stroke-width="1.5"
+              stroke-linecap="round"
+              class="text-ink-300"
+            />
+
+            {/* Nozzle, still going, entirely unaware. */}
+            <path d="M96 18h18v14l-9 9-9-9z" class="fill-ink-950" />
+            <line x1="105" y1="41" x2="105" y2="50" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" class="text-ink-400" />
+          </svg>
+        </div>
+
+        <div class="sm:col-span-3">
+          <p class="font-mono text-[0.6875rem] font-medium uppercase tracking-[0.22em] text-mutedText">
+            404
+          </p>
+
+          <h1 class="mt-5 text-pretty text-3xl font-semibold leading-[1.1] tracking-[-0.025em] text-primaryText sm:text-[2.5rem]">
+            Deze is losgetrild van het bed
+          </h1>
+
+          <p class="mt-6 leading-relaxed text-mutedText">
+            De pagina die je zocht bestaat niet, of niet meer. Meestal is dat
+            een typefout in de URL — en soms heb ik iets verplaatst zonder erbij
+            na te denken. Beide zijn op te lossen.
+          </p>
+
+          <div class="mt-7">
+            <StatusChip label="print_geslaagd" value="false" state="off" />
+          </div>
+
+          <div class="mt-9 flex flex-wrap gap-3">
+            <Button href="/" variant="primary" arrow>Terug naar het begin</Button>
+            <Button href="/blog" variant="secondary">Alle notities</Button>
+          </div>
+
+          <Annotation arrow="right-up" tone="tomato" tilt={1} class="mt-10">
+            Opnieuw opstarten, iets meer hechting, tweede poging.
+          </Annotation>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <SiteFooter />
+</BaseLayout>
