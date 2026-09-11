@@ -1,26 +1,35 @@
 ---
 /**
  * @component SectionHeading
- * @version   1.0.0
- * @updated   2026-09-10
+ * @version   2.0.0
+ * @updated   2026-09-11
  *
- * The eyebrow + title pair every light section opens with.
+ * The label + title pair every section opens with, set as a field-journal
+ * entry header: a numbered mono label with a coloured pad beside it, then the
+ * title in ink.
  *
- * Previously each section rolled its own, and they disagreed on both markup
- * and hierarchy: some emitted `<h3>` above `<h2>`, and the title was always
- * cyan `accentText` — 2.15:1 on the page background. Here the eyebrow is a
- * small mono label (the developer signal, and it doubles as the section's
- * kicker for a skim-reader) and the title is ink, so the largest text on the
- * page is also the most readable.
+ * The colour lives in the pad, never in the label text. That is what keeps the
+ * palette reading as incidental — a marker dot against a heading — rather than
+ * as a per-section colour scheme, which is the thing that makes a site look
+ * like a SaaS landing page. It also sidesteps a real problem: two of the five
+ * topic marks (`acid`, `amber`) sit below 3:1 on paper and could not legally
+ * set type at this size anyway.
+ *
+ * `topic` ties the heading into the site's five-verb vocabulary (see
+ * `topics.ts`); `eyebrow` is the escape hatch for a section that is not one of
+ * the five.
  */
 import TextRender from "@ui/TextRender.astro";
+import { topicFor } from "@ui/topics";
 
 export interface Props {
-  /** Small mono label above the title, e.g. "Over". */
+  /** One of the five verbs. Supplies both the label and its pad colour. */
+  topic?: string;
+  /** Used when `topic` is not set, or to override its label. */
   eyebrow?: string;
   title?: string;
-  /** `center` for short sections, `left` for anything with prose under it. */
-  align?: "center" | "left";
+  /** Two-digit entry number, e.g. "03". Purely editorial furniture. */
+  index?: string;
   /**
    * Heading level. Sections on a page that already has an `<h1>` want `h2`
    * (the default); a page whose main title this *is* — /blog, /gallery —
@@ -28,35 +37,62 @@ export interface Props {
    * classes below either way, so this changes the outline, not the look.
    */
   as?: "h1" | "h2";
+  /** `sm` for the smaller sub-sections, so not every heading shouts. */
+  size?: "sm" | "lg";
   class?: string;
 }
 
 const {
+  topic,
   eyebrow = "",
   title = "",
-  align = "center",
+  index = "",
   as: Heading = "h2",
+  size = "lg",
   class: extraClass = "",
 } = Astro.props;
 
-const alignment =
-  align === "center" ? "mx-auto max-w-2xl text-center items-center" : "max-w-3xl items-start";
+const resolved = topicFor(topic);
+const label = eyebrow || resolved?.label || "";
+const pad = resolved?.mark ?? "bg-hairlineStrong";
+const rule = resolved?.rule ?? "bg-hairline";
+
+const titleSize =
+  size === "lg"
+    ? "text-[2rem] leading-[1.1] sm:text-[2.75rem]"
+    : "text-2xl leading-tight sm:text-3xl";
 ---
 
-<div class:list={["flex flex-col", alignment, extraClass]} data-reveal>
+<div class:list={["flex max-w-3xl flex-col", extraClass]} data-reveal>
   {
-    eyebrow && (
-      <p class="flex items-center gap-2.5 font-mono text-xs font-medium uppercase tracking-[0.18em] text-accentText">
-        {/* Draws itself out from the mark as the heading arrives; the states live
-            in ScrollReveal's global sheet, keyed off `data-reveal-rule`. */}
-        <span class="h-px w-6 origin-left bg-accentText/40" data-reveal-rule aria-hidden="true" />
-        <TextRender>{eyebrow}</TextRender>
+    label && (
+      <p class="flex items-center gap-2.5 font-mono text-[0.6875rem] font-medium uppercase tracking-[0.22em] text-mutedText">
+        {/* The entry number. `mutedText`, not a pale hairline: at 11px a
+            hairline-coloured numeral sits near 1.6:1, which is not "quiet
+            furniture", it is invisible. Kept quiet by size and by sitting
+            before the pad instead. */}
+        {index && <span class="tabular-nums text-mutedText">{index}</span>}
+        {/* The topic's pad. Square, like every other node on the site. */}
+        <span class:list={["h-1.5 w-1.5 shrink-0", pad]} aria-hidden="true" />
+        <TextRender>{label}</TextRender>
+        {/* Draws itself out as the heading arrives; the states live in
+            ScrollReveal's global sheet, keyed off `data-reveal-rule`. */}
+        <span
+          class:list={["h-px w-10 origin-left", rule]}
+          data-reveal-rule
+          aria-hidden="true"
+        />
       </p>
     )
   }
   {
     title && (
-      <Heading class="mt-4 text-pretty text-3xl font-bold tracking-tight text-primaryText sm:text-4xl">
+      <Heading
+        class:list={[
+          "mt-5 text-pretty font-semibold tracking-[-0.02em] text-primaryText",
+          titleSize,
+        ]}
+      >
         <TextRender>{title}</TextRender>
       </Heading>
     )

@@ -1,20 +1,22 @@
 ---
 /**
  * @component PhotoCollage
- * @version   1.0.0
- * @updated   2026-09-10
+ * @version   2.0.0
+ * @updated   2026-09-11
  * @source    astro-template@0ad4fd0
  * @copied    2026-09-10
  * @modified  true
  *
- * Copied from the template and restyled onto this site's tokens.
+ * The FOTOGRAFEREN section: four photographs off to the gallery.
  *
- * - The scattered rotations are gone. They fought the rest of the page, and
- *   the tilt cropped the photographs at the corners of their own frames.
- *   A straight grid with a hairline frame lets the photography carry itself.
- * - The button comes from `@ui/Button.astro` rather than being the page's
- *   only solid blue pill.
- * - Heading pair comes from `@ui/SectionHeading.astro`.
+ * Restyled onto the journal's geometry — square corners, no drop shadows, a
+ * contact-sheet row rather than four equal tiles. The frames alternate portrait
+ * and landscape crops and one of them sits lower than its neighbours, which is
+ * the same "arranged rather than stamped out" idea the project cards use.
+ *
+ * Note the section still reshuffles on every build (see below), so consecutive
+ * deploys genuinely differ. That is a deliberate property of the page, not a
+ * bug to stabilise.
  */
 import type { ImageMetadata } from "astro";
 import CustomPicture from "@ui/CustomPicture.astro";
@@ -30,6 +32,8 @@ export interface CollageLink {
 export interface Props {
   title?: string;
   subtitle?: string;
+  topic?: string;
+  index?: string;
   smallText?: string;
   button?: CollageLink;
 }
@@ -37,6 +41,8 @@ export interface Props {
 const {
   title = "",
   subtitle = "",
+  topic,
+  index = "",
   smallText = "",
   button = { label: "", link: "" },
 } = Astro.props;
@@ -52,12 +58,26 @@ const pickedImages = Object.values(galleryImages)
   .map((mod) => mod.default)
   .sort(() => Math.random() - 0.5)
   .slice(0, 4);
+
+/**
+ * Alternating crops, and a drop on the second frame.
+ *
+ * Complete literals: Tailwind cannot see a class name assembled at runtime,
+ * which is also why this is a table of finished strings rather than a
+ * template built from an index.
+ */
+const frames = [
+  { crop: "aspect-[4/5]", offset: "" },
+  { crop: "aspect-[4/5]", offset: "sm:mt-10" },
+  { crop: "aspect-[4/5]", offset: "" },
+  { crop: "aspect-[4/5]", offset: "sm:mt-10" },
+];
 ---
 
 <section class="border-y border-hairline bg-surfaceMuted py-20 sm:py-28">
   <div class="mx-auto max-w-6xl px-6 lg:px-8">
     <div class="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
-      <SectionHeading eyebrow={subtitle} title={title} align="left" />
+      <SectionHeading topic={topic} eyebrow={subtitle} title={title} index={index} />
       {
         button?.link && (
           <Button href={button.link} variant="secondary" arrow class="shrink-0">
@@ -71,23 +91,32 @@ const pickedImages = Object.values(galleryImages)
       pickedImages.length > 0 && (
         <div class="mt-12 grid grid-cols-2 gap-4 sm:gap-6 md:grid-cols-4">
           {pickedImages.map((image, i) => (
-            <div
-              class="group overflow-hidden rounded-2xl border border-hairline bg-surface p-2 shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-md"
+            <a
+              href={button?.link || "/gallery"}
+              class:list={[
+                "group block no-underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink-950 focus-visible:ring-offset-4 focus-visible:ring-offset-surfaceMuted",
+                frames[i % frames.length].offset,
+              ]}
               data-reveal
               style={`--reveal-delay: ${i * 90}ms`}
             >
-              {/* The zoom lives on an inner clip box so the photo grows within
-                  its mount rather than spilling over the white frame. */}
-              <div class="overflow-hidden rounded-xl">
+              {/* The zoom lives on a clip box so the photo grows inside its
+                  frame rather than spilling past the edge. */}
+              <div class="overflow-hidden">
                 <CustomPicture
                   alt="Een foto uit de gallerij"
-                  classes="aspect-[4/5] w-full rounded-xl transition-transform duration-500 ease-out group-hover:scale-[1.06]"
+                  classes={`w-full ${frames[i % frames.length].crop} transition-transform duration-500 ease-out group-hover:scale-[1.04]`}
                   sizes="(min-width: 768px) 260px, 45vw"
                   srcImagePath={image}
                   loading="lazy"
                 />
               </div>
-            </div>
+              {/* A contact-sheet frame number. Real in the sense that matters:
+                  it is this frame's position in the row, nothing more. */}
+              <span class="mt-2 block font-mono text-[0.6875rem] text-mutedText" aria-hidden="true">
+                {String(i + 1).padStart(2, "0")}
+              </span>
+            </a>
           ))}
         </div>
       )
@@ -95,7 +124,7 @@ const pickedImages = Object.values(galleryImages)
 
     {
       smallText && (
-        <p class="mt-8 max-w-xl text-sm leading-relaxed text-mutedText" data-reveal>
+        <p class="mt-10 max-w-xl text-sm leading-relaxed text-mutedText" data-reveal>
           <TextRender>{smallText}</TextRender>
         </p>
       )

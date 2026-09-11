@@ -13,11 +13,12 @@ src/
     blog/             blog posts
     gallery/          photo albums
   content.config.ts   zod schemas — READ THIS BEFORE EDITING FRONTMATTER
-  pages/              routes
+  pages/              routes (incl. /now and a 404 built from a failed print)
   components/         this site's components; yours to change freely
   layouts/            BaseLayout, BlogLayout
   assets/             images
-  site.ts             site-wide settings (name, lang, analytics id)
+  site.ts             site-wide settings (name, lang, nav, analytics id)
+  buildInfo.ts        rev / commit / build time — the footer's metadata is real
 astro-template/       submodule: shared components, imported as @template/*
 contact-worker/       Cloudflare Worker serving /api/contact
 ```
@@ -76,11 +77,48 @@ report which copies have upstream fixes available; see
 
 ## Styling
 
-Tailwind, with tokens from the template's preset — `bg-background`,
-`text-primaryText`, `text-accentText`, and the `primary`/`secondary`/`accent`
-scales. Override them in `tailwind.config.cjs` under `theme.extend`. Never
-hardcode a hex value, and never build a class name by string concatenation:
-Tailwind only sees complete literals.
+The look is a **technical field journal**: warm paper (`bg-background`),
+near-black type, hairline rules, near-square corners, and saturated colour used
+the way it turns up on a workbench — a highlighter stripe, a registration mark,
+an LED. Read the header comment in `tailwind.config.cjs`; it is the design
+rationale, not just a token list.
+
+Surfaces are `background` / `surface` / `surfaceMuted`, separated by `hairline`
+(and `hairlineStrong` for a rule that should read as drawn). Text is
+`primaryText` / `mutedText` / `noteText`.
+
+The five mark colours — `cobalt`, `tomato`, `acid`, `violet`, `amber` — each
+have three members, and the split is load-bearing:
+
+- `bg-cobalt` etc. is the **mark**: rules, dots, fills. Never type.
+- `text-cobalt-ink` etc. is the **only** member that may set type. Each clears
+  4.5:1 on `surfaceMuted`, the darkest surface they land on.
+- `bg-cobalt-wash` is a tint to put type on top of.
+
+`acid` and `amber` are below 3:1 as marks and are flagged DECORATIVE ONLY in
+the config — they must never be the sole carrier of meaning. This is why a
+topic's label is always ink and only the pad beside it is coloured.
+
+There is deliberately **no per-section colour scheme**. Assigning one hue per
+section is the SaaS-landing-page move this design exists to avoid.
+
+Never hardcode a hex value, and never build a class name by string
+concatenation: Tailwind only sees complete literals.
+
+### The five verbs
+
+`src/components/topics.ts` holds the site's vocabulary — bouwen, knutselen,
+schrijven, fotograferen, vertellen — with each one's label and mark colour.
+Section headings, blog tags and the topic strip all read from it, which is what
+makes cloud work land as one part of the picture rather than as the identity.
+A blog post opts in with `topic:` in its frontmatter.
+
+### Motion
+
+All motion is ambient — nothing has to run for the page to be understood. Reach
+for it through `motion-safe:` **always**, never bare. `prefers-reduced-motion:
+reduce` currently leaves the site with zero running animations and nothing
+hidden; keep it that way.
 
 ## Commands
 
@@ -114,8 +152,27 @@ pnpm run deploy      # astro build && wrangler deploy
   are DPR 2-3, so a photo shown in a 256px slot wants a ~768px original.
   `CustomPicture` generates variants at 240/480/720/960 plus the source's own
   width, and it never upscales — hand it a 400px file and 400px is all any
-  screen gets, however large the slot. This is why the hero portrait
-  (`src/assets/image.jpeg`, 400x400) looks soft on a phone: replace it with a
-  ~1000px version and it sharpens with no code change.
+  screen gets, however large the slot.
+
+  **Two assets are currently the limiting factor on the design**, and both are
+  a drop-in fix:
+  - `src/assets/image.jpeg` (hero portrait) is 400x400. The hero is drawn for a
+    portrait at ~40% of the viewport but is pinned to 320px so the 4:5 crop
+    lands at exactly 320x400 with nothing upscaled. Drop in a ~1200px version
+    and follow the instructions in `Hero.astro`'s header comment — one constant
+    and one `sizes` string.
+  - `src/assets/speaking-nimma-codes.jpg` is 356x200. `SpeakingFeature` is
+    drawn for a near-full-bleed photograph but caps the frame at `max-w-2xl`
+    for the same reason. A ~1600px original lets it run full width.
+
+- **`TextRender` treats `_x_` as markdown emphasis.** Anything passed through it
+  that contains underscores gets mangled — `works_on_my_machine` came out as
+  `works<i>on</i>my_machine`. Identifiers (status chips, package-style tags)
+  are therefore rendered literally, not through `TextRender`.
+
+- **The gallery JPEGs have no EXIF.** They were exported stripped, so there is
+  no shutter speed or aperture to read out of them. Photo captions carry place
+  and date only; do not write plausible-looking camera settings under a
+  photograph, because they would be fiction.
 - **`PhotoCollage` reshuffles on every build.** The homepage collage picks four
   random gallery photos at build time, so consecutive deploys differ.

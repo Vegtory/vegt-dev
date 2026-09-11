@@ -1,0 +1,122 @@
+---
+/**
+ * @component SpeakingFeature
+ * @version   1.0.0
+ * @updated   2026-09-11
+ *
+ * "Soms leg ik het ook uit." — the talk photograph, roughly halfway down the
+ * homepage.
+ *
+ * Placed here rather than at the top on purpose: the portrait and the
+ * speaking photo are two pictures of the same person, and stacking them in
+ * the hero makes the opening screen a headshot gallery. Separated, the second
+ * one arrives as an editorial beat partway down instead.
+ *
+ * The metadata under the frame is free text from the content file, and it
+ * should say only what is true of the actual talk. Treated as an artefact —
+ * a photograph with a caption — rather than as a "Speaking" testimonial
+ * block, which is the corporate version of this section and reads as stock.
+ *
+ * ---------------------------------------------------------------------------
+ * ON THE IMAGE. `src/assets/speaking-nimma-codes.jpg` is 356x200. The layout
+ * below is drawn for a near-full-bleed photograph but caps the frame at
+ * `max-w-2xl`, because `CustomPicture` never upscales and a 356px source
+ * stretched across a 1152px row would be visibly soft. Drop in the original
+ * at ~1600px wide and raise the cap on the figure to let this run full width.
+ * ---------------------------------------------------------------------------
+ */
+import type { ImageMetadata } from "astro";
+import CustomPicture from "@ui/CustomPicture.astro";
+import TextRender from "@ui/TextRender.astro";
+import SectionHeading from "@ui/SectionHeading.astro";
+import Button from "@ui/Button.astro";
+import MetaLine from "@ui/MetaLine.astro";
+import Annotation from "@ui/Annotation.astro";
+import { proseBase } from "@ui/prose";
+
+export interface ImageItem {
+  image: ImageMetadata | string;
+  description?: string;
+  subText?: string;
+}
+
+export interface Props {
+  title?: string;
+  subtitle?: string;
+  topic?: string;
+  index?: string;
+  imageItem?: ImageItem;
+  captionMeta?: string[];
+  note?: string;
+  cta?: { label: string; link: string };
+}
+
+const {
+  title = "",
+  subtitle = "",
+  topic,
+  index = "",
+  imageItem,
+  captionMeta = [],
+  note = "",
+  cta,
+} = Astro.props;
+---
+
+<section class="bg-background py-20 sm:py-28">
+  <div class="mx-auto max-w-6xl px-6 lg:px-8">
+    <div class="flex flex-col gap-12 lg:flex-row lg:items-start lg:gap-16">
+      {
+        imageItem?.image && (
+          <figure class="w-full min-w-0 max-w-2xl lg:flex-1" data-reveal>
+            <div class="relative">
+              <CustomPicture
+                alt={imageItem.description}
+                classes="w-full aspect-[16/9]"
+                sizes="(min-width: 1024px) 576px, calc(100vw - 3rem)"
+                srcImagePath={imageItem.image}
+                loading="lazy"
+              />
+              {/* Registration marks, as on the hero portrait, so the two
+                  photographs on the page are mounted the same way. */}
+              <span class="absolute -bottom-1 -left-1 h-3 w-3 border-b border-l border-ink-950" aria-hidden="true" />
+              <span class="absolute -right-1 -top-1 h-3 w-3 border-r border-t border-ink-950" aria-hidden="true" />
+            </div>
+
+            {captionMeta.length > 0 && (
+              <figcaption class="mt-4">
+                <MetaLine items={captionMeta} shape="stack" />
+              </figcaption>
+            )}
+          </figure>
+        )
+      }
+
+      <div class="w-full min-w-0 lg:max-w-md">
+        <SectionHeading topic={topic} eyebrow={subtitle} title={title} index={index} size="sm" />
+
+        <div class="mt-6" data-reveal style="--reveal-delay: 90ms">
+          <div class={proseBase}><slot /></div>
+        </div>
+
+        {
+          cta && (
+            <div class="mt-8" data-reveal style="--reveal-delay: 140ms">
+              <Button href={cta.link} variant="secondary" arrow>
+                <TextRender>{cta.label}</TextRender>
+              </Button>
+            </div>
+          )
+        }
+
+        {
+          note && (
+            <Annotation arrow="right-down" tone="acid" tilt={1} class="mt-10">
+              {note}
+            </Annotation>
+          )
+        }
+      </div>
+    </div>
+  </div>
+</section>

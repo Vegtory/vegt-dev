@@ -1,0 +1,145 @@
+---
+/**
+ * @component Connector
+ * @version   1.0.0
+ * @updated   2026-09-11
+ *
+ * The site's one recurring motif: a thin path between two points, with a
+ * soldered-looking pad at each end.
+ *
+ * It is intentionally ambiguous. Depending on what it sits between it reads as
+ * service → queue → worker, Pi → sensor, solar → meter → Home Assistant,
+ * camera → lens, or idea → daft prototype → surprisingly useful thing. That
+ * ambiguity is the point: it gives every interest on the site one shared
+ * visual DNA without ever resolving into a literal architecture diagram, which
+ * would brand the whole site "cloud" and undo the thing this design is for.
+ *
+ * Two variants:
+ *   - `seam`   a full-width rule between sections, optionally labelled.
+ *   - `branch` one node fanning out to three, which connect on hover of an
+ *              ancestor marked `group`. Used on the homelab heading.
+ *
+ * All of it is decoration: `aria-hidden`, and every animation is behind
+ * `motion-safe:`, so a reader who asked for reduced motion gets the connected
+ * end state immediately rather than a slower version of the transition.
+ */
+
+export interface Props {
+  variant?: "seam" | "branch";
+  /** Mark colour for the pads and the path. */
+  tone?: "hairline" | "cobalt" | "tomato" | "acid" | "violet" | "amber";
+  /** `seam` only: a mono label sitting on the rule. */
+  label?: string;
+  class?: string;
+}
+
+const {
+  variant = "seam",
+  tone = "hairline",
+  label = "",
+  class: extraClass = "",
+} = Astro.props;
+
+// Complete literals; Tailwind cannot see a runtime-assembled class name.
+const padTone: Record<string, string> = {
+  hairline: "bg-hairlineStrong",
+  cobalt: "bg-cobalt",
+  tomato: "bg-tomato",
+  acid: "bg-acid",
+  violet: "bg-violet",
+  amber: "bg-amber",
+};
+
+const ruleTone: Record<string, string> = {
+  hairline: "bg-hairline",
+  cobalt: "bg-cobalt/30",
+  tomato: "bg-tomato/30",
+  acid: "bg-acid/40",
+  violet: "bg-violet/30",
+  amber: "bg-amber/40",
+};
+
+const strokeTone: Record<string, string> = {
+  hairline: "text-hairlineStrong",
+  cobalt: "text-cobalt",
+  tomato: "text-tomato",
+  acid: "text-acid",
+  violet: "text-violet",
+  amber: "text-amber",
+};
+---
+
+{
+  variant === "seam" && (
+    <div
+      class:list={["flex items-center gap-3", extraClass]}
+      aria-hidden="true"
+    >
+      {/* Square pads rather than circles: a via on a board, and it keeps the
+          motif in the same geometry as the cards, which have no radius to
+          speak of either. */}
+      <span class:list={["h-1.5 w-1.5 shrink-0", padTone[tone]]} />
+      <span class:list={["h-px flex-1", ruleTone[tone]]} />
+      {/* The rule is split in two only when there is a label to sit between
+          the halves. Unlabelled, a second span plus the flex gap left a
+          visible break in the middle of the line — which read as a broken
+          trace rather than as a seam. */}
+      {label && (
+        <>
+          <span class="shrink-0 font-mono text-[0.6875rem] uppercase tracking-[0.2em] text-mutedText">
+            {label}
+          </span>
+          <span class:list={["h-px flex-1", ruleTone[tone]]} />
+        </>
+      )}
+      <span class:list={["h-1.5 w-1.5 shrink-0", padTone[tone]]} />
+    </div>
+  )
+}
+
+{
+  variant === "branch" && (
+    <svg
+      class:list={["h-8 w-16 shrink-0 overflow-visible", strokeTone[tone], extraClass]}
+      viewBox="0 0 64 32"
+      fill="none"
+      aria-hidden="true"
+    >
+      {/* The three paths. `pathLength="12"` normalises every path to the same
+          length whatever its actual geometry, so one dash pattern and one
+          keyframe cover all three and they complete together. */}
+      {[
+        "M6 16h18c6 0 6-11 12-11h22",
+        "M6 16h52",
+        "M6 16h18c6 0 6 11 12 11h22",
+      ].map((d, i) => (
+        <path
+          d={d}
+          stroke="currentColor"
+          stroke-width="1.25"
+          stroke-linecap="round"
+          pathLength="12"
+          stroke-dasharray="3 3"
+          stroke-dashoffset="12"
+          class="opacity-70 transition-opacity duration-300 group-hover:opacity-100 motion-safe:group-hover:animate-trace"
+          style={`animation-delay: ${i * 90}ms`}
+        />
+      ))}
+
+      {/* Source pad, then the three destinations. The destinations start dim
+          and come up as the traces arrive. */}
+      <rect x="3" y="13" width="6" height="6" fill="currentColor" />
+      {[5, 16, 27].map((y, i) => (
+        <rect
+          x="55"
+          y={y}
+          width="6"
+          height="6"
+          fill="currentColor"
+          class="opacity-40 transition-opacity duration-300 group-hover:opacity-100"
+          style={`transition-delay: ${180 + i * 90}ms`}
+        />
+      ))}
+    </svg>
+  )
+}

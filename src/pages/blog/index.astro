@@ -8,9 +8,9 @@ import { site } from "../../site";
 ---
 
 <BaseLayout
-  title="Blog — William van der Vegt"
-  description="Alle blog artikelen"
-  keywords="blog"
+  title="Notities — William van der Vegt"
+  description="Alles wat ik de moeite van het opschrijven waard vond: cloud, homelab, domotica en meten aan energie."
+  keywords="blog, notities, cloud, Azure, Home Assistant, homelab, domotica"
   lang={site.lang}
   locale={site.locale}
   umamiId={site.umamiId}
@@ -18,15 +18,19 @@ import { site } from "../../site";
   <SiteHeader />
 
   <main class="bg-background">
-    <div class="mx-auto max-w-3xl px-6 pb-24 pt-12 sm:px-8">
-      <SectionHeading eyebrow="Blog" title="Wat ik tegenkom, opgeschreven" align="left" as="h1">
-        <p class="mt-5 max-w-2xl leading-relaxed text-mutedText">
+    <div class="mx-auto max-w-3xl px-6 pb-24 pt-14 sm:px-8">
+      <SectionHeading
+        topic="write"
+        title="Wat ik tegenkom, opgeschreven"
+        as="h1"
+      >
+        <p class="mt-6 max-w-2xl leading-relaxed text-mutedText">
           Alles wat ik de moeite van het opschrijven waard vond. De artikelen
           zijn in het Engels, zodat ze een breder publiek bereiken.
         </p>
       </SectionHeading>
 
-      <div class="mt-12">
+      <div class="mt-14">
         <BlogList />
       </div>
     </div>

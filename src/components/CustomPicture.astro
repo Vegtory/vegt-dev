@@ -7,11 +7,16 @@
  * @copied    2026-09-10
  * @modified  true
  *
- * Modified, in two places — both bugs are still upstream in astro-template:
+ * Modified, in three places. The first two are bugs still upstream in
+ * astro-template; the third is this site's own motion rule:
  *   - `imageWidths`: the width ladder now offers the image's own width as a
  *     top rung when it falls between two fixed steps.
  *   - `baseWidth`: pins `getImage`'s base render to a width already in the
  *     srcSet, instead of letting it emit an unreferenced full-size encode.
+ *   - Both placeholder spinners are behind `motion-safe:`. They sit under the
+ *     image rather than being removed once it decodes, so they spin forever
+ *     behind every photograph on the page — and they were the only thing still
+ *     animating for a reader who had asked for reduced motion.
  */
 import { getImage } from "astro:assets";
 import type { ImageMetadata } from "astro";
@@ -261,12 +266,12 @@ if (!hasFailed && passedImage) {
         {!rawImagePath.endsWith("svg") && (
           <div
             class="absolute w-full h-full flex justify-center items-center"
-            class:list={[!bgColor && "bg-secondary-200"]}
+            class:list={[!bgColor && "bg-surfaceMuted"]}
             style={bgColor ? `background: ${bgColor}; filter: blur(20px); transform: scale(1.15)` : undefined}
           >
             {!bgColor && <svg
               aria-hidden="true"
-              class="w-8 h-8 mr-2 text-accent-200 animate-spin fill-accent-500"
+              class="w-8 h-8 mr-2 text-hairline motion-safe:animate-spin fill-hairlineStrong"
               viewBox="0 0 100 101"
               xmlns="http://www.w3.org/2000/svg"
             >
@@ -283,7 +288,7 @@ if (!hasFailed && passedImage) {
         )}
         {bgColor && (
           <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
-            <div class="w-5 h-5 rounded-full border-2 border-white/20 border-t-white/60 animate-spin" />
+            <div class="w-5 h-5 rounded-full border-2 border-white/20 border-t-white/60 motion-safe:animate-spin" />
           </div>
         )}
         {directImageUrl ? (
@@ -313,7 +318,7 @@ if (!hasFailed && passedImage) {
         )}
       </div>
       {subText && (
-        <span class="text-gray-500 text-xs ml-1 z-10">
+        <span class="mt-2 block font-mono text-[0.6875rem] text-mutedText">
           <TextRender>{subText}</TextRender>
         </span>
       )}

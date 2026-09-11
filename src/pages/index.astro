@@ -7,8 +7,12 @@ import { site } from "../site";
 
 import SiteHeader from "@ui/SiteHeader.astro";
 import Hero from "@ui/Hero.astro";
+import TopicStrip from "@ui/TopicStrip.astro";
 import TextWithLargeImage from "@ui/TextWithLargeImage.astro";
 import ToolsShowcase from "@ui/ToolsShowcase.astro";
+import TinkerGrid from "@ui/TinkerGrid.astro";
+import PhotoInterrupt from "@ui/PhotoInterrupt.astro";
+import SpeakingFeature from "@ui/SpeakingFeature.astro";
 import PhotoCollage from "@ui/PhotoCollage.astro";
 import SimpleBlogRenderer from "@ui/SimpleBlogRenderer.astro";
 import SiteFooter from "@ui/SiteFooter.astro";
@@ -40,6 +44,9 @@ async function section<T extends SectionData["type"]>(id: string, type: T) {
 const hero = await section("hero", "hero");
 const over = await section("over", "textWithLargeImage");
 const tools = await section("tools", "toolsShowcase");
+const knutselen = await section("knutselen", "tinkerGrid");
+const onderbreking = await section("onderbreking", "photoInterrupt");
+const vertellen = await section("vertellen", "speaking");
 const fotografie = await section("fotografie", "photoCollage");
 const blog = await section("blog", "simpleBlogRenderer");
 
@@ -48,13 +55,15 @@ const blog = await section("blog", "simpleBlogRenderer");
 // get a body; passing one to the others would silently discard it.
 const { Content: OverBody } = over;
 const { Content: ToolsBody } = tools;
+const { Content: KnutselBody } = knutselen;
+const { Content: VertelBody } = vertellen;
 const { Content: BlogBody } = blog;
 ---
 
 <BaseLayout
   title={site.name}
-  description="William van der Vegt, onder andere een full-stack software developer met een passie voor de cloud en DevOps."
-  keywords="Full-stack Developer, Software Developer, IT consultant, Microsoft, Azure, Cloud, DevOps, C#"
+  description="William van der Vegt — software, systemen en dingen die ik waarschijnlijk niet had hoeven bouwen. Cloud, homelab, 3D-printen, meten aan energie en fotografie."
+  keywords="software developer, cloud, Azure, C#, homelab, Home Assistant, 3D printen, domotica, fotografie, Nijmegen"
   lang={site.lang}
   locale={site.locale}
   umamiId={site.umamiId}
@@ -62,31 +71,59 @@ const { Content: BlogBody } = blog;
   <SiteHeader />
 
   <main>
-    {/* The wrapper ids are the in-page anchor targets, e.g. the hero's CTA
-        links to #Over and the header's to #Contact. */}
-    <div id="Hero"><Hero {...hero.data} /></div>
+    {/*
+      The page is one continuous stream of things William does, rather than a
+      portfolio hierarchy with hobbies filed at the bottom. Two deliberate
+      properties of the order below:
 
-    <div id="Over">
+        - Photography interrupts the technical content instead of following
+          it. The full-bleed frame sits between the homelab and the speaking
+          section, so the page has a person in it before it asks anyone to
+          read about Modbus.
+        - The two photographs of William are kept far apart. Portrait at the
+          top, talk photo around 60% down; together at the top they would make
+          the opening screen a headshot gallery.
+
+      The wrapper ids are the in-page anchor targets used by src/site.ts.
+    */}
+    <div id="hero"><Hero {...hero.data} /></div>
+
+    <TopicStrip />
+
+    <div id="over">
       <TextWithLargeImage {...over.data}>
         <OverBody components={mdxComponents} />
       </TextWithLargeImage>
     </div>
 
-    <div id="Tools">
+    <div id="bouwen">
       <ToolsShowcase {...tools.data}>
         <ToolsBody components={mdxComponents} />
       </ToolsShowcase>
     </div>
 
-    <div id="Fotografie"><PhotoCollage {...fotografie.data} /></div>
+    <div id="knutselen">
+      <TinkerGrid {...knutselen.data}>
+        <KnutselBody components={mdxComponents} />
+      </TinkerGrid>
+    </div>
 
-    <div id="Blog">
+    <PhotoInterrupt {...onderbreking.data} />
+
+    <div id="vertellen">
+      <SpeakingFeature {...vertellen.data}>
+        <VertelBody components={mdxComponents} />
+      </SpeakingFeature>
+    </div>
+
+    <div id="schrijven">
       <SimpleBlogRenderer {...blog.data}>
         <BlogBody components={mdxComponents} />
       </SimpleBlogRenderer>
     </div>
+
+    <div id="fotograferen"><PhotoCollage {...fotografie.data} /></div>
   </main>
 
   <SiteFooter />
-
 </BaseLayout>

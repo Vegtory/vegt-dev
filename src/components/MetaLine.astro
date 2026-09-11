@@ -1,0 +1,86 @@
+---
+/**
+ * @component MetaLine
+ * @version   1.0.0
+ * @updated   2026-09-11
+ *
+ * The small mono metadata that runs under photographs, headings and cards.
+ *
+ * Three shapes, and the distinction matters:
+ *   - `dots`    items separated by a middot: "software · cloud · homelab".
+ *   - `comment` the items rendered as a source comment: "// Venetië, 2023".
+ *   - `stack`   one item per line, for a caption block beside an image.
+ *
+ * `comment` is one of the site's handful of small coding jokes, and it is
+ * rationed deliberately — if every caption looks like code then the joke is
+ * just a theme, and a theme is what this design is avoiding. The `//` itself
+ * is `aria-hidden`, because a screen reader reading "slash slash" before every
+ * photo caption is noise rather than wit.
+ *
+ * Note what this component will NOT do: it renders exactly the items it is
+ * given. The gallery JPEGs on this site were exported with their EXIF
+ * stripped, so there is no aperture or shutter speed to show, and inventing
+ * plausible-looking ones would make the page lie about the photographs. Pass
+ * the fields that are actually known — place, date, album — and leave it at
+ * that until the originals are re-exported with EXIF intact.
+ */
+import TextRender from "@ui/TextRender.astro";
+
+export interface Props {
+  /** The metadata, already in display form. Empty entries are dropped. */
+  items?: (string | undefined | null)[];
+  shape?: "dots" | "comment" | "stack";
+  size?: "xs" | "sm";
+  class?: string;
+}
+
+const {
+  items = [],
+  shape = "dots",
+  size = "xs",
+  class: extraClass = "",
+} = Astro.props;
+
+const shown = items.filter((i): i is string => Boolean(i && i.trim()));
+
+// One tone only. There used to be a `faint` variant on `ink-400`, which came
+// out at 3.6:1 on paper — below the 4.5:1 this text needs at 11px. There is no
+// lighter value that passes, so rather than keep an option that could only ever
+// be the wrong answer, the tone is fixed.
+const sizeClass = size === "xs" ? "text-[0.6875rem]" : "text-xs";
+---
+
+{
+  shown.length > 0 && (
+    <div
+      class:list={[
+        "font-mono tracking-[0.08em]",
+        "text-mutedText",
+        sizeClass,
+        shape === "stack" ? "flex flex-col gap-1" : "flex flex-wrap items-center gap-x-2 gap-y-1",
+        extraClass,
+      ]}
+    >
+      {shape === "comment" && (
+        <span class="select-none text-hairlineStrong" aria-hidden="true">
+          //
+        </span>
+      )}
+
+      {shown.map((item, i) => (
+        <>
+          {/* Separator for the dotted shape. Hidden from assistive tech: the
+              items are already read as separate phrases. */}
+          {shape === "dots" && i > 0 && (
+            <span class="text-hairlineStrong" aria-hidden="true">
+              ·
+            </span>
+          )}
+          <span class:list={[shape === "comment" && i > 0 && "before:mr-2 before:content-['·'] before:text-hairlineStrong"]}>
+            <TextRender>{item}</TextRender>
+          </span>
+        </>
+      ))}
+    </div>
+  )
+}

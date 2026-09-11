@@ -1,0 +1,53 @@
+---
+/**
+ * @component TopicStrip
+ * @version   1.0.0
+ * @updated   2026-09-11
+ *
+ * The thin band under the hero that lays out the site's five verbs.
+ *
+ * It exists so the taxonomy is stated once, plainly, near the top — and so
+ * that cloud work arrives as one of five things rather than as the headline.
+ * Everything below it (section labels, blog tags, the /now page) reuses the
+ * same vocabulary, which is what makes a page covering Azure load testing and
+ * a 3D-printed bracket feel like one person's interests rather than a mixed
+ * bag.
+ *
+ * Deliberately not five big homepage blocks. It is a strip: five labels, five
+ * pads, one line each. The verbs are the organising idea, not the furniture.
+ *
+ * The pads are the only colour, and they are the only place the five marks
+ * appear together — which is the one spot on the site where the palette is
+ * allowed to look like a palette.
+ */
+import { topics, topicOrder } from "@ui/topics";
+
+export interface Props {
+  class?: string;
+}
+
+const { class: extraClass = "" } = Astro.props;
+---
+
+<section class:list={["border-b border-hairline bg-background", extraClass]}>
+  <div class="mx-auto max-w-6xl px-6 py-10 lg:px-8">
+    <ul class="grid grid-cols-1 gap-x-8 gap-y-6 sm:grid-cols-2 lg:grid-cols-5 lg:gap-x-6">
+      {
+        topicOrder.map((key, i) => {
+          const topic = topics[key];
+          return (
+            <li data-reveal style={`--reveal-delay: ${i * 60}ms`}>
+              <p class="flex items-center gap-2.5 font-mono text-[0.6875rem] font-medium uppercase tracking-[0.22em] text-primaryText">
+                <span class:list={["h-1.5 w-1.5 shrink-0", topic.mark]} aria-hidden="true" />
+                {topic.label}
+              </p>
+              <p class="mt-2.5 text-[0.8125rem] leading-relaxed text-mutedText">
+                {topic.blurb}
+              </p>
+            </li>
+          );
+        })
+      }
+    </ul>
+  </div>
+</section>

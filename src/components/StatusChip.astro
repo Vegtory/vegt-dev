@@ -1,0 +1,90 @@
+---
+/**
+ * @component StatusChip
+ * @version   1.0.0
+ * @updated   2026-09-11
+ *
+ * A `key: value` chip, set like a line out of a config file.
+ *
+ * This is where the site's driest joke lives — a project whose status is
+ * `works_on_my_machine: true` — so the component has to be able to carry a
+ * punchline and a plain fact in the same shape, without the plain facts
+ * looking like they are also being funny. Hence `value` being typed as a
+ * string rather than a boolean: `true`, `2019`, `nog niet af` and `idle` all
+ * render identically, and only the words are doing the work.
+ *
+ * The value's colour is the one signal: `ok` for something running, `wip` for
+ * something half-built, `off` for something retired. `neutral` is the default
+ * and is the right answer for most chips — a page where every chip is coloured
+ * is a dashboard, not a notebook.
+ *
+ * Both halves are rendered as literal text, deliberately: `TextRender` treats
+ * `_x_` as markdown emphasis, so putting it anywhere near this component turns
+ * `works_on_my_machine` into `works<i>on</i>my_machine` — it ate two
+ * underscores and italicised the middle. Identifiers are not prose, and this
+ * chip exists specifically to show identifiers.
+ */
+
+export interface Props {
+  /** The key, in snake_case. Rendered dim, because the value is the content. */
+  label: string;
+  value: string;
+  state?: "neutral" | "ok" | "wip" | "off";
+  /** Draws a pad that breathes, for something genuinely live right now. */
+  live?: boolean;
+  class?: string;
+}
+
+const {
+  label,
+  value,
+  state = "neutral",
+  live = false,
+  class: extraClass = "",
+} = Astro.props;
+
+// Complete literals; Tailwind cannot see a runtime-assembled class name. Note
+// every one of these is an `-ink` member: the bare marks are 1.9-4:1 on paper
+// and could not legally set type this small.
+const valueTone: Record<string, string> = {
+  neutral: "text-primaryText",
+  ok: "text-acid-ink",
+  wip: "text-amber-ink",
+  off: "text-mutedText",
+};
+
+const padTone: Record<string, string> = {
+  neutral: "bg-hairlineStrong",
+  ok: "bg-acid",
+  wip: "bg-amber",
+  off: "bg-ink-300",
+};
+---
+
+<span
+  class:list={[
+    "inline-flex items-center gap-2 border border-hairline bg-surfaceMuted px-2.5 py-1 font-mono text-[0.6875rem] leading-none",
+    extraClass,
+  ]}
+>
+  {
+    (state !== "neutral" || live) && (
+      <span
+        class:list={[
+          "h-1.5 w-1.5 shrink-0",
+          padTone[state],
+          // Only something actually live breathes. A permanently pulsing dot
+          // next to a static fact is the kind of detail that reads as fake.
+          live && "motion-safe:animate-node-pulse",
+        ]}
+        aria-hidden="true"
+      />
+    )
+  }
+  <span class="text-mutedText">
+    {label}<span aria-hidden="true">:</span>
+  </span>
+  <span class:list={["font-medium", valueTone[state]]}>
+    {value}
+  </span>
+</span>

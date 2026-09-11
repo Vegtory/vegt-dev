@@ -1,22 +1,19 @@
 ---
 /**
  * @component SimpleBlogRenderer
- * @version   1.0.0
- * @updated   2026-09-10
+ * @version   2.0.0
+ * @updated   2026-09-11
  * @source    astro-template@0ad4fd0
  * @copied    2026-09-10
  * @modified  true
  *
- * Copied from the template and restyled onto this site's tokens.
+ * The SCHRIJVEN section: the three most recent posts.
  *
- * - Cards get a real frame (`surface` on `hairline`) and lift on hover, so
- *   they read as one component with the tool cards.
- * - `text-gray-900`/`text-gray-600`/`text-gray-500` become tokens.
- * - Dates were `toDateString()`, i.e. "Mon Jun 15 2026", on a `lang="nl"`
- *   site — and `BlogList` next door already formatted the same values as
- *   "15 June 2026". Both now use `formatDate` from `@ui/date`.
- * - "Alle artikelen bekijken" was the page's only cyan link; it now uses the
- *   shared `@ui/Button.astro` inline variant.
+ * Restyled as index entries rather than as cards — a hairline lattice, mono
+ * dates, the topic carried by a pad rather than a coloured label. The first
+ * entry takes the full width with a wider image, because three identical
+ * tiles is the single most generated-looking row on the internet and this page
+ * has spent the rest of its length avoiding exactly that.
  */
 import { getCollection } from "astro:content";
 import CustomPicture from "@ui/CustomPicture.astro";
@@ -25,13 +22,16 @@ import SectionHeading from "@ui/SectionHeading.astro";
 import Button from "@ui/Button.astro";
 import { formatDate } from "@ui/date";
 import { proseBase } from "@ui/prose";
+import { topicFor } from "@ui/topics";
 
 export interface Props {
   title?: string;
   subtitle?: string;
+  topic?: string;
+  index?: string;
 }
 
-const { title = "", subtitle = "" } = Astro.props;
+const { title = "", subtitle = "", topic, index = "" } = Astro.props;
 
 const allBlogs = await getCollection("blog");
 const posts = allBlogs
@@ -43,10 +43,8 @@ const posts = allBlogs
 <section class="bg-background py-20 sm:py-28">
   <div class="mx-auto max-w-6xl px-6 lg:px-8">
     <div class="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
-      <SectionHeading eyebrow={subtitle} title={title} align="left" />
-      <Button href="/blog" variant="secondary" arrow class="shrink-0">
-        Alle artikelen
-      </Button>
+      <SectionHeading topic={topic} eyebrow={subtitle} title={title} index={index} />
+      <Button href="/blog" variant="inline" class="shrink-0">Alle notities</Button>
     </div>
 
     {/* The measure lives on this wrapper, not on the prose element: the
@@ -57,40 +55,72 @@ const posts = allBlogs
       <div class={proseBase}><slot /></div>
     </div>
 
-    <div class="mt-14 grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
+    <div class="mt-12 border-t border-hairline">
       {
-        posts.map(({ id, data }, i) => (
-          <article
-            data-reveal
-            style={`--reveal-delay: ${i * 110}ms`}
-            class="group relative flex flex-col overflow-hidden rounded-2xl border border-hairline bg-surface shadow-sm transition duration-200 hover:-translate-y-1 hover:border-primary-200 hover:shadow-md focus-within:ring-2 focus-within:ring-primary-600 focus-within:ring-offset-2 focus-within:ring-offset-background">
-            <CustomPicture
-              alt={data.description}
-              classes="aspect-[16/9] w-full transition-transform duration-500 ease-out group-hover:scale-[1.04]"
-              sizes="(min-width: 1040px) 368px, (min-width: 640px) 45vw, calc(100vw - 3rem)"
-              srcImagePath={data.imageItem.image}
-              loading="lazy"
-            />
+        posts.map(({ id, data }, i) => {
+          const postTopic = topicFor(data.topic);
+          // The first entry is the lead: wider image, larger heading.
+          const lead = i === 0;
+          return (
+            <article
+              data-reveal
+              style={`--reveal-delay: ${i * 90}ms`}
+              class="group relative flex flex-col gap-5 border-b border-hairline py-7 transition-colors hover:bg-surfaceMuted sm:flex-row sm:items-start sm:gap-8"
+            >
+              <div class:list={["w-full shrink-0", lead ? "sm:w-72" : "sm:w-44"]}>
+                <CustomPicture
+                  alt={data.description}
+                  classes={lead ? "aspect-[16/9] w-full" : "aspect-[4/3] w-full"}
+                  sizes={lead ? "(min-width: 640px) 288px, calc(100vw - 3rem)" : "(min-width: 640px) 176px, calc(100vw - 3rem)"}
+                  srcImagePath={data.imageItem.image}
+                  loading="lazy"
+                />
+              </div>
 
-            <div class="flex flex-1 flex-col p-6">
-              <time datetime={data.date.toISOString()} class="font-mono text-xs text-mutedText">
-                {formatDate(data.date)}
-              </time>
+              <div class="min-w-0 flex-1">
+                <div class="flex flex-wrap items-center gap-x-3 gap-y-1.5 font-mono text-[0.6875rem] text-mutedText">
+                  <time datetime={data.date.toISOString()}>{formatDate(data.date)}</time>
+                  {postTopic && (
+                    <>
+                      <span class="text-hairlineStrong" aria-hidden="true">·</span>
+                      <span class="inline-flex items-center gap-1.5">
+                        {/* The pad carries the colour; the label stays ink.
+                            Two of the five marks are too light to set type
+                            in, so no topic ever colours its own label. */}
+                        <span class:list={["h-1.5 w-1.5", postTopic.mark]} aria-hidden="true" />
+                        {postTopic.id}
+                      </span>
+                    </>
+                  )}
+                </div>
 
-              <h3 class="mt-3 text-lg font-semibold leading-snug text-primaryText transition-colors group-hover:text-primary-700">
-                <a href={`/blog/${id}`} class="no-underline focus:outline-none">
-                  {/* Stretches the anchor over the whole card. */}
-                  <span class="absolute inset-0" aria-hidden="true" />
-                  <TextRender>{data.title}</TextRender>
-                </a>
-              </h3>
+                <h3
+                  class:list={[
+                    "mt-2.5 font-semibold leading-snug tracking-[-0.01em] text-primaryText",
+                    lead ? "text-xl sm:text-2xl" : "text-lg",
+                  ]}
+                >
+                  <a href={`/blog/${id}`} class="no-underline focus:outline-none">
+                    {/* Stretches the anchor over the whole row. */}
+                    <span class="absolute inset-0" aria-hidden="true" />
+                    <TextRender>{data.title}</TextRender>
+                  </a>
+                </h3>
 
-              <p class="mt-3 line-clamp-3 text-sm leading-relaxed text-mutedText">
-                <TextRender>{data.description}</TextRender>
-              </p>
-            </div>
-          </article>
-        ))
+                <p class="mt-2.5 line-clamp-2 max-w-2xl text-sm leading-relaxed text-mutedText">
+                  <TextRender>{data.description}</TextRender>
+                </p>
+              </div>
+
+              <span
+                class="hidden shrink-0 self-center text-hairlineStrong transition-transform duration-200 group-hover:translate-x-0.5 group-hover:text-primaryText sm:block"
+                aria-hidden="true"
+              >
+                →
+              </span>
+            </article>
+          );
+        })
       }
     </div>
   </div>
