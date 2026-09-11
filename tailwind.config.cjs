@@ -269,6 +269,38 @@ module.exports = {
           to: { opacity: "1", transform: "none" },
         },
 
+        /**
+         * The hero's opening line, arriving as though it were being written.
+         *
+         * A soft-edged mask sweeps left to right across the text. It is the
+         * one line on the site set in the handwriting face, and a generic
+         * fade-and-rise was saying nothing about that; a stroke travelling
+         * across it does.
+         *
+         * Only `mask-position` moves. The mask itself — image, size, repeat —
+         * is declared on the element, at the position that shows everything,
+         * which is what makes this safe to hide behind `motion-safe:`: a
+         * reader who asked for less movement gets the finished line rather
+         * than a permanently half-masked one.
+         *
+         * The geometry has to agree with the utilities in `Hero.astro`, and it
+         * is solved rather than eyeballed — the first attempt was not, and the
+         * stroke finished its visible travel in the first third of the
+         * duration while the remaining two thirds moved a mask that was
+         * already clear of the text.
+         *
+         * With the mask 3x the element's width, 1% of position moves it 2% of
+         * that width. The opaque band therefore ends at exactly the element's
+         * right edge at 0% (`black 33.3%` of 300% = 100%), and the soft edge
+         * has just cleared the left edge at 100% (`transparent 43.3%` of 300%
+         * = 130%, shifted -200%). Every percent of the animation is a percent
+         * of real travel. Move one number and the rest have to move with it.
+         */
+        "write-in": {
+          from: { maskPosition: "100% 0" },
+          to: { maskPosition: "0% 0" },
+        },
+
         /** A connection being established — the dashes crawl along the path
          *  once, on hover. 12 is the dash cycle set on the path itself; any
          *  other value makes the loop visibly jump. */
@@ -315,6 +347,11 @@ module.exports = {
         // `backwards` holds the opening frame during the delay, so a staggered
         // element stays invisible until its turn instead of flashing first.
         "rise-in": "rise-in 0.6s cubic-bezier(0.22, 1, 0.36, 1) backwards",
+        // Slower than `rise-in`, and on a curve with far less ease-out: this
+        // is a stroke crossing the line at something like a writing pace, and
+        // `rise-in`'s curve spends 75% of its travel in the first third, which
+        // read as a swipe. `backwards` holds it masked through its delay.
+        "write-in": "write-in 1.1s cubic-bezier(0.4, 0.1, 0.3, 1) backwards",
         trace: "trace 0.7s linear forwards",
         // Coprime-ish minute-scale periods; see the keyframes above.
         "wash-a": "wash-a 83s ease-in-out infinite",

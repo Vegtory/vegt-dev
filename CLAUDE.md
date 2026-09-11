@@ -167,6 +167,15 @@ for it through `motion-safe:` **always**, never bare. `prefers-reduced-motion:
 reduce` currently leaves the site with zero running animations and nothing
 hidden; keep it that way.
 
+That last clause is where a reveal built out of a **mask** or a **clip-path**
+will catch you. `motion-safe:` takes away the animation, not the property it
+animates — so the resting state has to be the finished one, and the animation
+has to travel *towards* it. `write-in`, the sweep across the hero's
+handwritten line, is built that way: the mask utilities on the paragraph park
+it fully open and the keyframes run from hidden to that. Get it backwards and
+reduced motion leaves the text permanently half-masked, which no amount of
+`motion-safe:` will tell you about.
+
 ## Commands
 
 ```bash

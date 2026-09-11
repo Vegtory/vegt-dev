@@ -92,6 +92,30 @@
  * ---------------------------------------------------------------------------
  *
  * ---------------------------------------------------------------------------
+ * THE ENTRANCE.
+ *
+ * One cascade, in reading order: the opening line, the given name, the
+ * surname, the three roles, then the buttons. The delays below are a sequence
+ * and are meant to stay one — they drifted out of order once already, with the
+ * buttons arriving in the middle of the roles list, which reads as a page
+ * assembling itself rather than as a page being laid out.
+ *
+ * The opening line gets its own animation rather than `rise-in`: a mask sweeps
+ * across it left to right, so the one line on the site set in handwriting
+ * arrives as though it were being written. See `write-in` in the Tailwind
+ * config for the geometry, which the mask utilities on that paragraph have to
+ * agree with.
+ *
+ * The mask's resting position is the one that shows the whole line. That is
+ * deliberate and load-bearing: `motion-safe:` removes the animation, not the
+ * mask, so a resting position of "hidden" would leave a reader who asked for
+ * less movement looking at a permanently half-masked sentence.
+ *
+ * The figure is still not in the cascade, and still cannot be — see point 1
+ * above.
+ * ---------------------------------------------------------------------------
+ *
+ * ---------------------------------------------------------------------------
  * ONE NUMBER TO KNOW: `FIGURE_WIDTH`.
  *
  * `src/assets/portrait-bw.jpg` is 400x400 and `CustomPicture` never upscales,
@@ -208,7 +232,10 @@ const family = space > -1 ? title.slice(space + 1) : "";
         still lands above the portrait. */}
     {
       intro && (
-        <p class="max-w-sm text-pretty pt-10 font-hand text-[1.4rem] leading-snug text-blackText motion-safe:animate-rise-in sm:ml-auto sm:text-right sm:text-[1.55rem]">
+        <p
+          class="max-w-sm text-pretty pt-10 font-hand text-[1.4rem] leading-snug text-blackText [mask-image:linear-gradient(90deg,black_33.3%,transparent_43.3%)] [mask-position:0%_0] [mask-repeat:no-repeat] [mask-size:300%_100%] motion-safe:animate-write-in sm:ml-auto sm:text-right sm:text-[1.55rem]"
+          style="animation-delay: 60ms;"
+        >
           <TextRender>{intro}</TextRender>
         </p>
       )
@@ -250,13 +277,13 @@ const family = space > -1 ? title.slice(space + 1) : "";
             runs on under the figure rather than stopping short of it. The
             section's `overflow-hidden` is what keeps that from widening the
             page. */}
-        <h1
-          class="motion-safe:animate-rise-in lg:w-[42rem]"
-          style="animation-delay: 40ms;"
-        >
+        <h1 class="lg:w-[42rem]">
           {/* The given name: the loud half. Capitals, heavy, tracked in tight
               enough that the letters nearly touch. */}
-          <span class="block text-[clamp(3rem,14vw,7.5rem)] font-semibold uppercase leading-[0.82] tracking-[-0.04em] text-primaryText">
+          <span
+            class="block text-[clamp(3rem,14vw,7.5rem)] font-semibold uppercase leading-[0.82] tracking-[-0.04em] text-primaryText motion-safe:animate-rise-in"
+            style="animation-delay: 170ms;"
+          >
             <TextRender>{given}</TextRender>
           </span>
 
@@ -275,7 +302,10 @@ const family = space > -1 ? title.slice(space + 1) : "";
               like one headline in two weights. */}
           {
             family && (
-              <span class="mt-2 block text-[clamp(1.75rem,7.2vw,3.9rem)] font-light leading-[1] tracking-[0.01em] text-mutedText sm:mt-3">
+              <span
+                class="mt-2 block text-[clamp(1.75rem,7.2vw,3.9rem)] font-light leading-[1] tracking-[0.01em] text-mutedText motion-safe:animate-rise-in sm:mt-3"
+                style="animation-delay: 280ms;"
+              >
                 <TextRender>{family}</TextRender>
               </span>
             )
@@ -288,7 +318,7 @@ const family = space > -1 ? title.slice(space + 1) : "";
               {roles.map((role, i) => (
                 <li
                   class="flex items-baseline gap-3 motion-safe:animate-rise-in"
-                  style={`animation-delay: ${240 + i * 80}ms`}
+                  style={`animation-delay: ${400 + i * 85}ms`}
                 >
                   {/* The index is furniture, so it is hidden from assistive
                       tech — an ordered list already announces position, and
@@ -316,7 +346,7 @@ const family = space > -1 ? title.slice(space + 1) : "";
           ctas.length > 0 && (
             <div
               class="mt-9 flex flex-col gap-3 motion-safe:animate-rise-in sm:flex-row sm:flex-wrap"
-              style="animation-delay: 360ms;"
+              style="animation-delay: 700ms;"
             >
               {ctas.map((cta, i) => (
                 <Button
