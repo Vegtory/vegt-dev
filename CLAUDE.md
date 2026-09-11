@@ -262,6 +262,12 @@ pnpm run deploy      # astro build && wrangler deploy
   percentage resolves against the viewport as it is while the URL bar is
   showing. Pages that want to fill a short viewport say `min-h-screen`.
 
+- **An Astro comment cannot be the first thing inside `{cond && (`.** Writing
+  `{ x && ( {/* why */} <div>…` is a parse error — "Expected `)` but found
+  `$$render`" — which names the line but not the reason, and reads like a
+  mismatched tag. Put the comment on the line *above* the expression. This has
+  caught three separate components here.
+
 - **Nothing may go before `<html>` in a layout — not even a comment.** An Astro
   expression ahead of the opening tag stops Astro treating that element as the
   document root, and the page ships with no `<html>`, `<head>` or `<body>` at

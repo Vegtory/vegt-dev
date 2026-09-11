@@ -1,7 +1,7 @@
 ---
 /**
  * @component SpeakingFeature
- * @version   1.0.0
+ * @version   1.1.0
  * @updated   2026-09-11
  *
  * "Soms leg ik het ook uit." — the talk photograph, roughly halfway down the
@@ -13,7 +13,9 @@
  * one arrives as an editorial beat partway down instead.
  *
  * The metadata under the frame is free text from the content file, and it
- * should say only what is true of the actual talk. Treated as an artefact —
+ * should say only what is true of the actual talk — the place was "Nijmegen"
+ * for a while on the strength of the name on the banner, and it was DeftPower
+ * in Arnhem. Ask rather than infer. Treated as an artefact —
  * a photograph with a caption — rather than as a "Speaking" testimonial
  * block, which is the corporate version of this section and reads as stock.
  *
@@ -72,9 +74,18 @@ const {
 
   <div class="relative mx-auto max-w-6xl px-6 lg:px-8">
     <div class="flex flex-col gap-12 lg:flex-row lg:items-start lg:gap-16">
+      {/* Below `lg` the photograph follows the text instead of leading it: the
+          section is introduced by its heading, and a phone that opens on a
+          picture with no eyebrow above it has no idea what it is looking at
+          yet. On a wide screen the two sit side by side and DOM order puts the
+          frame on the left, which is where it belongs. `order` is the whole
+          change — no duplicated markup.
+
+          This comment lives ABOVE the expression, not inside it: an Astro
+          comment as the first thing after `{cond && (` is a parse error. */}
       {
         imageItem?.image && (
-          <figure class="w-full min-w-0 max-w-2xl lg:flex-1" data-reveal>
+          <figure class="order-last w-full min-w-0 max-w-2xl lg:order-none lg:flex-1" data-reveal>
             <div class="relative">
               <CustomPicture
                 alt={imageItem.description}
