@@ -162,20 +162,22 @@ const FIGURE_WIDTH = "w-72 sm:w-[22rem] lg:w-[33rem]";
 const FIGURE_OVERLAP = "lg:-ml-16";
 
 /**
- * The name, broken into display lines.
+ * The name, split into the given name and everything after it.
  *
- * Set on its own lines rather than left to wrap: at this size the column would
- * break "WILLIAM VAN DER VEGT" wherever it happened to run out, and a name is
- * not a paragraph. Dutch tussenvoegsels ride with the surname, so "van der"
- * and "Vegt" stay on one line and the given name gets its own.
+ * Set on two lines rather than left to wrap: at this size the column would
+ * break "William van der Vegt" wherever it happened to run out, and a name is
+ * not a paragraph. The split is on the first space, so any given name plus any
+ * remainder works and a single-word name degrades to one line.
  *
- * The rule is simply "first word, then the rest", which handles any name of
- * two or more words and degrades to a single line for one word.
+ * The two halves are then set as a deliberate pair rather than as one long
+ * headline — see the markup. The given name is the loud one; the surname is
+ * quieter, lighter and in its own case, which is also why the tussenvoegsels
+ * are left alone: "van der Vegt" is how the name is actually written, and
+ * shouting it in capitals throws away that detail.
  */
 const space = title.indexOf(" ");
-const nameLines = space > -1
-  ? [title.slice(0, space), title.slice(space + 1)]
-  : [title].filter(Boolean);
+const given = space > -1 ? title.slice(0, space) : title;
+const family = space > -1 ? title.slice(space + 1) : "";
 ---
 
 <section class="relative overflow-hidden border-b border-hairline bg-background">
@@ -239,17 +241,34 @@ const nameLines = space > -1
             section's `overflow-hidden` is what keeps that from widening the
             page. */}
         <h1
-          class="font-semibold uppercase leading-[0.82] tracking-[-0.04em] text-primaryText motion-safe:animate-rise-in lg:w-[42rem]"
+          class="motion-safe:animate-rise-in lg:w-[42rem]"
           style="animation-delay: 40ms;"
         >
+          {/* The given name: the loud half. Capitals, heavy, tracked in tight
+              enough that the letters nearly touch. */}
+          <span class="block text-[clamp(2.5rem,11vw,7.5rem)] font-semibold uppercase leading-[0.82] tracking-[-0.04em] text-primaryText">
+            <TextRender>{given}</TextRender>
+          </span>
+
+          {/* The surname: the quiet half, and deliberately a different voice
+              rather than the same one turned down. Three things change at once
+              — weight (semibold to light), case (capitals to the name as it is
+              actually written), and colour (ink to muted) — because changing
+              only one reads as an accident, and changing all three reads as a
+              pair.
+
+              It keeps roughly half the given name's size, which is small enough
+              to be clearly subordinate and large enough to still hold the
+              bottom of the block. The tracking goes the other way too: the
+              given name is tightened to -0.04em, this is opened slightly, so
+              the two halves sit differently on the line rather than looking
+              like one headline in two weights. */}
           {
-            /* One line per word-group, so the name stacks into a block rather
-               than wrapping wherever the column happens to end. */
-            nameLines.map((line) => (
-              <span class="block text-[clamp(2.5rem,11vw,7.5rem)]">
-                <TextRender>{line}</TextRender>
+            family && (
+              <span class="mt-2 block text-[clamp(1.5rem,5.6vw,3.9rem)] font-light leading-[1] tracking-[0.01em] text-mutedText sm:mt-3">
+                <TextRender>{family}</TextRender>
               </span>
-            ))
+            )
           }
         </h1>
 
