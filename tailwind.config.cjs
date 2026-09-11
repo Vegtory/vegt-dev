@@ -313,31 +313,33 @@ module.exports = {
          * The ambient washes behind the hero portrait.
          *
          * Three of them, on deliberately mismatched periods, so the pattern
-         * they make together never repeats within any plausible visit — with
-         * 83s, 107s and 131s the trio only returns to its starting
-         * arrangement after about nine and a half days.
+         * they make together never repeats within any plausible visit — the
+         * three are primes, so the trio only returns to its starting
+         * arrangement after 59 x 73 x 89 seconds, about four and a half days.
          *
-         * The movements are large in distance but glacial in rate: a wash
-         * crosses a few percent of the viewport per minute, which is slow
-         * enough that you cannot catch it moving by staring, only by looking
-         * away and back. That is the brief. Anything faster and a coloured
-         * blob is sliding around behind a photograph, which is the effect this
-         * design spent its whole first pass avoiding.
+         * The movements are large in distance and slow in rate: a wash crosses
+         * something like a tenth of its own width in ten seconds. That is
+         * enough that a reader who watches the band for a few seconds can see
+         * it breathing, and not enough to become a coloured blob sliding
+         * around behind a photograph, which is the effect this design spent
+         * its whole first pass avoiding. They were half this far and half this
+         * fast to begin with, which put them under the threshold where anyone
+         * noticed them at all.
          *
          * `transform` only, so the browser composites them without a repaint
          * and the cost of running forever is close to nothing.
          */
         "wash-a": {
           "0%, 100%": { transform: "translate3d(0, 0, 0) scale(1)" },
-          "50%": { transform: "translate3d(6%, -4%, 0) scale(1.18)" },
+          "50%": { transform: "translate3d(10%, -7%, 0) scale(1.26)" },
         },
         "wash-b": {
-          "0%, 100%": { transform: "translate3d(0, 0, 0) scale(1.12)" },
-          "50%": { transform: "translate3d(-7%, 5%, 0) scale(0.94)" },
+          "0%, 100%": { transform: "translate3d(0, 0, 0) scale(1.16)" },
+          "50%": { transform: "translate3d(-11%, 8%, 0) scale(0.9)" },
         },
         "wash-c": {
-          "0%, 100%": { transform: "translate3d(0, 0, 0) scale(1.05)" },
-          "50%": { transform: "translate3d(4%, 6%, 0) scale(1.22)" },
+          "0%, 100%": { transform: "translate3d(0, 0, 0) scale(1.04)" },
+          "50%": { transform: "translate3d(7%, 10%, 0) scale(1.3)" },
         },
       },
 
@@ -354,9 +356,9 @@ module.exports = {
         "write-in": "write-in 1.1s cubic-bezier(0.4, 0.1, 0.3, 1) backwards",
         trace: "trace 0.7s linear forwards",
         // Coprime-ish minute-scale periods; see the keyframes above.
-        "wash-a": "wash-a 83s ease-in-out infinite",
-        "wash-b": "wash-b 107s ease-in-out infinite",
-        "wash-c": "wash-c 131s ease-in-out infinite",
+        "wash-a": "wash-a 59s ease-in-out infinite",
+        "wash-b": "wash-b 73s ease-in-out infinite",
+        "wash-c": "wash-c 89s ease-in-out infinite",
       },
     },
   },

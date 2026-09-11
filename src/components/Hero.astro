@@ -1,7 +1,7 @@
 ---
 /**
  * @component Hero
- * @version   3.0.0
+ * @version   3.2.0
  * @updated   2026-09-11
  * @source    astro-template@0ad4fd0
  * @copied    2026-09-10
@@ -17,78 +17,80 @@
  *
  * WHY THE FIGURE IS BESIDE THE NAME AND NOT CENTRED ON IT. The reference for
  * this hero centres the figure over the name, and it works there because the
- * name is ghosted to a pale tint — so the face, being darker, wins. Multiply
- * keeps the darker layer, and that cuts both ways: with the name in ink it is
- * darker than a face, so "WILLIAM" prints straight across his eyes. The only
- * way to centre it is to drop the name to a tint pale enough for skin to beat,
- * which lands far under 3:1 — and this is the page's `h1`. So the name keeps
- * its contrast and the figure moves off to the side, overlapping only where it
- * is the dark shirt doing the occluding.
+ * name is ghosted to a pale tint the photograph can sit on top of. This name
+ * is the page's `h1` and stays in ink, so nothing may cover it: the figure is
+ * an opaque cut-out, and centred it would take "WILLI—" out of "WILLIAM" and
+ * leave the heading to be guessed at. So the figure moves off to the side and
+ * overlaps only the empty run at the end of the line.
  *
  * On a phone there is no room to put anything beside anything, so the figure
  * goes above the name and the name is pulled back up into the bottom of it.
- * That is the same rule, applied vertically: the overlap lands on the chest,
- * well below the collar, and the face is never underneath type.
+ * Here the name is the layer on top, and the rule is the same one read the
+ * other way round: the overlap lands on the chest, well below the collar, so
+ * the type crosses a light shirt rather than the face — which it would both
+ * obscure and, ink on mid-grey skin, be hard to read on.
+ *
+ * WHICH OF THE TWO IS ON TOP IS NOT DECIDED BY SOURCE ORDER. It reads as
+ * though it should be, and this file said so for a while and was wrong: the
+ * frame CustomPicture draws is `relative z-0`, and a positioned element with a
+ * `z-index` is painted in a later pass than ordinary in-flow content, however
+ * far down the document that content sits. The mobile fade mask would do the
+ * same on its own — a mask makes its element a stacking context too, which is
+ * painted in that same later pass. So the figure covers the name by default,
+ * and on a phone it did: the semi-transparent bottom of the shirt washed the
+ * tops of the letters out to grey. The name wins that pass back with a
+ * `z-index` of its own, and it needs one at exactly the widths where it is
+ * supposed to be on top.
  *
  * ---------------------------------------------------------------------------
- * HOW THE CUT-OUT WORKS — read this before touching the portrait or the layout.
+ * THE CUT-OUT — read this before swapping the portrait.
  *
- * There is no masking, no transparent PNG and no background removal. The
- * portrait is a studio headshot on a white backdrop, composited with
- * `mix-blend-mode: multiply`.
+ * `portrait-bw.png` is a real cut-out: greyscale plus an alpha channel, and
+ * nothing on this page removes a background. The matte was computed from the
+ * studio shot on its white backdrop by `scripts/cutout-portrait.py`, which is
+ * where the arithmetic lives, along with the flat-field correction a delivered
+ * photo is likely to need first — this one arrived with a lighting gradient
+ * behind the subject running 231 at the top of the frame to 251 at the bottom,
+ * and every one of those levels reads as thin foreground.
  *
- * `portrait-bw.jpg` did NOT arrive with a white backdrop, and this is the part
- * to repeat when the high-resolution version lands. The delivered file had a
- * smooth vertical lighting gradient behind the subject, running from 231 at the
- * top of the frame to 251 at the bottom — invisible as a photograph, fatal as a
- * multiply source, because anything below 255 multiplies into a visibly darker
- * rectangle on the page. Thresholding it out was not an option either: the
- * light polo shirt sits at 208-235, straight through the backdrop's own range,
- * so no cut-off separates them.
+ * It used to be done here instead: the JPEG on its white backdrop, composited
+ * with `mix-blend-mode: multiply`, which keeps the darker of the two layers so
+ * white became page and the figure stayed. That rendered correctly and cost
+ * one CSS property, and it is worth knowing what it demanded, because the
+ * markup below was shaped around it:
  *
- * What fixed it was a flat-field correction, which is exact here because the
- * gradient is purely vertical and the subject never reaches either side of the
- * frame. For each row, take the median of the ten leftmost and ten rightmost
- * pixels as that row's background level, smooth it over a few rows to keep JPEG
- * noise from banding, then scale the whole row so that level becomes 255. The
- * backdrop goes to 254-255 everywhere and the subject keeps its tones relative
- * to white — the chest band moved by about one level, from 228 to 229.
+ *   - NO ANCESTOR OF THE IMAGE COULD FORM A STACKING CONTEXT. An element only
+ *     blends with the backdrop inside the nearest isolating ancestor, so a
+ *     `z-index`, an `opacity` below 1, a `transform`, a `filter` or a
+ *     `will-change` anywhere up the tree left the figure blending against
+ *     nothing and rendering as a plain white box.
+ *   - The figure could not be animated, since `rise-in` animates `transform`.
+ *   - The page under it had to stay light, or multiply ate the figure instead
+ *     of the backdrop.
+ *   - The backdrop in the file had to be white, not merely light. A backdrop
+ *     at 231 is a visible grey box.
  *
- * If a replacement photo shows a grey box behind the figure, that is this, and
- * that is the fix.
+ * None of that binds any more — the figure is an ordinary image that happens
+ * to be person-shaped, and it is now free to be animated, wrapped or layered.
+ * The layout below still does its stacking with DOM order alone, because that
+ * is a perfectly good way to say what overlaps what, but it is no longer a
+ * constraint and adding a `z-index` no longer breaks anything.
  *
- * Multiply keeps the darker of the two layers. White over paper leaves paper,
- * so the backdrop disappears completely; the person is darker than the page
- * everywhere, so the person stays. The result is a true cut-out that costs one
- * CSS property, and it gets *better* with a black-and-white source, not worse.
+ * Two things do still bind:
  *
- * Four things this depends on, every one of which silently breaks it:
+ *   1. `showPlaceholder={false}` is not optional. CustomPicture's blur-up
+ *      layer is a scaled, blurred copy of the photo painted BEHIND the image,
+ *      and an image you can see through shows it — the figure would stand in a
+ *      grey ghost of himself.
+ *   2. The fallback format has to carry alpha. JPEG cannot, so CustomPicture
+ *      serves PNG under the WebP for any source with an alpha channel; that is
+ *      automatic, but it is the reason a `<picture>` here is not the usual
+ *      WebP + JPEG pair.
  *
- *   1. NO ANCESTOR OF THE IMAGE MAY FORM A STACKING CONTEXT. An element only
- *      blends with the backdrop inside the nearest isolating ancestor, so a
- *      `z-10`, an `opacity` below 1, a `transform`, a `filter` or a
- *      `will-change` anywhere up the tree leaves the figure blending against
- *      nothing and rendering as a plain white box. This is exactly what
- *      happened on the first attempt, with a `relative z-10` wrapper.
- *      It is also why the figure has no entrance animation: `rise-in` animates
- *      `transform`, which would isolate the image for the duration and flash
- *      the white box before popping.
- *      Layering here is therefore done with DOM order alone — h1, then the
- *      figure, then the corner text — and deliberately no `z-index` at all.
- *      Absolute positioning is fine; it only isolates once `z-index` is set.
- *   2. The page under it must stay light. On a dark surface multiply eats the
- *      figure instead of the backdrop.
- *   3. The portrait's backdrop must stay white. Not "light" — white. See the
- *      flat-field note above; a backdrop at 231 is already a visible box.
- *   4. `showPlaceholder={false}` is not optional. CustomPicture otherwise
- *      paints a blurred, 1.15x-scaled copy of the same photo behind the image;
- *      that copy multiplies too and rings the figure in grey.
- *
- * `grayscale` is applied here in CSS as well, and is now a genuine no-op:
- * `portrait-bw.jpg` measures a mean chroma spread of 0.0, i.e. it is already
- * true greyscale. It stays as a guard, because the obvious way to break the
- * look later is to drop a colour photograph in and not notice. (It sits on the
- * image itself, not on an ancestor — see point 1.)
+ * `grayscale` is applied in CSS as well and is a genuine no-op: the file
+ * measures a mean chroma spread of 0.0, i.e. it is already true greyscale. It
+ * stays as a guard, because the obvious way to break the look later is to drop
+ * a colour photograph in and not notice.
  * ---------------------------------------------------------------------------
  *
  * ---------------------------------------------------------------------------
@@ -111,28 +113,31 @@
  * mask, so a resting position of "hidden" would leave a reader who asked for
  * less movement looking at a permanently half-masked sentence.
  *
- * The figure is still not in the cascade, and still cannot be — see point 1
- * above.
+ * The figure is deliberately not in the cascade. It used to be barred from it
+ * — a `transform` on the blended image collapsed the cut-out — and that bar is
+ * gone with the blend, but the composition still wants the photograph simply
+ * to be there while the text assembles itself in front of it.
  * ---------------------------------------------------------------------------
  *
  * ---------------------------------------------------------------------------
  * ONE NUMBER TO KNOW: `FIGURE_WIDTH`.
  *
- * `src/assets/portrait-bw.jpg` is 400x400 and `CustomPicture` never upscales,
+ * `src/assets/portrait-bw.png` is 400x400 and `CustomPicture` never upscales,
  * so 400px of real detail is all there is. The subject fills 97% x 96% of that
  * frame, so there is no margin to crop away and nothing to reclaim — the only
  * lever is how far the file gets stretched.
  *
- * It is set below to a size that stretches it about 1.25x, which a blended
+ * It is set below to a size that stretches it about 1.25x, which a soft-edged
  * black-and-white figure carries but a crisp framed colour photo would not.
  * That is why this hero is as large as it is and no larger.
  *
  * Note the phone and tablet sizes are DOWNscales of the same file, so they are
  * pin sharp; only the `lg` size stretches it.
  *
- * A ~1400px portrait on the same white backdrop lets this go to the full
- * reference proportions: raise the `lg` step of `FIGURE_WIDTH` and update
- * `sizes` to match. Nothing else in this file needs to change.
+ * A ~1400px portrait on the same white backdrop, run through
+ * `scripts/cutout-portrait.py`, lets this go to the full reference
+ * proportions: raise the `lg` step of `FIGURE_WIDTH` and update `sizes` to
+ * match. Nothing else in this file needs to change.
  * ---------------------------------------------------------------------------
  */
 import type { ImageMetadata } from "astro";
@@ -177,9 +182,10 @@ const portrait = imageItems[0];
 /** See the long note above before changing this. */
 const FIGURE_WIDTH = "w-full sm:w-[22rem] lg:w-[33rem]";
 /**
- * Pulls the figure back over the text column so the two overlap. It has to be
- * a margin rather than a transform: a transform on an ancestor of the blended
- * image forms a stacking context and the cut-out reverts to a white box.
+ * Pulls the figure back over the text column so the two overlap. A margin
+ * rather than a transform, so the figure's box moves with it and the name's
+ * column reflows around it — a transform would slide the picture over a column
+ * that still believes it is the full width.
  */
 const FIGURE_OVERLAP = "lg:-ml-16";
 
@@ -204,9 +210,8 @@ const family = space > -1 ? title.slice(space + 1) : "";
 
 <section class="relative overflow-hidden border-b border-hairline bg-background">
   {/* The washes. A SIBLING painted before the content, never an ancestor of
-      it — every layer in here carries a `blur()`, and a filter on an ancestor
-      of the portrait would form a stacking context and collapse the cut-out
-      into a white box. See AmbientWash's header note.
+      it: they are atmosphere, and everything on this page has to sit in front
+      of them. See AmbientWash's header note.
 
       The graph paper that used to sit in this corner is gone: the washes do
       the atmosphere here now, and the ruled pad reads as far more purposeful
@@ -248,8 +253,9 @@ const family = space > -1 ? title.slice(space + 1) : "";
         rather than sitting politely next to it.
 
         Note the complete absence of `z-index`: paint order is DOM order (text
-        column first, figure second, so the figure wins), and adding one
-        anywhere would isolate the figure and kill the blend. */}
+        column first, figure second, so the figure wins). That is deliberate
+        and it is enough; it was once also mandatory, which the header note
+        explains. */}
     <div class="mt-6 flex flex-col lg:mt-4 lg:flex-row lg:items-end lg:gap-4">
       {/* Below `lg` the name is pulled up INTO the bottom of the portrait. Set
           flush underneath it the name read as a caption hanging off the photo
@@ -259,20 +265,24 @@ const family = space > -1 ? title.slice(space + 1) : "";
           negative margin is the whole spacing decision, stated once.
 
           How far up is a real constraint, not taste. It must clear the face:
-          multiply keeps the darker layer, so ink type wins over skin and
-          "WILLIAM" would print straight across his eyes (see the note at the
-          top of this file). Crossing the SHIRT is fine and is the intent — the
-          shirt is light, so the name stays near-black on near-white and reads
-          as a printed overlay. These values put the cap line on the chest,
-          below the collar, at every width from 320 up.
+          the name is painted over the figure here, so it would cover his eyes
+          outright, and ink on mid-grey skin is a poor read besides. Crossing
+          the SHIRT is fine and is the intent — the shirt is light, so the name
+          stays near-black on near-white and reads as a printed overlay. These
+          values put the cap line on the chest, below the collar, at every
+          width from 320 up.
 
-          Margins are safe here where a transform would not be; see point 1 of
-          the header note. Paint order is on our side too: `order-first` moves
-          the figure in the flex order, and flex items paint in order-modified
-          order, so the name is drawn over the figure on a phone and under it
-          at `lg`. Both are what the layout wants, and neither needs a
-          `z-index` — which would break the cut-out. */}
-      <div class="-mt-11 min-w-0 pb-12 sm:-mt-14 lg:mt-0 lg:flex-1">
+          `relative z-10` is what puts the name on top of the shirt, and it is
+          dropped again at `lg` — `lg:static` takes the text column back out of
+          the paint order it is competing in, so the figure returns to being
+          the upper layer and keeps overlapping the tail of the h1 the way the
+          composition wants. `order-first` moves the figure to the top of the
+          phone layout; it does NOT decide which of the two is drawn over the
+          other. See the header note. This is also the one thing the cut-out
+          bought outright: under the old multiply composite a `z-index`
+          anywhere in here turned the figure into a white box, so this fix was
+          not available. */}
+      <div class="relative z-10 -mt-11 min-w-0 pb-12 sm:-mt-14 lg:static lg:mt-0 lg:flex-1">
         {/* Deliberately wider than the column it sits in, so the longest line
             runs on under the figure rather than stopping short of it. The
             section's `overflow-hidden` is what keeps that from widening the
@@ -366,17 +376,15 @@ const family = space > -1 ? title.slice(space + 1) : "";
       {/* `order-first` below `lg`: in source order the figure follows the text
           column, which put it after the buttons on a phone — the headshot
           arrived last, as an afterthought, when it is supposed to be the thing
-          you land on. `order` is safe here where a transform would not be: it
-          does not form a stacking context, so the multiply cut-out survives
-          it. */}
+          you land on. It is layering that decides what covers what here, not
+          this; see the text column above. */}
       {
         portrait?.image && (
           <div class:list={["order-first shrink-0 lg:order-none lg:mx-0", FIGURE_WIDTH, FIGURE_OVERLAP]}>
             {/* Quality is high on purpose: the file is a few hundred pixels
                 square, so this costs single-digit KB, and it is the only
                 photograph of a face above the fold. `showPlaceholder` must
-                stay false and the filter must stay on the image — see the
-                header note. */}
+                stay false — see the header note. */}
             {/* The bottom fade is mobile-only, and it earns its place.
                 The source frame cuts the shoulders off square. On desktop that
                 never shows, because the figure bleeds past the section's bottom
@@ -385,14 +393,12 @@ const family = space > -1 ? title.slice(space + 1) : "";
                 Dissolving the last quarter into the page hides an arbitrary
                 crop and suits a cut-out better than a straight edge does.
 
-                The mask sits on the SAME element as the blend, which is why it
-                is safe: a mask does form a stacking context, but the blending
-                element's own stacking context is the thing being composited,
-                not a boundary. Only an ANCESTOR with one breaks the cut-out.
-                Verified at 390 / 768 / 1440. */}
+                It multiplies into the alpha the file already carries, so the
+                fade is a fade of the figure, not of a rectangle drawn over
+                him. Verified at 390 / 768 / 1440. */}
             <CustomPicture
               alt={portrait.description}
-              classes="aspect-square w-full grayscale mix-blend-multiply [mask-image:linear-gradient(to_bottom,black_74%,transparent_100%)] lg:[mask-image:none]"
+              classes="aspect-square w-full grayscale [mask-image:linear-gradient(to_bottom,black_74%,transparent_100%)] lg:[mask-image:none]"
               sizes="(max-width: 639px) 100vw, (max-width: 1023px) 352px, 528px"
               srcImagePath={portrait.image}
               priority={true}

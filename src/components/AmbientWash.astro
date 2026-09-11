@@ -1,7 +1,7 @@
 ---
 /**
  * @component AmbientWash
- * @version   1.0.0
+ * @version   1.2.0
  * @updated   2026-09-11
  *
  * Soft colour drifting behind a section, like light falling across the page.
@@ -16,8 +16,8 @@
  *     `strong` is for the hero, where the only things over it are a headline
  *     and a cut-out figure. `faint` is for everywhere else.
  *   - It moves on a scale of minutes. See the keyframes in the Tailwind config:
- *     the three periods are 83s, 107s and 131s, which is slow enough that you
- *     notice it only by looking away and back.
+ *     the three periods are 59s, 73s and 89s, slow enough that the band reads
+ *     as breathing rather than as something sliding about behind the type.
  *   - The animation is behind `motion-safe:`, and that prefix is load-bearing.
  *     A bare `animate-wash-a` keeps running under
  *     `prefers-reduced-motion: reduce`, because the default
@@ -27,21 +27,43 @@
  *     itself so the animation is never declared in the first place.
  *
  * ---------------------------------------------------------------------------
- * IT ALSO TINTS THE HERO PORTRAIT, AND THAT IS DELIBERATE.
+ * HOW STRONG THESE CAN GET, AND WHAT SETS THE CEILING.
  *
- * The portrait is composited with `mix-blend-mode: multiply`, so it takes the
- * colour of whatever is behind it: neutral silver where the wash is absent,
- * warm where the wash is strong. That is why the figure goes peach around the
- * shoulders and stays grey at the head — the same thing happening in the
- * reference this was drawn from, and it comes for free rather than being
- * painted into the asset.
+ * Amber, tomato and cobalt: a warm band with one cool counterweight, which on
+ * a silver ground reads as low evening light falling across the page. An
+ * editor palette was tried here — acid, violet and cobalt, the colours of a
+ * syntax theme — and it was wrong: three saturated hues at this blur turn the
+ * band into a mesh gradient, which is the generated-portfolio look this design
+ * exists to avoid. Warm light on cool stock is the idea. Keep it.
  *
- * Two consequences worth knowing. Keep the washes light: multiply means a
- * darker wash makes a darker figure, and a saturated one makes a stained one.
- * And keep them as SIBLINGS painted before the figure, never as ancestors of
- * it — an ancestor with a `filter` (which every blurred layer here has) forms
- * a stacking context and the cut-out collapses into a white box. Siblings are
- * safe no matter what they carry.
+ * What caps the strength is not taste, it is one line of type. The mono `(01)`
+ * indices beside the hero's roles are `mutedText` at 12px, and they are the
+ * tightest contrast on the site — everything else over this band is either
+ * near-black or large, and clears 11:1. They sit on the amber layer, which is
+ * why amber is measured rather than chosen: at 0.21 those indices hold 4.65:1,
+ * sampled off the rendered page at four points around each animation's cycle
+ * at 390 / 768 / 1440. That is the whole margin over the 4.5:1 floor. Raise an
+ * opacity here — amber above all — and re-measure before pushing it.
+ * ---------------------------------------------------------------------------
+ *
+ * ---------------------------------------------------------------------------
+ * IT NO LONGER TINTS THE HERO PORTRAIT.
+ *
+ * It used to, and the note that said so was right at the time: the portrait
+ * was a JPEG on a white backdrop composited with `mix-blend-mode: multiply`,
+ * which meant it took the colour of whatever was behind it — peach around the
+ * shoulders, grey at the head. The portrait is now a real cut-out with an
+ * alpha channel and no blend mode, so it keeps its own black and white and the
+ * wash is what it always claimed to be: light behind the figure.
+ *
+ * That removes the trap this section used to carry (a blurred ancestor formed
+ * a stacking context and collapsed the cut-out into a white box) and it
+ * removes the ceiling on how dark a wash could go before it stained him, which
+ * is what let these go up from 0.17 / 0.12 / 0.10 to where they now sit. They
+ * are still deliberately light: past a point they stop reading as light on
+ * paper and start reading as a coloured background with a photograph on it,
+ * and the top-left quarter of the hero is left as bare silver on purpose so
+ * there is something for them to be lighting.
  * ---------------------------------------------------------------------------
  */
 
@@ -76,26 +98,29 @@ const strong = intensity === "strong";
 const layers = strong
   ? [
       // Amber, wide and LOW. Deliberately an ellipse rather than a circle and
-      // wide enough to run the full width of the band: the warmth has to reach
-      // under the figure, not stop beside it, or the portrait stays grey while
-      // the empty half of the hero glows.
+      // wide enough to run the full width of the band: the warmth has to carry
+      // on behind the figure, not stop beside it, or only the empty half of
+      // the hero is lit and the light reads as a shape rather than as light.
       //
       // It sits low because the silver has to win the top two-thirds. The band
       // should read as light gathering at the foot of the page, not as a
       // coloured background with a photograph on it.
-      "left-[-8%] top-[52%] h-[46rem] w-[85%] bg-amber/[0.17] motion-safe:animate-wash-a",
-      // Tomato, centred under the figure. This is the layer doing the tinting —
-      // it is what turns the shoulders warm where they cross it. Kept lighter
-      // than the amber: multiply means a dark shirt through a strong warm wash
-      // goes sepia, and sepia is a different decade's design.
-      "left-[34%] top-[58%] h-[42rem] w-[60%] bg-tomato/[0.12] motion-safe:animate-wash-b",
+      //
+      // This is also the layer the mono indices beside the roles sit on, which
+      // is what caps it — see the contrast note above.
+      "left-[-8%] top-[52%] h-[46rem] w-[85%] bg-amber/[0.21] motion-safe:animate-wash-a",
+      // Tomato, centred behind the figure, where it warms the page around his
+      // shoulders — which is where the eye already is. Kept lighter than the
+      // amber: two warm layers at equal strength stop being two light sources
+      // and become one flat orange field.
+      "left-[34%] top-[58%] h-[42rem] w-[60%] bg-tomato/[0.16] motion-safe:animate-wash-b",
       // Cobalt, high and right. A cool counterweight; without it the band
       // slides into a sunset, which is a different and much cheaper look.
-      "right-[-14%] top-[-30%] h-[42rem] w-[55%] bg-cobalt/[0.10] motion-safe:animate-wash-c",
+      "right-[-14%] top-[-30%] h-[42rem] w-[55%] bg-cobalt/[0.14] motion-safe:animate-wash-c",
     ]
   : [
-      "left-[-10%] top-[-30%] h-[34rem] w-[45%] bg-cobalt/[0.07] motion-safe:animate-wash-c",
-      "right-[-12%] bottom-[-40%] h-[32rem] w-[42%] bg-amber/[0.09] motion-safe:animate-wash-a",
+      "left-[-10%] top-[-30%] h-[34rem] w-[45%] bg-cobalt/[0.08] motion-safe:animate-wash-c",
+      "right-[-12%] bottom-[-40%] h-[32rem] w-[42%] bg-amber/[0.11] motion-safe:animate-wash-a",
     ];
 
 ---
@@ -112,7 +137,7 @@ const layers = strong
       <div
         class:list={[
           "absolute rounded-full will-change-transform",
-          strong ? "blur-[130px]" : "blur-[130px]",
+          strong ? "blur-[112px]" : "blur-[130px]",
           layer,
         ]}
         data-wash-layer

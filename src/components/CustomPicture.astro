@@ -1,14 +1,14 @@
 ---
 /**
  * @component CustomPicture
- * @version   1.0.0
- * @updated   2026-09-10
+ * @version   1.1.0
+ * @updated   2026-09-11
  * @source    astro-template@10c3958
  * @copied    2026-09-10
  * @modified  true
  *
- * Modified, in four places. The first two are bugs still upstream in
- * astro-template; the last two are this site's own:
+ * Modified, in five places. The first two are bugs still upstream in
+ * astro-template; the rest are this site's own:
  *   - `imageWidths`: the width ladder now offers the image's own width as a
  *     top rung when it falls between two fixed steps.
  *   - `baseWidth`: pins `getImage`'s base render to a width already in the
@@ -17,8 +17,11 @@
  *     image rather than being removed once it decodes, so they spin forever
  *     behind every photograph on the page — and they were the only thing still
  *     animating for a reader who had asked for reduced motion.
- *   - `showPlaceholder`, so an image composited with a blend mode can turn the
+ *   - `showPlaceholder`, so an image with transparency in it can turn the
  *     blur-up layer off. See the prop's own comment.
+ *   - The fallback format follows the source: PNG for an image with an alpha
+ *     channel, JPEG for everything else. The hero portrait is a cut-out, and
+ *     JPEG has no transparency to fall back to.
  */
 import { getImage } from "astro:assets";
 import type { ImageMetadata } from "astro";
@@ -41,12 +44,11 @@ export interface Props {
   /**
    * Draw the blur-up placeholder and the loading spinner behind the image.
    *
-   * Set false for an image that is composited against the page — the hero
-   * portrait blends with `mix-blend-mode: multiply` so its white studio
-   * background drops out into the paper, and a blurred, scaled-up copy of the
-   * same photo sitting behind it multiplies too, ringing the cut-out figure in
-   * grey. It is also simply pointless on an eager image, which never shows a
-   * placeholder long enough for anyone to see one.
+   * Set false for an image with transparency in it. The placeholder is a
+   * blurred, scaled-up copy of the same photo sitting *behind* the image, and
+   * an image you can see through shows it: the hero portrait would stand in
+   * its own grey ghost. It is also simply pointless on an eager image, which
+   * never shows a placeholder long enough for anyone to see one.
    */
   showPlaceholder?: boolean;
 }
@@ -133,9 +135,48 @@ const resolvedFromAssets = matchesByBasename[0];
 
 const passedImage = directImage ?? resolvedFromAssets;
 
+/**
+ * The image's path on disk, which two things below need: the blur-up
+ * placeholder, and the alpha check that picks the fallback format.
+ *
+ * Astro 5 puts it on local ImageMetadata as `fsPath`. Prefer that: images that
+ * arrive through a content-collection `image()` field are fresh objects, so
+ * matching the glob by reference identity would miss them; matching on `.src`
+ * is the fallback.
+ */
+const globPath = passedImage
+  ? Object.entries(imageModules).find(
+      ([, mod]) => toImageMetadata(mod)?.src === passedImage.src,
+    )?.[0]
+  : undefined;
+const absolutePath = passedImage
+  ? (passedImage as { fsPath?: string }).fsPath ??
+    (globPath ? resolve(process.cwd(), globPath.replace(/^\//, "")) : undefined)
+  : undefined;
+
+/**
+ * Whether the source carries an alpha channel, which decides the fallback
+ * format. JPEG cannot hold transparency, so a cut-out handed to the usual
+ * WebP + JPEG pair comes back composited onto black in the fallback — and the
+ * `<img>` that every `<picture>` ends with is a fallback. PNG instead, for
+ * those only: it is the bigger file, and an opaque photograph should not pay
+ * for it.
+ *
+ * Read from the header rather than from `stats()`, which decodes the whole
+ * image. A PNG with an unused alpha channel therefore gets a PNG fallback,
+ * which is what it already was.
+ */
+let hasAlpha = false;
+if (absolutePath) {
+  try {
+    hasAlpha = Boolean((await sharp(absolutePath).metadata()).hasAlpha);
+  } catch (_) {}
+}
+const fallbackFormat = hasAlpha ? "png" : "jpeg";
+
 let webpsSrcSet;
-let jpegsSrcSet;
-let jpeg;
+let fallbackSrcSet;
+let fallbackImage;
 let fixedAspectRatio;
 
 if (!hasFailed && !passedImage && !directImageUrl) {
@@ -211,16 +252,16 @@ if (!hasFailed && passedImage) {
     width: baseWidth,
     widths: imageWidths,
   });
-  let jpegsGen = await getImage({
+  let fallbackGen = await getImage({
     src: resolvedImage,
-    format: "jpeg",
+    format: fallbackFormat,
     quality: quality,
     width: baseWidth,
     widths: imageWidths,
   });
 
   webpsSrcSet = webpsGen.srcSet.attribute;
-  jpegsSrcSet = jpegsGen.srcSet.attribute;
+  fallbackSrcSet = fallbackGen.srcSet.attribute;
 
   // Select appropriate default size based on typical display - prefer smaller images
   const getImageUrl = (srcSet: any) => {
@@ -234,7 +275,7 @@ if (!hasFailed && passedImage) {
            values[values.length - 1]?.url;
   };
 
-  jpeg = getImageUrl(jpegsGen.srcSet);
+  fallbackImage = getImageUrl(fallbackGen.srcSet);
 
   fixedAspectRatio = resolvedImage.width / resolvedImage.height;
 }
@@ -242,17 +283,6 @@ if (!hasFailed && passedImage) {
 let bgColor: string | undefined;
 if (!hasFailed && passedImage) {
   try {
-    // Astro 5 puts the on-disk path on local ImageMetadata. Prefer it: images
-    // that arrive through a content-collection `image()` field are fresh
-    // objects, so matching the glob by reference identity would miss them and
-    // silently drop the blur-up placeholder. Fall back to matching on `.src`.
-    const fsPath = (passedImage as { fsPath?: string }).fsPath;
-    const globPath = Object.entries(imageModules).find(
-      ([, mod]) => toImageMetadata(mod)?.src === passedImage.src,
-    )?.[0];
-    const absolutePath =
-      fsPath ?? (globPath ? resolve(process.cwd(), globPath.replace(/^\//, "")) : undefined);
-
     if (absolutePath) {
       const { data } = await sharp(absolutePath)
         .resize(15, null, { fit: "inside" })
@@ -317,9 +347,9 @@ if (!hasFailed && passedImage) {
         ) : (
           <picture>
             <source type="image/webp" srcset={webpsSrcSet} sizes={sizes} />
-            <source srcset={jpegsSrcSet} sizes={sizes} />
+            <source type={`image/${fallbackFormat}`} srcset={fallbackSrcSet} sizes={sizes} />
             <img
-              src={jpeg as any}
+              src={fallbackImage as any}
               alt={alt}
               class="absolute inset-0 object-cover w-full h-full !m-0 !rounded-none"
               width={passedImage?.width}
