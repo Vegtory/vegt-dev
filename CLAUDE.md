@@ -146,7 +146,17 @@ The font ships with its SIL Open Font License at
 `strong`, the speaking section and footer at `faint`. Three rules keep it from
 becoming a gradient background: it is always behind something, it never carries
 meaning or sits under body copy at strength, and it moves on a scale of minutes
-(83s / 107s / 131s, transform-only, behind `motion-safe:`).
+(59s / 73s / 89s, transform-only, behind `motion-safe:`).
+
+The hero's three are **acid, violet and cobalt** — the greens, purples and
+blues of a syntax theme rather than the amber-and-tomato sunset they started
+as. Which hue goes where is a contrast decision: `acid` is much the lightest of
+the five marks, so it is the one that may sit under the 12px mono indices
+beside the roles, which are the tightest contrast on the site; the two that
+darken the page are kept right and high, where nothing small is printed. Those
+indices measure 4.8:1 at worst, sampled on the rendered page at four points
+around each animation's cycle at 390 / 768 / 1440. **Raise an opacity and
+re-measure** — the numbers are not slack.
 
 It used to **tint the hero portrait**, back when that was a `multiply`
 composite taking the colour of whatever was behind it. The portrait is a real

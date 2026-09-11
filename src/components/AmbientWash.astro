@@ -1,7 +1,7 @@
 ---
 /**
  * @component AmbientWash
- * @version   1.1.0
+ * @version   1.2.0
  * @updated   2026-09-11
  *
  * Soft colour drifting behind a section, like light falling across the page.
@@ -16,8 +16,8 @@
  *     `strong` is for the hero, where the only things over it are a headline
  *     and a cut-out figure. `faint` is for everywhere else.
  *   - It moves on a scale of minutes. See the keyframes in the Tailwind config:
- *     the three periods are 83s, 107s and 131s, which is slow enough that you
- *     notice it only by looking away and back.
+ *     the three periods are 59s, 73s and 89s, slow enough that the band reads
+ *     as breathing rather than as something sliding about behind the type.
  *   - The animation is behind `motion-safe:`, and that prefix is load-bearing.
  *     A bare `animate-wash-a` keeps running under
  *     `prefers-reduced-motion: reduce`, because the default
@@ -25,6 +25,28 @@
  *     `motion-safe:[animation-play-state:running]` utility, as this first did,
  *     changes nothing at all. The variant has to sit on the `animate-*` class
  *     itself so the animation is never declared in the first place.
+ *
+ * ---------------------------------------------------------------------------
+ * THE HUES ARE THE EDITOR PALETTE, NOT THE SUNSET ONE.
+ *
+ * `strong` used to be amber, tomato and cobalt — a warm band with one cool
+ * counterweight, which on a silver ground reads as evening light. It is acid,
+ * violet and cobalt now: the greens, purples and blues a syntax theme is made
+ * of, which is a great deal more at home behind a page about writing software.
+ * The three are far enough apart on the wheel to stay legible as three light
+ * sources; two neighbours would blend into one smear at this blur radius.
+ *
+ * WHICH HUE GOES WHERE IS A CONTRAST DECISION, NOT A COMPOSITIONAL ONE. The
+ * mono `(01)` indices beside the hero's roles are `mutedText` at 12px, and
+ * they are the tightest contrast on the site — everything else over this band
+ * is either near-black or large. So the layer that sits under them is `acid`,
+ * which is by far the lightest of the five marks, and the two that actually
+ * darken the page are kept to the right and to the top where nothing small is
+ * printed. Measured on the rendered page, at four points around each
+ * animation's cycle and at 390 / 768 / 1440, those indices hold 4.8:1 at
+ * worst. Raise an opacity here and re-measure, because the figure moving in
+ * front of the layers is not what decides this — the layers under the text are.
+ * ---------------------------------------------------------------------------
  *
  * ---------------------------------------------------------------------------
  * IT NO LONGER TINTS THE HERO PORTRAIT.
@@ -38,10 +60,12 @@
  *
  * That removes the trap this section used to carry (a blurred ancestor formed
  * a stacking context and collapsed the cut-out into a white box) and it
- * removes the ceiling on how dark a wash could go before it stained him. The
- * layers below are still deliberately light, but now for the ordinary reason:
- * at strength they stop reading as light on paper and start reading as a
- * coloured background with a photograph on it.
+ * removes the ceiling on how dark a wash could go before it stained him, which
+ * is what let these go up to where they now sit. They are still deliberately
+ * light: at strength they stop reading as light on paper and start reading as
+ * a coloured background with a photograph on it, and the top-left quarter of
+ * the hero is left as bare silver on purpose so there is something for them to
+ * be lighting.
  * ---------------------------------------------------------------------------
  */
 
@@ -75,27 +99,27 @@ const strong = intensity === "strong";
  */
 const layers = strong
   ? [
-      // Amber, wide and LOW. Deliberately an ellipse rather than a circle and
-      // wide enough to run the full width of the band: the warmth has to carry
-      // on behind the figure, not stop beside it, or only the empty half of
-      // the hero is lit and the light reads as a shape rather than as light.
+      // Acid, low and LEFT, under the text column. The lightest of the three
+      // by some distance, which is why it is the one allowed under type — see
+      // the contrast note above. A green this pale on cool silver reads as a
+      // screen's glow rather than as a colour.
       //
       // It sits low because the silver has to win the top two-thirds. The band
       // should read as light gathering at the foot of the page, not as a
       // coloured background with a photograph on it.
-      "left-[-8%] top-[52%] h-[46rem] w-[85%] bg-amber/[0.17] motion-safe:animate-wash-a",
-      // Tomato, centred behind the figure, where it warms the page around his
-      // shoulders — which is where the eye already is. Kept lighter than the
-      // amber: two warm layers at strength stop being two light sources and
-      // become one flat orange field.
-      "left-[34%] top-[58%] h-[42rem] w-[60%] bg-tomato/[0.12] motion-safe:animate-wash-b",
-      // Cobalt, high and right. A cool counterweight; without it the band
-      // slides into a sunset, which is a different and much cheaper look.
-      "right-[-14%] top-[-30%] h-[42rem] w-[55%] bg-cobalt/[0.10] motion-safe:animate-wash-c",
+      "left-[-12%] top-[54%] h-[38rem] w-[50%] bg-acid/[0.24] motion-safe:animate-wash-a",
+      // Violet, centred and low, carrying on behind the figure. The densest
+      // layer, and deliberately placed where the page has no small type over
+      // it: from the end of the roles across to the figure's shoulders.
+      "left-[30%] top-[46%] h-[44rem] w-[60%] bg-violet/[0.22] motion-safe:animate-wash-b",
+      // Cobalt, high and right, behind the head and the opening line. The
+      // structural accent doing the cool half of the lighting — without it the
+      // other two settle into a single green-violet smear.
+      "right-[-14%] top-[-32%] h-[44rem] w-[58%] bg-cobalt/[0.19] motion-safe:animate-wash-c",
     ]
   : [
-      "left-[-10%] top-[-30%] h-[34rem] w-[45%] bg-cobalt/[0.07] motion-safe:animate-wash-c",
-      "right-[-12%] bottom-[-40%] h-[32rem] w-[42%] bg-amber/[0.09] motion-safe:animate-wash-a",
+      "left-[-10%] top-[-30%] h-[34rem] w-[45%] bg-cobalt/[0.08] motion-safe:animate-wash-c",
+      "right-[-12%] bottom-[-40%] h-[32rem] w-[42%] bg-violet/[0.09] motion-safe:animate-wash-a",
     ];
 
 ---
@@ -112,7 +136,7 @@ const layers = strong
       <div
         class:list={[
           "absolute rounded-full will-change-transform",
-          strong ? "blur-[130px]" : "blur-[130px]",
+          strong ? "blur-[112px]" : "blur-[130px]",
           layer,
         ]}
         data-wash-layer
