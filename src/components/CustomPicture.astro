@@ -7,8 +7,8 @@
  * @copied    2026-09-10
  * @modified  true
  *
- * Modified, in three places. The first two are bugs still upstream in
- * astro-template; the third is this site's own motion rule:
+ * Modified, in four places. The first two are bugs still upstream in
+ * astro-template; the last two are this site's own:
  *   - `imageWidths`: the width ladder now offers the image's own width as a
  *     top rung when it falls between two fixed steps.
  *   - `baseWidth`: pins `getImage`'s base render to a width already in the
@@ -17,6 +17,8 @@
  *     image rather than being removed once it decodes, so they spin forever
  *     behind every photograph on the page — and they were the only thing still
  *     animating for a reader who had asked for reduced motion.
+ *   - `showPlaceholder`, so an image composited with a blend mode can turn the
+ *     blur-up layer off. See the prop's own comment.
  */
 import { getImage } from "astro:assets";
 import type { ImageMetadata } from "astro";
@@ -36,6 +38,17 @@ export interface Props {
   qualityOverride?: number;
   priority?: boolean;
   widthsOverride?: number[];
+  /**
+   * Draw the blur-up placeholder and the loading spinner behind the image.
+   *
+   * Set false for an image that is composited against the page — the hero
+   * portrait blends with `mix-blend-mode: multiply` so its white studio
+   * background drops out into the paper, and a blurred, scaled-up copy of the
+   * same photo sitting behind it multiplies too, ringing the cut-out figure in
+   * grey. It is also simply pointless on an eager image, which never shows a
+   * placeholder long enough for anyone to see one.
+   */
+  showPlaceholder?: boolean;
 }
 
 const {
@@ -48,6 +61,7 @@ const {
   subText,
   priority,
   widthsOverride,
+  showPlaceholder = true,
 } = Astro.props;
 
 function isImageMetadata(value: unknown): value is ImageMetadata {
@@ -263,7 +277,7 @@ if (!hasFailed && passedImage) {
             : `aspect-ratio: ${fixedAspectRatio};`
         }
       >
-        {!rawImagePath.endsWith("svg") && (
+        {showPlaceholder && !rawImagePath.endsWith("svg") && (
           <div
             class="absolute w-full h-full flex justify-center items-center"
             class:list={[!bgColor && "bg-surfaceMuted"]}
@@ -286,7 +300,7 @@ if (!hasFailed && passedImage) {
             </svg>}
           </div>
         )}
-        {bgColor && (
+        {showPlaceholder && bgColor && (
           <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
             <div class="w-5 h-5 rounded-full border-2 border-white/20 border-t-white/60 motion-safe:animate-spin" />
           </div>

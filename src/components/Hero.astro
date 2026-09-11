@@ -1,53 +1,96 @@
 ---
 /**
  * @component Hero
- * @version   2.0.0
+ * @version   3.0.0
  * @updated   2026-09-11
  * @source    astro-template@0ad4fd0
  * @copied    2026-09-10
  * @modified  true
  *
- * The opening screen: a photograph of a person, their name, and a sentence
- * that sounds like them.
+ * The opening screen: a cut-out figure standing in the name.
  *
- * The previous version led with a job title over a near-black band with two
- * drifting glows and a panning dot grid. All of that is gone. What replaced it:
+ * The composition is a single idea — the name set as large as the measure
+ * allows, and a cut-out figure standing beside and slightly over it, so the two
+ * read as one image rather than as a picture next to a heading. Everything else
+ * (the mono strip, the numbered roles, the intro, the status line) is small,
+ * which is what leaves the page to the name and the photograph.
  *
- * - The portrait is a photograph at size, not a circular avatar, set against
- *   an offset cobalt plate so it reads as something pasted onto the page.
- * - The name is the headline; the job title is not on the page at all. What
- *   the reader gets instead is `intro` — one sentence covering software,
- *   hardware, photography and writing, because that combination is the thing
- *   worth remembering, and "Full-stack Software Developer" is not.
- * - `currently` is the detail that makes this his page rather than a template:
- *   a real, slightly daft status line. Keep it current or delete it; a stale
- *   "currently" is worse than none.
+ * WHY THE FIGURE IS BESIDE THE NAME AND NOT CENTRED ON IT. The reference for
+ * this hero centres the figure over the name, and it works there because the
+ * name is ghosted to a pale tint — so the face, being darker, wins. Multiply
+ * keeps the darker layer, and that cuts both ways: with the name in ink it is
+ * darker than a face, so "WILLIAM" prints straight across his eyes. The only
+ * way to centre it is to drop the name to a tint pale enough for skin to beat,
+ * which lands far under 3:1 — and this is the page's `h1`. So the name keeps
+ * its contrast and the figure moves off to the side, overlapping only where it
+ * is the dark shirt doing the occluding.
  *
  * ---------------------------------------------------------------------------
- * ONE NUMBER TO KNOW, if the portrait ever looks soft, or looks too small.
+ * HOW THE CUT-OUT WORKS — read this before touching the portrait or the layout.
  *
- * This design wants the portrait at roughly 40% of the viewport. It is not
- * there, and the reason is the asset: `src/assets/image.jpeg` is 400x400, and
- * `CustomPicture` never upscales — hand it a 400px file and 400px is all any
- * screen gets, however large the slot.
+ * There is no masking, no transparent PNG and no background removal. The
+ * portrait is a studio headshot on a pure white backdrop (every edge of
+ * `image.jpeg` samples 255,255,255, and 51% of the frame is near-white), and
+ * the figure is composited with `mix-blend-mode: multiply`.
  *
- * So `PORTRAIT_SLOT` is pinned to 320px, which with the 4:5 crop below puts
- * the frame at exactly 320x400: the largest this file fills at native
- * resolution, with nothing invented. The column earns its presence from the
- * taller crop, the cobalt plate and the caption under it instead of from
- * pixels that are not in the file.
+ * Multiply keeps the darker of the two layers. White over paper leaves paper,
+ * so the backdrop disappears completely; the person is darker than the page
+ * everywhere, so the person stays. The result is a true cut-out that costs one
+ * CSS property, and it gets *better* with a black-and-white source, not worse.
  *
- * Replace the source with a ~1200px portrait and this opens straight up:
- * set `PORTRAIT_SLOT` to `w-64 sm:w-80 lg:w-[26rem]` and update `sizes` to
- * match. Nothing else needs touching.
+ * Four things this depends on, every one of which silently breaks it:
+ *
+ *   1. NO ANCESTOR OF THE IMAGE MAY FORM A STACKING CONTEXT. An element only
+ *      blends with the backdrop inside the nearest isolating ancestor, so a
+ *      `z-10`, an `opacity` below 1, a `transform`, a `filter` or a
+ *      `will-change` anywhere up the tree leaves the figure blending against
+ *      nothing and rendering as a plain white box. This is exactly what
+ *      happened on the first attempt, with a `relative z-10` wrapper.
+ *      It is also why the figure has no entrance animation: `rise-in` animates
+ *      `transform`, which would isolate the image for the duration and flash
+ *      the white box before popping.
+ *      Layering here is therefore done with DOM order alone — h1, then the
+ *      figure, then the corner text — and deliberately no `z-index` at all.
+ *      Absolute positioning is fine; it only isolates once `z-index` is set.
+ *   2. The page under it must stay light. On a dark surface multiply eats the
+ *      figure instead of the backdrop.
+ *   3. The portrait's backdrop must stay white-ish. A grey or coloured studio
+ *      background shows up as a grey rectangle.
+ *   4. `showPlaceholder={false}` is not optional. CustomPicture otherwise
+ *      paints a blurred, 1.15x-scaled copy of the same photo behind the image;
+ *      that copy multiplies too and rings the figure in grey.
+ *
+ * `grayscale` is applied here in CSS as well. It is deliberately belt-and-
+ * braces: it makes the current colour file match the intended look now, and it
+ * is a no-op once the black-and-white portrait replaces it. Delete the one
+ * class if the colour version is ever wanted back. (It sits on the image
+ * itself, not on an ancestor — see point 1.)
+ * ---------------------------------------------------------------------------
+ *
+ * ---------------------------------------------------------------------------
+ * ONE NUMBER TO KNOW: `FIGURE_WIDTH`.
+ *
+ * `src/assets/image.jpeg` is 400x400 and `CustomPicture` never upscales, so
+ * 400px of real detail is all there is. The subject fills 93% x 97% of that
+ * frame, so there is no margin to crop away and nothing to reclaim — the only
+ * lever is how far the file gets stretched.
+ *
+ * It is set below to a size that stretches it about 1.25x, which a blended
+ * black-and-white figure carries but a crisp framed colour photo would not.
+ * That is why this hero is as large as it is and no larger.
+ *
+ * Note the phone and tablet sizes are DOWNscales of the same file, so they are
+ * pin sharp; only the `lg` size stretches it.
+ *
+ * A ~1400px portrait on the same white backdrop lets this go to the full
+ * reference proportions: raise the `lg` step of `FIGURE_WIDTH` and update
+ * `sizes` to match. Nothing else in this file needs to change.
  * ---------------------------------------------------------------------------
  */
 import type { ImageMetadata } from "astro";
 import CustomPicture from "@ui/CustomPicture.astro";
 import TextRender from "@ui/TextRender.astro";
 import Button from "@ui/Button.astro";
-import Annotation from "@ui/Annotation.astro";
-import Connector from "@ui/Connector.astro";
 import MetaLine from "@ui/MetaLine.astro";
 
 export interface ImageItem {
@@ -68,10 +111,10 @@ export interface Props {
   intro?: string;
   /** The mono strip: "software · cloud · homelab · maken · fotografie". */
   meta?: string[];
+  /** The numbered list beside the figure. Three. */
+  roles?: string[];
   /** Honest, specific, slightly daft. Delete it rather than let it go stale. */
   currently?: string;
-  /** Pencilled note beside the portrait. */
-  note?: string;
   /** First is rendered solid, the rest outlined. Two is plenty. */
   ctas?: HeroLink[];
   imageItems?: ImageItem[];
@@ -81,8 +124,8 @@ const {
   title = "",
   intro = "",
   meta = [],
+  roles = [],
   currently = "",
-  note = "",
   ctas = [],
   imageItems = [],
 } = Astro.props;
@@ -90,7 +133,29 @@ const {
 const portrait = imageItems[0];
 
 /** See the long note above before changing this. */
-const PORTRAIT_SLOT = "w-52 sm:w-64 lg:w-80";
+const FIGURE_WIDTH = "w-72 sm:w-[22rem] lg:w-[33rem]";
+/**
+ * Pulls the figure back over the text column so the two overlap. It has to be
+ * a margin rather than a transform: a transform on an ancestor of the blended
+ * image forms a stacking context and the cut-out reverts to a white box.
+ */
+const FIGURE_OVERLAP = "lg:-ml-16";
+
+/**
+ * The name, broken into display lines.
+ *
+ * Set on its own lines rather than left to wrap: at this size the column would
+ * break "WILLIAM VAN DER VEGT" wherever it happened to run out, and a name is
+ * not a paragraph. Dutch tussenvoegsels ride with the surname, so "van der"
+ * and "Vegt" stay on one line and the given name gets its own.
+ *
+ * The rule is simply "first word, then the rest", which handles any name of
+ * two or more words and degrades to a single line for one word.
+ */
+const space = title.indexOf(" ");
+const nameLines = space > -1
+  ? [title.slice(0, space), title.slice(space + 1)]
+  : [title].filter(Boolean);
 ---
 
 <section class="relative overflow-hidden border-b border-hairline bg-background">
@@ -102,37 +167,19 @@ const PORTRAIT_SLOT = "w-52 sm:w-64 lg:w-80";
   >
   </div>
 
-  <div class="relative mx-auto max-w-6xl px-6 pb-16 pt-12 sm:pb-24 sm:pt-16 lg:px-8">
-    <div class="flex flex-col-reverse gap-12 md:flex-row md:items-start md:gap-14">
-      {/* --- Text column ------------------------------------------------- */}
-      <div class="w-full min-w-0 md:pt-6">
-        {
-          meta.length > 0 && (
-            <div class="motion-safe:animate-rise-in">
-              <MetaLine items={meta} shape="dots" size="sm" />
-            </div>
-          )
-        }
+  <div class="relative mx-auto max-w-6xl px-6 lg:px-8">
+    {/* --- Top strip: what he does, and one sentence on it ---------------- */}
+    <div class="flex flex-col gap-6 pt-10 sm:flex-row sm:items-start sm:justify-between sm:gap-10">
+      <div class="motion-safe:animate-rise-in">
+        <MetaLine items={meta} shape="dots" size="sm" />
+      </div>
 
-        <h1
-          class="mt-6 text-pretty text-[2.6rem] font-semibold leading-[0.98] tracking-[-0.035em] text-primaryText motion-safe:animate-rise-in sm:text-6xl lg:text-[4.2rem]"
-          style="animation-delay: 70ms;"
-        >
-          <TextRender>{title}</TextRender>
-          {/* The caret. Used exactly once on the entire site, in ink rather
-              than in an accent, because a page where every heading types
-              itself out is a terminal theme — which is the look this design
-              exists to avoid. */}
-          <span
-            class="ml-1 inline-block h-[0.72em] w-[2px] translate-y-[0.02em] bg-ink-950/70 motion-safe:animate-blink"
-            aria-hidden="true"></span>
-        </h1>
-
+      <div class="flex max-w-sm flex-col gap-5 sm:max-w-xs sm:items-end">
         {
           intro && (
             <p
-              class="mt-7 max-w-xl text-pretty text-lg leading-relaxed text-blackText motion-safe:animate-rise-in sm:text-xl"
-              style="animation-delay: 140ms;"
+              class="text-pretty leading-relaxed text-blackText motion-safe:animate-rise-in sm:text-right"
+              style="animation-delay: 90ms;"
             >
               <TextRender>{intro}</TextRender>
             </p>
@@ -141,24 +188,80 @@ const PORTRAIT_SLOT = "w-52 sm:w-64 lg:w-80";
 
         {
           currently && (
-            <div
-              class="mt-8 flex max-w-xl items-start gap-3 border-l-2 border-acid pl-4 motion-safe:animate-rise-in"
-              style="animation-delay: 210ms;"
+            <p
+              class="border-l-2 border-acid pl-4 font-mono text-[0.8125rem] leading-relaxed text-mutedText motion-safe:animate-rise-in sm:border-l-0 sm:border-r-2 sm:pl-0 sm:pr-4 sm:text-right"
+              style="animation-delay: 150ms;"
             >
-              <p class="font-mono text-[0.8125rem] leading-relaxed text-mutedText">
-                <span class="text-primaryText">op dit moment</span>
-                <span class="text-hairlineStrong" aria-hidden="true"> : </span>
-                <TextRender>{currently}</TextRender>
-              </p>
-            </div>
+              <span class="text-primaryText">op dit moment</span>
+              <span class="text-hairlineStrong" aria-hidden="true"> : </span>
+              <TextRender>{currently}</TextRender>
+            </p>
+          )
+        }
+      </div>
+    </div>
+
+    {/* --- Name and figure ------------------------------------------------
+        Two columns, bottom-aligned, so the figure lands on the section's
+        bottom edge and bleeds off it while the text column stops short. The
+        figure carries a negative left margin so it encroaches on the name
+        rather than sitting politely next to it.
+
+        Note the complete absence of `z-index`: paint order is DOM order (text
+        column first, figure second, so the figure wins), and adding one
+        anywhere would isolate the figure and kill the blend. */}
+    <div class="mt-8 flex flex-col lg:mt-4 lg:flex-row lg:items-end lg:gap-4">
+      <div class="min-w-0 pb-14 lg:flex-1">
+        {/* Deliberately wider than the column it sits in, so the longest line
+            runs on under the figure rather than stopping short of it. The
+            section's `overflow-hidden` is what keeps that from widening the
+            page. */}
+        <h1
+          class="font-semibold uppercase leading-[0.82] tracking-[-0.04em] text-primaryText motion-safe:animate-rise-in lg:w-[42rem]"
+          style="animation-delay: 40ms;"
+        >
+          {
+            /* One line per word-group, so the name stacks into a block rather
+               than wrapping wherever the column happens to end. */
+            nameLines.map((line) => (
+              <span class="block text-[clamp(2.5rem,11vw,7.5rem)]">
+                <TextRender>{line}</TextRender>
+              </span>
+            ))
+          }
+        </h1>
+
+        {
+          roles.length > 0 && (
+            <ol class="mt-9 flex flex-col gap-1.5">
+              {roles.map((role, i) => (
+                <li
+                  class="flex items-baseline gap-3 motion-safe:animate-rise-in"
+                  style={`animation-delay: ${240 + i * 80}ms`}
+                >
+                  {/* The index is furniture, so it is hidden from assistive
+                      tech — an ordered list already announces position, and
+                      "zero one" read before each role is noise. */}
+                  <span
+                    class="font-mono text-xs tabular-nums text-mutedText"
+                    aria-hidden="true"
+                  >
+                    ({String(i + 1).padStart(2, "0")})
+                  </span>
+                  <span class="text-xl font-medium italic tracking-tight text-primaryText sm:text-2xl">
+                    <TextRender>{role}</TextRender>
+                  </span>
+                </li>
+              ))}
+            </ol>
           )
         }
 
         {
           ctas.length > 0 && (
             <div
-              class="mt-10 flex flex-wrap gap-3 motion-safe:animate-rise-in"
-              style="animation-delay: 280ms;"
+              class="mt-9 flex flex-wrap gap-3 motion-safe:animate-rise-in"
+              style="animation-delay: 360ms;"
             >
               {ctas.map((cta, i) => (
                 <Button
@@ -174,55 +277,23 @@ const PORTRAIT_SLOT = "w-52 sm:w-64 lg:w-80";
         }
       </div>
 
-      {/* --- Portrait column ---------------------------------------------
-          Breaks the grid on purpose: it sits higher than the text column and
-          hangs a little past the right margin on wide screens. A hero where
-          both columns start on the same line is a template; this one looks
-          placed. */}
       {
         portrait?.image && (
-          <div class="shrink-0 self-start motion-safe:animate-rise-in md:-mt-1" style="animation-delay: 120ms;">
-            <div class:list={["relative", PORTRAIT_SLOT]}>
-              {/* The cobalt plate. Offset behind the photograph, squared off,
-                  like a registration block on a proof sheet. */}
-              <div
-                class="absolute -left-3 -top-3 h-full w-full bg-cobalt"
-                aria-hidden="true"
-              />
-
-              {/* 4:5 rather than the source's own square. A portrait crop is
-                  the editorial shape, it is the "slightly unconventional crop"
-                  this design asks for, and at this width it lands at exactly
-                  320x400 — the tallest frame a 400px file fills without being
-                  upscaled. Quality is high because the file is tiny and this
-                  is the only face above the fold. */}
-              <CustomPicture
-                alt={portrait.description}
-                classes="relative aspect-[4/5] w-full"
-                sizes="(max-width: 639px) 208px, (max-width: 1023px) 256px, 320px"
-                srcImagePath={portrait.image}
-                priority={true}
-                qualityOverride={84}
-              />
-
-              {/* Corner registration marks, on the two free corners. */}
-              <span class="absolute -bottom-1 -right-1 h-3 w-3 border-b border-r border-ink-950" aria-hidden="true" />
-              <span class="absolute -right-1 -top-1 h-3 w-3 border-r border-t border-ink-950" aria-hidden="true" />
-            </div>
-
-            {/* The note sits under the frame, in flow. It used to be absolutely
-                positioned into the left margin, where it ran underneath the
-                photograph at every width the two happened to overlap. */}
-            {
-              note && (
-                <div class:list={["mt-5", PORTRAIT_SLOT]}>
-                  <Connector tone="cobalt" />
-                  <Annotation arrow="none" tone="note" tilt={-1} class="mt-4 max-w-none">
-                    {note}
-                  </Annotation>
-                </div>
-              )
-            }
+          <div class:list={["mx-auto shrink-0 lg:mx-0", FIGURE_WIDTH, FIGURE_OVERLAP]}>
+            {/* Quality is high on purpose: the file is a few hundred pixels
+                square, so this costs single-digit KB, and it is the only
+                photograph of a face above the fold. `showPlaceholder` must
+                stay false and the filter must stay on the image — see the
+                header note. */}
+            <CustomPicture
+              alt={portrait.description}
+              classes="aspect-square w-full grayscale mix-blend-multiply"
+              sizes="(max-width: 639px) 288px, (max-width: 1023px) 352px, 528px"
+              srcImagePath={portrait.image}
+              priority={true}
+              qualityOverride={86}
+              showPlaceholder={false}
+            />
           </div>
         )
       }
