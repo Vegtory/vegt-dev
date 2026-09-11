@@ -10,7 +10,6 @@ import Hero from "@ui/Hero.astro";
 import TextWithLargeImage from "@ui/TextWithLargeImage.astro";
 import ToolsShowcase from "@ui/ToolsShowcase.astro";
 import TinkerGrid from "@ui/TinkerGrid.astro";
-import PhotoInterrupt from "@ui/PhotoInterrupt.astro";
 import SpeakingFeature from "@ui/SpeakingFeature.astro";
 import PhotoCollage from "@ui/PhotoCollage.astro";
 import SimpleBlogRenderer from "@ui/SimpleBlogRenderer.astro";
@@ -44,7 +43,6 @@ const hero = await section("hero", "hero");
 const over = await section("over", "textWithLargeImage");
 const tools = await section("tools", "toolsShowcase");
 const knutselen = await section("knutselen", "tinkerGrid");
-const onderbreking = await section("onderbreking", "photoInterrupt");
 const vertellen = await section("vertellen", "speaking");
 const fotografie = await section("fotografie", "photoCollage");
 const blog = await section("blog", "simpleBlogRenderer");
@@ -72,16 +70,17 @@ const { Content: BlogBody } = blog;
   <main>
     {/*
       The page is one continuous stream of things William does, rather than a
-      portfolio hierarchy with hobbies filed at the bottom. Two deliberate
-      properties of the order below:
+      portfolio hierarchy with hobbies filed at the bottom.
 
-        - Photography interrupts the technical content instead of following
-          it. The full-bleed frame sits between the homelab and the speaking
-          section, so the page has a person in it before it asks anyone to
-          read about Modbus.
-        - The two photographs of William are kept far apart. Portrait at the
-          top, talk photo around 60% down; together at the top they would make
-          the opening screen a headshot gallery.
+      There used to be a full-bleed photograph between the homelab and the
+      speaking section — a rhythm device, so the page had a person in it
+      before it asked anyone to read about Modbus. It read as out of place
+      and was removed; the collage at the bottom is the photography now.
+
+      One property of the order below is still deliberate: the two
+      photographs of William are kept far apart. Portrait at the top, talk
+      photo around 60% down; together at the top they would make the opening
+      screen a headshot gallery.
 
       The wrapper ids are the in-page anchor targets used by src/site.ts.
     */}
@@ -104,8 +103,6 @@ const { Content: BlogBody } = blog;
         <KnutselBody components={mdxComponents} />
       </TinkerGrid>
     </div>
-
-    <PhotoInterrupt {...onderbreking.data} />
 
     <div id="vertellen">
       <SpeakingFeature {...vertellen.data}>
