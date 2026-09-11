@@ -167,6 +167,11 @@ for it through `motion-safe:` **always**, never bare. `prefers-reduced-motion:
 reduce` currently leaves the site with zero running animations and nothing
 hidden; keep it that way.
 
+`scroll-smooth` counts. It is on the root as `motion-safe:scroll-smooth`, not
+bare — smooth scrolling is motion, and it is the kind a reader who asked for
+less of it most wants gone. It also interpolates against momentum scrolling on
+iOS. In-page anchors work either way; without it they jump.
+
 That last clause is where a reveal built out of a **mask** or a **clip-path**
 will catch you. `motion-safe:` takes away the animation, not the property it
 animates — so the resting state has to be the finished one, and the animation
@@ -241,6 +246,24 @@ pnpm run deploy      # astro build && wrangler deploy
   animation, and why it passes `showPlaceholder={false}` to `CustomPicture`.
   The full explanation is in `Hero.astro`'s header comment — read it before
   restructuring that section.
+
+- **Never put `h-full` on `<html>` or `<body>`.** It reads as harmless and it
+  silently breaks the sticky header. `height: 100%` on a ten-thousand-pixel
+  document gives the body an 844px box; the header's `position: sticky` is
+  bounded by its containing block, so it sticks for exactly one screen and then
+  scrolls away for the rest of the page. It also leaves `clientHeight` and
+  `scrollHeight` disagreeing by an order of magnitude, and on a phone the
+  percentage resolves against the viewport as it is while the URL bar is
+  showing. Pages that want to fill a short viewport say `min-h-screen`.
+
+- **Nothing may go before `<html>` in a layout — not even a comment.** An Astro
+  expression ahead of the opening tag stops Astro treating that element as the
+  document root, and the page ships with no `<html>`, `<head>` or `<body>` at
+  all. The browser rebuilds them, so it still renders and nothing errors, but
+  every attribute on those three tags is gone: `lang`, the body's font and
+  background classes, `scroll-padding-top`. A comment explaining the root
+  classes was enough to do it. Put the explanation in `BaseLayout`'s docblock,
+  which is where it now lives.
 
 - **Tailwind emits nothing for an off-scale opacity modifier.** `bg-amber/26`
   produces no rule at all — no warning, no build error, the class just lands in
