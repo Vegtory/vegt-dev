@@ -241,10 +241,11 @@ pnpm run deploy      # astro build && wrangler deploy
 - **The hero portrait is a real cut-out — an alpha PNG, not a blend mode.**
   It was a `mix-blend-mode: multiply` composite of a white-backdrop JPEG until
   the matte was baked into the file, and that is worth knowing because the hero
-  still carries the shape of it: DOM-order layering, no `z-index` anywhere, no
-  entrance animation on the figure. Those are now choices rather than
-  requirements — an isolating ancestor no longer turns the figure into a white
-  box, and the page underneath no longer has to be light.
+  still carries the shape of it: layering kept to a minimum, no entrance
+  animation on the figure. Those are now choices rather than requirements — an
+  isolating ancestor no longer turns the figure into a white box, the page
+  underneath no longer has to be light, and a `z-index` is available again,
+  which is exactly what puts the name over the portrait on a phone.
 
   Two things about it are still load-bearing. It passes
   `showPlaceholder={false}` to `CustomPicture`, because the blur-up layer is
@@ -259,6 +260,18 @@ pnpm run deploy      # astro build && wrangler deploy
   threshold separates them, and the fix is a flat-field correction (per-row
   median of the outer ten columns as the background level, scaled to 255). Read
   `Hero.astro`'s header comment before restructuring that section.
+
+- **Flex `order` does not decide what is painted over what.** It reads as
+  though it must — move an item later in the order and it should win — and it
+  does not. A positioned element, or any element that forms a stacking context
+  (a `mask`, a `filter`, an `opacity` below 1, a `transform`), is painted in a
+  later pass than ordinary in-flow content, wherever it sits in the order. The
+  frame `CustomPicture` draws is `relative z-0`, so a photograph covers text it
+  overlaps by default, and the hero's name spent a while printing *underneath*
+  the phone portrait: the semi-transparent bottom of the shirt washed the tops
+  of the letters out to grey, while the comment beside it explained confidently
+  that flex order had it the other way round. Type that has to sit on top of an
+  image needs its own `z-index`.
 
 - **Never put `h-full` on `<html>` or `<body>`.** It reads as harmless and it
   silently breaks the sticky header. `height: 100%` on a ten-thousand-pixel

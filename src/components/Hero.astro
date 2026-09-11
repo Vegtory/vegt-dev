@@ -23,13 +23,24 @@
  * leave the heading to be guessed at. So the figure moves off to the side and
  * overlaps only the empty run at the end of the line.
  *
- * On a phone there is no room to put anything beside anything, so the two
- * stack and nothing overlaps: the name, the figure under it, then the roles
- * and the buttons. The overlap is what makes the pair read as one image when
- * they stand side by side, and it does not survive the translation — at 390
- * the picture is nearly the width of the screen, so type laid over it reads as
- * a caption printed on a photograph rather than as a composition. The name
- * leads and the face follows, which is the order the hero is read in anyway.
+ * On a phone there is no room to put anything beside anything, so the figure
+ * goes above the name and the name is pulled back up into the bottom of it.
+ * Here the name is the layer on top, and the rule is the same one read the
+ * other way round: the overlap lands on the chest, well below the collar, so
+ * the type crosses a light shirt rather than the face — which it would both
+ * obscure and, ink on mid-grey skin, be hard to read on.
+ *
+ * WHICH OF THE TWO IS ON TOP IS NOT DECIDED BY SOURCE ORDER. It reads as
+ * though it should be, and this file said so for a while and was wrong: the
+ * frame CustomPicture draws is `relative z-0`, and a positioned element with a
+ * `z-index` is painted in a later pass than ordinary in-flow content, however
+ * far down the document that content sits. The mobile fade mask would do the
+ * same on its own — a mask makes its element a stacking context too, which is
+ * painted in that same later pass. So the figure covers the name by default,
+ * and on a phone it did: the semi-transparent bottom of the shirt washed the
+ * tops of the letters out to grey. The name wins that pass back with a
+ * `z-index` of its own, and it needs one at exactly the widths where it is
+ * supposed to be on top.
  *
  * ---------------------------------------------------------------------------
  * THE CUT-OUT — read this before swapping the portrait.
@@ -245,29 +256,38 @@ const family = space > -1 ? title.slice(space + 1) : "";
         column first, figure second, so the figure wins). That is deliberate
         and it is enough; it was once also mandatory, which the header note
         explains. */}
-    <div class="mt-6 flex flex-col pb-12 lg:mt-4 lg:flex-row lg:items-end lg:gap-4 lg:pb-0">
-      {/* THE TEXT COLUMN IS `contents` BELOW `lg`, WHICH IS THE WHOLE TRICK.
-          The name has to come before the figure on a phone and the roles after
-          it — name, face, then the list — and `order` can only shuffle items
-          that are siblings in the same flex box. `display: contents` drops
-          this wrapper out of the box and promotes its children into it, so the
-          h1, the roles and the buttons each get an `order` of their own and
-          the figure can slot in between them. At `lg` it becomes a block
-          again, the three are ordinary children of it, `order` stops applying,
-          and the two-column row is exactly as it was.
+    <div class="mt-6 flex flex-col lg:mt-4 lg:flex-row lg:items-end lg:gap-4">
+      {/* Below `lg` the name is pulled up INTO the bottom of the portrait. Set
+          flush underneath it the name read as a caption hanging off the photo
+          rather than as part of it; the two have to touch for the hero to be
+          one composition, which is exactly what the `lg:-ml-16` does on
+          desktop. There is no column gap on a phone for the same reason — the
+          negative margin is the whole spacing decision, stated once.
 
-          The figure and the name do NOT overlap on a phone. They did, with the
-          name pulled up into the shirt; at 390 the picture is nearly as wide
-          as the screen, so that read as type dropped on a photograph rather
-          than as one composition — which is what the overlap does well at `lg`
-          and cannot do here. The overlap is now a desktop idea only, and it is
-          the `lg:-ml-16` that states it. */}
-      <div class="contents lg:block lg:min-w-0 lg:flex-1 lg:pb-12">
+          How far up is a real constraint, not taste. It must clear the face:
+          the name is painted over the figure here, so it would cover his eyes
+          outright, and ink on mid-grey skin is a poor read besides. Crossing
+          the SHIRT is fine and is the intent — the shirt is light, so the name
+          stays near-black on near-white and reads as a printed overlay. These
+          values put the cap line on the chest, below the collar, at every
+          width from 320 up.
+
+          `relative z-10` is what puts the name on top of the shirt, and it is
+          dropped again at `lg` — `lg:static` takes the text column back out of
+          the paint order it is competing in, so the figure returns to being
+          the upper layer and keeps overlapping the tail of the h1 the way the
+          composition wants. `order-first` moves the figure to the top of the
+          phone layout; it does NOT decide which of the two is drawn over the
+          other. See the header note. This is also the one thing the cut-out
+          bought outright: under the old multiply composite a `z-index`
+          anywhere in here turned the figure into a white box, so this fix was
+          not available. */}
+      <div class="relative z-10 -mt-11 min-w-0 pb-12 sm:-mt-14 lg:static lg:mt-0 lg:flex-1">
         {/* Deliberately wider than the column it sits in, so the longest line
             runs on under the figure rather than stopping short of it. The
             section's `overflow-hidden` is what keeps that from widening the
             page. */}
-        <h1 class="order-1 lg:w-[42rem]">
+        <h1 class="lg:w-[42rem]">
           {/* The given name: the loud half. Capitals, heavy, tracked in tight
               enough that the letters nearly touch. */}
           <span
@@ -304,7 +324,7 @@ const family = space > -1 ? title.slice(space + 1) : "";
 
         {
           roles.length > 0 && (
-            <ol class="order-3 mt-9 flex flex-col gap-1.5">
+            <ol class="mt-9 flex flex-col gap-1.5">
               {roles.map((role, i) => (
                 <li
                   class="flex items-baseline gap-3 motion-safe:animate-rise-in"
@@ -335,7 +355,7 @@ const family = space > -1 ? title.slice(space + 1) : "";
         {
           ctas.length > 0 && (
             <div
-              class="order-4 mt-9 flex flex-col gap-3 motion-safe:animate-rise-in sm:flex-row sm:flex-wrap"
+              class="mt-9 flex flex-col gap-3 motion-safe:animate-rise-in sm:flex-row sm:flex-wrap"
               style="animation-delay: 700ms;"
             >
               {ctas.map((cta, i) => (
@@ -353,15 +373,14 @@ const family = space > -1 ? title.slice(space + 1) : "";
         }
       </div>
 
-      {/* `order-2` below `lg` puts the figure between the name and the roles.
-          Left in source order it lands after the buttons, at the bottom of the
-          section — the headshot arriving last, as an afterthought, when it is
-          supposed to be the thing you land on. Directly under the name it is
-          still the second thing on the page and the name is still the first,
-          which is the order the hero is read in anyway. */}
+      {/* `order-first` below `lg`: in source order the figure follows the text
+          column, which put it after the buttons on a phone — the headshot
+          arrived last, as an afterthought, when it is supposed to be the thing
+          you land on. It is layering that decides what covers what here, not
+          this; see the text column above. */}
       {
         portrait?.image && (
-          <div class:list={["order-2 mt-8 shrink-0 lg:order-none lg:mt-0", FIGURE_WIDTH, FIGURE_OVERLAP]}>
+          <div class:list={["order-first shrink-0 lg:order-none lg:mx-0", FIGURE_WIDTH, FIGURE_OVERLAP]}>
             {/* Quality is high on purpose: the file is a few hundred pixels
                 square, so this costs single-digit KB, and it is the only
                 photograph of a face above the fold. `showPlaceholder` must
