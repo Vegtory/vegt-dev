@@ -148,15 +148,18 @@ becoming a gradient background: it is always behind something, it never carries
 meaning or sits under body copy at strength, and it moves on a scale of minutes
 (59s / 73s / 89s, transform-only, behind `motion-safe:`).
 
-The hero's three are **acid, violet and cobalt** — the greens, purples and
-blues of a syntax theme rather than the amber-and-tomato sunset they started
-as. Which hue goes where is a contrast decision: `acid` is much the lightest of
-the five marks, so it is the one that may sit under the 12px mono indices
-beside the roles, which are the tightest contrast on the site; the two that
-darken the page are kept right and high, where nothing small is printed. Those
-indices measure 4.8:1 at worst, sampled on the rendered page at four points
-around each animation's cycle at 390 / 768 / 1440. **Raise an opacity and
-re-measure** — the numbers are not slack.
+The hero's three are **amber, tomato and cobalt** — warm light on cool stock,
+with one cool counterweight so the band does not slide into a sunset. A syntax
+palette (acid / violet / cobalt) was tried and reverted: three saturated hues
+at this blur radius read as a mesh gradient, which is the look this design
+exists to avoid.
+
+What caps their strength is one line of type. The 12px mono indices beside the
+hero's roles are the tightest contrast on the site, they sit on the amber
+layer, and at its current 0.21 they measure **4.65:1** — sampled on the
+rendered page at four points around each animation's cycle at 390 / 768 /
+1440. That is the entire margin over the 4.5:1 floor, so **raise an opacity
+and re-measure**, amber above all.
 
 It used to **tint the hero portrait**, back when that was a `multiply`
 composite taking the colour of whatever was behind it. The portrait is a real
