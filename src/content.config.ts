@@ -170,18 +170,6 @@ const sections = defineCollection({
         cta: link.optional(),
       }),
 
-      /**
-       * A photograph interrupting the technical content. Not a gallery — one
-       * picture, big, with a caption, so the page has a person in it.
-       */
-      z.object({
-        type: z.literal("photoInterrupt"),
-        imageItem: imageItem(image),
-        /** Rendered as a `//` source comment under the frame. */
-        captionMeta: z.array(z.string()).default([]),
-        note: z.string().default(""),
-      }),
-
       z.object({
         type: z.literal("photoCollage"),
         title: z.string(),
