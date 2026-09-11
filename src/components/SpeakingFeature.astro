@@ -32,6 +32,7 @@ import SectionHeading from "@ui/SectionHeading.astro";
 import Button from "@ui/Button.astro";
 import MetaLine from "@ui/MetaLine.astro";
 import Annotation from "@ui/Annotation.astro";
+import AmbientWash from "@ui/AmbientWash.astro";
 import { proseBase } from "@ui/prose";
 
 export interface ImageItem {
@@ -63,8 +64,13 @@ const {
 } = Astro.props;
 ---
 
-<section class="bg-background py-20 sm:py-28">
-  <div class="mx-auto max-w-6xl px-6 lg:px-8">
+<section class="relative overflow-hidden bg-background py-20 sm:py-28">
+  {/* The only other band with a wash. This one is a long, plain stretch with a
+      single photograph in it, and the wash is what keeps it from reading as a
+      flat grey gap between two dense sections. */}
+  <AmbientWash intensity="faint" />
+
+  <div class="relative mx-auto max-w-6xl px-6 lg:px-8">
     <div class="flex flex-col gap-12 lg:flex-row lg:items-start lg:gap-16">
       {
         imageItem?.image && (

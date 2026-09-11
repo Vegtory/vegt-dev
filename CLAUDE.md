@@ -77,11 +77,16 @@ report which copies have upstream fixes available; see
 
 ## Styling
 
-The look is a **technical field journal**: warm paper (`bg-background`),
-near-black type, hairline rules, near-square corners, and saturated colour used
-the way it turns up on a workbench — a highlighter stripe, a registration mark,
-an LED. Read the header comment in `tailwind.config.cjs`; it is the design
-rationale, not just a token list.
+The look is a **technical field journal printed on silver**: cool light grey
+stock (`bg-background`), near-black type, hairline rules, near-square corners,
+and saturated colour used the way it turns up on a workbench — a highlighter
+stripe, a registration mark, an LED. Read the header comment in
+`tailwind.config.cjs`; it is the design rationale, not just a token list.
+
+The neutral is cool on purpose. It was warm paper until the hero gained its
+ambient washes, and warm paper under a warm wash reads as one muddy cream; a
+silver ground is what lets the peach register as light falling on the page
+rather than as the page's own colour.
 
 Surfaces are `background` / `surface` / `surfaceMuted`, separated by `hairline`
 (and `hairlineStrong` for a rule that should read as drawn). Text is
@@ -104,6 +109,19 @@ section is the SaaS-landing-page move this design exists to avoid.
 
 Never hardcode a hex value, and never build a class name by string
 concatenation: Tailwind only sees complete literals.
+
+### Ambient washes
+
+`AmbientWash.astro` is soft colour drifting behind a section — the hero at
+`strong`, the speaking section and footer at `faint`. Three rules keep it from
+becoming a gradient background: it is always behind something, it never carries
+meaning or sits under body copy at strength, and it moves on a scale of minutes
+(83s / 107s / 131s, transform-only, behind `motion-safe:`).
+
+It also **tints the hero portrait**, deliberately — the cut-out is a `multiply`
+composite, so it takes the colour of whatever is behind it. Keep the washes
+light: a darker wash makes a darker figure and a saturated one makes a stained
+one.
 
 ### The five verbs
 
@@ -178,6 +196,19 @@ pnpm run deploy      # astro build && wrangler deploy
   animation, and why it passes `showPlaceholder={false}` to `CustomPicture`.
   The full explanation is in `Hero.astro`'s header comment — read it before
   restructuring that section.
+
+- **Tailwind emits nothing for an off-scale opacity modifier.** `bg-amber/26`
+  produces no rule at all — no warning, no build error, the class just lands in
+  the HTML and the element renders fully transparent. Only values on the
+  opacity scale work bare (5, 10, 20, 25, 30, 40, 50, 60, 70, 75, 80, 90, 95,
+  100); anything else must be bracketed: `bg-amber/[0.26]`. Two of the three
+  hero washes and two of the four layers in the 404 illustration were invisible
+  for exactly this reason.
+
+- **`motion-safe:` belongs on the `animate-*` class itself.** A bare
+  `animate-wash-a` keeps running under `prefers-reduced-motion: reduce`, and
+  pairing it with a `motion-safe:[animation-play-state:running]` utility fixes
+  nothing, because `running` is already the default.
 
 - **`TextRender` treats `_x_` as markdown emphasis.** Anything passed through it
   that contains underscores gets mangled — `works_on_my_machine` came out as

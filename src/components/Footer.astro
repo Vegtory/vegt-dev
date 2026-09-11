@@ -27,6 +27,7 @@
  */
 import TextRender from "@ui/TextRender.astro";
 import Connector from "@ui/Connector.astro";
+import AmbientWash from "@ui/AmbientWash.astro";
 import { builtAt, rev, commit } from "../buildInfo";
 
 export interface Props {
@@ -66,8 +67,12 @@ const head = dot > -1 ? wordmark.slice(0, dot) : wordmark;
 const tail = dot > -1 ? wordmark.slice(dot + 1) : "";
 ---
 
-<footer class="border-t border-hairline bg-background">
-  <div class="mx-auto max-w-6xl px-6 py-16 sm:py-20 lg:px-8">
+<footer class="relative overflow-hidden border-t border-hairline bg-background">
+  {/* A faint echo of the hero's washes, so the page closes the way it opened
+      rather than ending on flat silver. */}
+  <AmbientWash intensity="faint" />
+
+  <div class="relative mx-auto max-w-6xl px-6 py-16 sm:py-20 lg:px-8">
     <div class="flex flex-col gap-12 md:flex-row md:justify-between md:gap-16">
       <div class="max-w-md" data-reveal>
         {
@@ -134,7 +139,7 @@ const tail = dot > -1 ? wordmark.slice(dot + 1) : "";
     <div class="mt-8 flex flex-col-reverse items-start gap-6 sm:flex-row sm:items-center sm:justify-between">
       <div class="flex flex-wrap items-center gap-x-3 gap-y-2 font-mono text-[0.6875rem] text-mutedText">
         <span class="text-mutedText">
-          <TextRender>{head}</TextRender>{tail && (<><span class="text-cobalt">.</span><TextRender>{tail}</TextRender></>)}
+          <TextRender>{head}</TextRender>{tail && (<><span class="text-cobalt-ink">.</span><TextRender>{tail}</TextRender></>)}
         </span>
         <span aria-hidden="true">/</span>
         <span>rev. {rev}</span>

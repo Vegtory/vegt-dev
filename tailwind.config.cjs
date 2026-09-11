@@ -3,12 +3,18 @@ const preset = require("./astro-template/tailwind.preset.cjs");
 /**
  * Design tokens for vegt.dev.
  *
- * The look is a technical field journal: warm paper, near-black type, hairline
- * rules, and saturated colour used the way it turns up on a workbench — a
- * highlighter stripe, a registration mark, an LED, the sleeve of one cable in a
- * bundle. Colour is never the subject. There is deliberately no "section
- * colour" scheme, because assigning one hue per section is the SaaS-landing-page
- * move this design is trying not to make.
+ * The look is a technical field journal printed on silver: cool light grey
+ * stock, near-black type, hairline rules, and saturated colour used the way it
+ * turns up on a workbench — a highlighter stripe, a registration mark, an LED,
+ * the sleeve of one cable in a bundle. Colour is never the subject, and there
+ * is deliberately no "section colour" scheme, because assigning one hue per
+ * section is the SaaS-landing-page move this design is trying not to make.
+ *
+ * The neutral was warm paper (#faf8f4) until the hero gained its ambient
+ * washes. Warm paper under a warm wash reads as one muddy cream; a cool silver
+ * ground is what lets the peach and amber register as light falling on the
+ * page rather than as the page's own colour. Everything cooled with it so the
+ * site does not split into a cold hero above a warm body.
  *
  * The previous iteration of this file described a "dark-anchored, light body"
  * system: near-black bands at the hero and footer, two drifting glows and a
@@ -30,19 +36,19 @@ const preset = require("./astro-template/tailwind.preset.cjs");
  * then landed at ~4.35 on the chip they are actually used on.
  */
 
-/** Near-black, very slightly warm so it sits on paper rather than on white. */
+/** Near-black with a cool cast, so it sits on silver rather than on white. */
 const ink = {
-  50: "#f6f5f3",
-  100: "#e9e7e2",
-  200: "#d5d2ca",
-  300: "#b1aca1",
-  400: "#86817a",
-  500: "#615d58",
-  600: "#4a4743",
-  700: "#3a3835",
-  800: "#26252a",
-  900: "#1a1b1f",
-  950: "#14161a",
+  50: "#f4f6f8",
+  100: "#e6eaef",
+  200: "#d0d6de",
+  300: "#a9b2be",
+  400: "#7d8695",
+  500: "#5a6472",
+  600: "#454e5c",
+  700: "#353d49",
+  800: "#232a34",
+  900: "#181d25",
+  950: "#12151b",
 };
 
 /**
@@ -75,16 +81,16 @@ const primary = {
  */
 const marks = {
   /** 4.87:1 as a mark. The structural accent; see `primary` for its scale. */
-  cobalt: { DEFAULT: "#2563eb", ink: "#1d4ed8", wash: "#e9eefc" },
+  cobalt: { DEFAULT: "#2563eb", ink: "#1d4ed8", wash: "#e4ebfb" },
   /** 3.47:1 as a mark — fine for a rule or a dot, never for small type. */
-  tomato: { DEFAULT: "#e4572e", ink: "#b83c1b", wash: "#fbeae4" },
+  tomato: { DEFAULT: "#e4572e", ink: "#ad3818", wash: "#f7e4dd" },
   /** 1.86:1. DECORATIVE ONLY: a highlighter swipe, an LED, a plot line that
    *  is also labelled. It must never be the sole carrier of meaning. */
-  acid: { DEFAULT: "#84cc16", ink: "#456d0d", wash: "#eef7dc" },
+  acid: { DEFAULT: "#84cc16", ink: "#456d0d", wash: "#eaf4d7" },
   /** 3.99:1 as a mark. */
-  violet: { DEFAULT: "#8b5cf6", ink: "#6d28d9", wash: "#f0eafd" },
+  violet: { DEFAULT: "#8b5cf6", ink: "#6d28d9", wash: "#ece6fc" },
   /** 2.64:1. DECORATIVE ONLY, same rule as `acid`. */
-  amber: { DEFAULT: "#f97316", ink: "#a44b08", wash: "#fdeedb" },
+  amber: { DEFAULT: "#f97316", ink: "#a44b08", wash: "#fae7d3" },
 };
 
 module.exports = {
@@ -110,36 +116,37 @@ module.exports = {
         ...marks,
 
         // --- Surfaces -----------------------------------------------------
-        /** The page. Warm off-white — paper, not white. */
-        background: "#faf8f4",
-        /** Cards and anything that should lift off the page. */
+        /** The page. Cool silver — light stock, not white. */
+        background: "#eef1f5",
+        /** Cards and anything that should lift off the page. Pure white now
+         *  genuinely lifts, which it barely did against warm paper. */
         surface: "#ffffff",
         /** Recessed fills — metadata blocks, code chips, table stripes. */
-        surfaceMuted: "#f2efe8",
+        surfaceMuted: "#e3e8ee",
         /** The workhorse rule. Everything is separated by a hairline, not a shadow. */
-        hairline: "#e3ded3",
+        hairline: "#d7dde5",
         /** A second, darker rule for the one edge per section that should read
          *  as drawn rather than as a seam. */
-        hairlineStrong: "#c9c2b3",
+        hairlineStrong: "#b4bdc8",
 
         // --- Text ---------------------------------------------------------
-        /** Headings. 17.1:1 on `background`. */
-        primaryText: "#14161a",
-        /** Body copy. Same value: on paper this dark is comfortable, and two
+        /** Headings. 15.8:1 on `background`. */
+        primaryText: "#131720",
+        /** Body copy. Same value: at this weight it is comfortable, and two
          *  near-identical near-blacks is a distinction nobody can see. */
-        blackText: "#14161a",
-        /** Secondary copy, metadata, captions. 6.1:1. */
-        mutedText: "#575f6b",
-        /** Annotations — the pencilled margin notes. 4.9:1, and only ever
+        blackText: "#131720",
+        /** Secondary copy, metadata, captions. 5.7:1. */
+        mutedText: "#555f6d",
+        /** Annotations — the pencilled margin notes. 5.2:1, and only ever
          *  used at 13px+ italic, never for anything load-bearing. */
-        noteText: "#6b6256",
+        noteText: "#5d6573",
         /** The one link/accent text colour. Cobalt at 6.3:1. */
         accentText: "#1d4ed8",
 
         // --- Text on dark -------------------------------------------------
         // Only the code blocks and the 404 plate are dark now.
-        /** On `ink-950`: 16.5:1. */
-        whiteText: "#faf8f4",
+        /** On `ink-950`: 16.0:1. */
+        whiteText: "#eef1f5",
         secondaryText: "#1a1b1f",
       },
 
@@ -191,7 +198,7 @@ module.exports = {
         /** Engineering graph paper. Used at low opacity behind one or two
          *  blocks per page, never the whole page. */
         graph:
-          "linear-gradient(to right, #c9c2b3 1px, transparent 1px), linear-gradient(to bottom, #c9c2b3 1px, transparent 1px)",
+          "linear-gradient(to right, #b4bdc8 1px, transparent 1px), linear-gradient(to bottom, #b4bdc8 1px, transparent 1px)",
         /** A highlighter swipe, for marking a few words inside a heading. */
         marker:
           "linear-gradient(to bottom, transparent 58%, rgba(132, 204, 22, 0.45) 58%)",
@@ -245,6 +252,37 @@ module.exports = {
           from: { strokeDashoffset: "12" },
           to: { strokeDashoffset: "0" },
         },
+
+        /**
+         * The ambient washes behind the hero portrait.
+         *
+         * Three of them, on deliberately mismatched periods, so the pattern
+         * they make together never repeats within any plausible visit — with
+         * 83s, 107s and 131s the trio only returns to its starting
+         * arrangement after about nine and a half days.
+         *
+         * The movements are large in distance but glacial in rate: a wash
+         * crosses a few percent of the viewport per minute, which is slow
+         * enough that you cannot catch it moving by staring, only by looking
+         * away and back. That is the brief. Anything faster and a coloured
+         * blob is sliding around behind a photograph, which is the effect this
+         * design spent its whole first pass avoiding.
+         *
+         * `transform` only, so the browser composites them without a repaint
+         * and the cost of running forever is close to nothing.
+         */
+        "wash-a": {
+          "0%, 100%": { transform: "translate3d(0, 0, 0) scale(1)" },
+          "50%": { transform: "translate3d(6%, -4%, 0) scale(1.18)" },
+        },
+        "wash-b": {
+          "0%, 100%": { transform: "translate3d(0, 0, 0) scale(1.12)" },
+          "50%": { transform: "translate3d(-7%, 5%, 0) scale(0.94)" },
+        },
+        "wash-c": {
+          "0%, 100%": { transform: "translate3d(0, 0, 0) scale(1.05)" },
+          "50%": { transform: "translate3d(4%, 6%, 0) scale(1.22)" },
+        },
       },
 
       animation: {
@@ -254,6 +292,10 @@ module.exports = {
         // element stays invisible until its turn instead of flashing first.
         "rise-in": "rise-in 0.6s cubic-bezier(0.22, 1, 0.36, 1) backwards",
         trace: "trace 0.7s linear forwards",
+        // Coprime-ish minute-scale periods; see the keyframes above.
+        "wash-a": "wash-a 83s ease-in-out infinite",
+        "wash-b": "wash-b 107s ease-in-out infinite",
+        "wash-c": "wash-c 131s ease-in-out infinite",
       },
     },
   },

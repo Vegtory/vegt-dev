@@ -1,0 +1,154 @@
+---
+/**
+ * @component AmbientWash
+ * @version   1.0.0
+ * @updated   2026-09-11
+ *
+ * Soft colour drifting behind a section, like light falling across the page.
+ *
+ * This is the one place the site's palette appears as colour rather than as a
+ * mark, and it is kept honest by three rules:
+ *
+ *   - It is always behind something. A wash on an empty band is a gradient
+ *     background, which is the generated-portfolio look; a wash behind a
+ *     photograph is lighting.
+ *   - It never carries meaning and never sits under body copy at strength.
+ *     `strong` is for the hero, where the only things over it are a headline
+ *     and a cut-out figure. `faint` is for everywhere else.
+ *   - It moves on a scale of minutes. See the keyframes in the Tailwind config:
+ *     the three periods are 83s, 107s and 131s, which is slow enough that you
+ *     notice it only by looking away and back.
+ *   - The animation is behind `motion-safe:`, and that prefix is load-bearing.
+ *     A bare `animate-wash-a` keeps running under
+ *     `prefers-reduced-motion: reduce`, because the default
+ *     `animation-play-state` is already `running` — pairing it with a
+ *     `motion-safe:[animation-play-state:running]` utility, as this first did,
+ *     changes nothing at all. The variant has to sit on the `animate-*` class
+ *     itself so the animation is never declared in the first place.
+ *
+ * ---------------------------------------------------------------------------
+ * IT ALSO TINTS THE HERO PORTRAIT, AND THAT IS DELIBERATE.
+ *
+ * The portrait is composited with `mix-blend-mode: multiply`, so it takes the
+ * colour of whatever is behind it: neutral silver where the wash is absent,
+ * warm where the wash is strong. That is why the figure goes peach around the
+ * shoulders and stays grey at the head — the same thing happening in the
+ * reference this was drawn from, and it comes for free rather than being
+ * painted into the asset.
+ *
+ * Two consequences worth knowing. Keep the washes light: multiply means a
+ * darker wash makes a darker figure, and a saturated one makes a stained one.
+ * And keep them as SIBLINGS painted before the figure, never as ancestors of
+ * it — an ancestor with a `filter` (which every blurred layer here has) forms
+ * a stacking context and the cut-out collapses into a white box. Siblings are
+ * safe no matter what they carry.
+ * ---------------------------------------------------------------------------
+ */
+
+export interface Props {
+  /** `strong` behind the hero portrait; `faint` for a section that just needs
+   *  its flatness broken. */
+  intensity?: "strong" | "faint";
+  class?: string;
+}
+
+const { intensity = "faint", class: extraClass = "" } = Astro.props;
+
+const strong = intensity === "strong";
+
+/**
+ * The three layers.
+ *
+ * Warm first and lowest, because that is where the reference puts its light —
+ * low and to the centre, under the figure. The cool one sits high and opposite
+ * so the band reads as two light sources rather than as one coloured smear.
+ *
+ * Complete class literals: Tailwind cannot see a name assembled at runtime.
+ *
+ * The opacities are bracketed (`bg-amber/[0.26]`, not `bg-amber/26`) and have
+ * to stay that way. Tailwind only generates a slash-opacity utility for values
+ * that are ON its opacity scale — 5, 10, 20, 25, 30, 40, 50, 60, 70, 75, 80,
+ * 90, 95, 100 — and emits absolutely nothing for anything else. No warning, no
+ * build error: the class lands in the HTML, no rule is ever written, and the
+ * layer renders fully transparent. Two of these three washes were invisible
+ * for exactly that reason before this note existed.
+ */
+const layers = strong
+  ? [
+      // Amber, wide and LOW. Deliberately an ellipse rather than a circle and
+      // wide enough to run the full width of the band: the warmth has to reach
+      // under the figure, not stop beside it, or the portrait stays grey while
+      // the empty half of the hero glows.
+      //
+      // It sits low because the silver has to win the top two-thirds. The band
+      // should read as light gathering at the foot of the page, not as a
+      // coloured background with a photograph on it.
+      "left-[-8%] top-[52%] h-[46rem] w-[85%] bg-amber/[0.17] motion-safe:animate-wash-a",
+      // Tomato, centred under the figure. This is the layer doing the tinting —
+      // it is what turns the shoulders warm where they cross it. Kept lighter
+      // than the amber: multiply means a dark shirt through a strong warm wash
+      // goes sepia, and sepia is a different decade's design.
+      "left-[34%] top-[58%] h-[42rem] w-[60%] bg-tomato/[0.12] motion-safe:animate-wash-b",
+      // Cobalt, high and right. A cool counterweight; without it the band
+      // slides into a sunset, which is a different and much cheaper look.
+      "right-[-14%] top-[-30%] h-[42rem] w-[55%] bg-cobalt/[0.10] motion-safe:animate-wash-c",
+    ]
+  : [
+      "left-[-10%] top-[-30%] h-[34rem] w-[45%] bg-cobalt/[0.07] motion-safe:animate-wash-c",
+      "right-[-12%] bottom-[-40%] h-[32rem] w-[42%] bg-amber/[0.09] motion-safe:animate-wash-a",
+    ];
+
+---
+
+{/* `overflow-hidden` keeps the blur from bleeding past the section edge, which
+    would tint the band above or below it. */}
+<div
+  class:list={["pointer-events-none absolute inset-0 overflow-hidden", extraClass]}
+  aria-hidden="true"
+  data-wash
+>
+  {
+    layers.map((layer) => (
+      <div
+        class:list={[
+          "absolute rounded-full will-change-transform",
+          strong ? "blur-[130px]" : "blur-[130px]",
+          layer,
+        ]}
+        data-wash-layer
+      />
+    ))
+  }
+</div>
+
+<script>
+  // Park the washes while their section is off-screen.
+  //
+  // They are cheap — transform-only, so the compositor handles them without a
+  // repaint — but "cheap and permanent" is still a frame every 16ms for a
+  // reader who has scrolled well past them, and on a laptop that is battery.
+  //
+  // Purely an optimisation: if this never runs, the washes simply keep
+  // animating, which is the behaviour without it anyway. It also deliberately
+  // does not start anything — `motion-safe:` in the CSS is what decides whether
+  // these move at all, and this must not override someone's reduced-motion
+  // preference by resuming an animation that should never have played.
+  (() => {
+    const washes = document.querySelectorAll<HTMLElement>("[data-wash]");
+    if (!washes.length || !("IntersectionObserver" in window)) return;
+
+    const io = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          const layers = entry.target.querySelectorAll<HTMLElement>("[data-wash-layer]");
+          layers.forEach((el) => {
+            el.style.animationPlayState = entry.isIntersecting ? "" : "paused";
+          });
+        }
+      },
+      { threshold: 0 },
+    );
+
+    washes.forEach((w) => io.observe(w));
+  })();
+</script>

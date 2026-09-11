@@ -50,11 +50,16 @@ import { site } from "../site";
             <line x1="126" y1="138" x2="136" y2="132" stroke="currentColor" stroke-width="1.5" class="text-hairlineStrong" />
 
             {/* The layers that went fine. Narrowing slightly, as a print does
-                when the first wall starts pulling away from the bed. */}
+                when the first wall starts pulling away from the bed.
+
+                Opacities are bracketed because Tailwind only generates a
+                slash-opacity utility for values on its opacity scale; `/65`
+                and `/35` are not on it and silently produced no rule at all,
+                which left two of these four layers unstyled. */}
             <rect x="54" y="124" width="52" height="7" class="fill-cobalt/80" />
-            <rect x="55" y="116" width="50" height="7" class="fill-cobalt/65" />
+            <rect x="55" y="116" width="50" height="7" class="fill-cobalt/[0.65]" />
             <rect x="57" y="108" width="46" height="7" class="fill-cobalt/50" />
-            <rect x="61" y="100" width="38" height="7" class="fill-cobalt/35" />
+            <rect x="61" y="100" width="38" height="7" class="fill-cobalt/[0.35]" />
 
             {/* Where it let go. */}
             <path

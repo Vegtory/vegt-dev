@@ -66,8 +66,15 @@ const tail = dot > -1 ? wordmark.slice(dot + 1) : "";
       <TextRender>{head}</TextRender>{
         tail && (
           <>
-            {/* The site's only logo: one cobalt full stop. */}
-            <span class="text-cobalt">.</span>
+            {/* The site's only logo: one cobalt full stop.
+
+                `cobalt-ink`, not the bare `cobalt` mark. The mark is 4.56:1 on
+                the page and drops to 4.32:1 where the footer's wash darkens the
+                ground under it — and this full stop is a letter of the
+                wordmark, not decoration. It is the same rule the rest of the
+                site follows: the marks are for rules and dots, `ink` is the
+                only member that sets type. */}
+            <span class="text-cobalt-ink">.</span>
             <TextRender>{tail}</TextRender>
           </>
         )
@@ -124,7 +131,7 @@ const tail = dot > -1 ? wordmark.slice(dot + 1) : "";
   <div class="fixed inset-y-0 right-0 z-50 w-full max-w-sm overflow-y-auto border-l border-hairline bg-background px-6 py-4">
     <div class="flex items-center justify-between">
       <span class="font-mono text-base font-semibold text-primaryText">
-        <TextRender>{head}</TextRender>{tail && (<><span class="text-cobalt">.</span><TextRender>{tail}</TextRender></>)}
+        <TextRender>{head}</TextRender>{tail && (<><span class="text-cobalt-ink">.</span><TextRender>{tail}</TextRender></>)}
       </span>
       <button
         type="button"

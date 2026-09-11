@@ -92,6 +92,7 @@ import CustomPicture from "@ui/CustomPicture.astro";
 import TextRender from "@ui/TextRender.astro";
 import Button from "@ui/Button.astro";
 import MetaLine from "@ui/MetaLine.astro";
+import AmbientWash from "@ui/AmbientWash.astro";
 
 export interface ImageItem {
   image: ImageMetadata | string;
@@ -159,13 +160,15 @@ const nameLines = space > -1
 ---
 
 <section class="relative overflow-hidden border-b border-hairline bg-background">
-  {/* Graph paper, bottom-left only. A whole page of it would be a texture; a
-      corner of it reads as the pad the page was drafted on. */}
-  <div
-    class="pointer-events-none absolute -bottom-8 left-0 h-72 w-72 bg-graph bg-[length:22px_22px] opacity-50 [mask-image:radial-gradient(circle_at_bottom_left,black,transparent_70%)]"
-    aria-hidden="true"
-  >
-  </div>
+  {/* The washes. A SIBLING painted before the content, never an ancestor of
+      it — every layer in here carries a `blur()`, and a filter on an ancestor
+      of the portrait would form a stacking context and collapse the cut-out
+      into a white box. See AmbientWash's header note.
+
+      The graph paper that used to sit in this corner is gone: the washes do
+      the atmosphere here now, and the ruled pad reads as far more purposeful
+      where it was kept, behind the homelab parts table. */}
+  <AmbientWash intensity="strong" />
 
   <div class="relative mx-auto max-w-6xl px-6 lg:px-8">
     {/* --- Top strip: what he does, and one sentence on it ---------------- */}
