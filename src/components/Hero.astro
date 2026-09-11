@@ -25,6 +25,11 @@
  * its contrast and the figure moves off to the side, overlapping only where it
  * is the dark shirt doing the occluding.
  *
+ * On a phone there is no room to put anything beside anything, so the figure
+ * goes above the name and the name is pulled back up into the bottom of it.
+ * That is the same rule, applied vertically: the overlap lands on the chest,
+ * well below the collar, and the face is never underneath type.
+ *
  * ---------------------------------------------------------------------------
  * HOW THE CUT-OUT WORKS — read this before touching the portrait or the layout.
  *
@@ -227,8 +232,29 @@ const family = space > -1 ? title.slice(space + 1) : "";
         Note the complete absence of `z-index`: paint order is DOM order (text
         column first, figure second, so the figure wins), and adding one
         anywhere would isolate the figure and kill the blend. */}
-    <div class="mt-6 flex flex-col gap-6 lg:mt-4 lg:flex-row lg:items-end lg:gap-4">
-      <div class="min-w-0 pb-12 lg:flex-1">
+    <div class="mt-6 flex flex-col lg:mt-4 lg:flex-row lg:items-end lg:gap-4">
+      {/* Below `lg` the name is pulled up INTO the bottom of the portrait. Set
+          flush underneath it the name read as a caption hanging off the photo
+          rather than as part of it; the two have to touch for the hero to be
+          one composition, which is exactly what the `lg:-ml-16` does on
+          desktop. There is no column gap on a phone for the same reason — the
+          negative margin is the whole spacing decision, stated once.
+
+          How far up is a real constraint, not taste. It must clear the face:
+          multiply keeps the darker layer, so ink type wins over skin and
+          "WILLIAM" would print straight across his eyes (see the note at the
+          top of this file). Crossing the SHIRT is fine and is the intent — the
+          shirt is light, so the name stays near-black on near-white and reads
+          as a printed overlay. These values put the cap line on the chest,
+          below the collar, at every width from 320 up.
+
+          Margins are safe here where a transform would not be; see point 1 of
+          the header note. Paint order is on our side too: `order-first` moves
+          the figure in the flex order, and flex items paint in order-modified
+          order, so the name is drawn over the figure on a phone and under it
+          at `lg`. Both are what the layout wants, and neither needs a
+          `z-index` — which would break the cut-out. */}
+      <div class="-mt-11 min-w-0 pb-12 sm:-mt-14 lg:mt-0 lg:flex-1">
         {/* Deliberately wider than the column it sits in, so the longest line
             runs on under the figure rather than stopping short of it. The
             section's `overflow-hidden` is what keeps that from widening the
