@@ -51,7 +51,7 @@ export const site = {
   nav: [
     { label: "Over", link: "/#over" },
     { label: "Projecten", link: "/#bouwen" },
-    { label: "Notities", link: "/blog" },
+    { label: "Blog", link: "/blog" },
     { label: "Foto's", link: "/gallery" },
   ],
 } as const;

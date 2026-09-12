@@ -1,8 +1,8 @@
 ---
 /**
  * @component BaseLayout
- * @version   1.0.0
- * @updated   2026-09-10
+ * @version   1.0.1
+ * @updated   2026-09-12
  * @source    astro-template@10c3958
  * @copied    2026-09-10
  * @modified  true
@@ -73,10 +73,18 @@ const {
     <meta name="description" content={description} />
     <meta name="keywords" content={keywords} />
 
+    {/* The icon is the wordmark reduced to what survives 16px: the `v` and
+        its cobalt full stop, on the site's own silver. All four files are
+        drawn by `scripts/make-favicon.py`, which is where the geometry and
+        the reasoning live.
+
+        The mask gets its own file. Safari fills every shape in a mask-icon
+        with the colour from this tag, so handing it the full-colour SVG
+        would paint the tile as well as the mark — one cobalt square. */}
     <link rel="icon" type="image/png" href="/favicon.png" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <link rel="mask-icon" href="favicon.svg" color="#000000" />
-    <link rel="apple-touch-icon" href="apple-favicon.png" />
+    <link rel="mask-icon" href="/favicon-mono.svg" color="#2563eb" />
+    <link rel="apple-touch-icon" href="/apple-favicon.png" />
 
     <link rel="sitemap" href="/sitemap-index.xml" />
 
