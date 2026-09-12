@@ -18,6 +18,21 @@
     { "pattern": "www.vegt.dev", "custom_domain": true }
   ],
 
+  // Preview URLs: every uploaded version gets its own
+  // <version-prefix>-vegt.<subdomain>.workers.dev, and
+  // `wrangler versions upload --preview-alias <name>` pins a readable one
+  // alongside it. `pnpm run preview:upload` is the whole workflow.
+  //
+  // Said out loud rather than left to the default. `preview_urls` inherits
+  // `workers_dev`, which is itself on unless told otherwise, so previews were
+  // already enabled -- but only by accident, and a toggle flipped in the
+  // dashboard silently reverts on the next `wrangler deploy` if this file does
+  // not state what it wants.
+  //
+  // They are public. Anyone with the URL can read an unreleased version; put
+  // Cloudflare Access in front of the Worker if that ever stops being fine.
+  "preview_urls": true,
+
   "observability": {
     "enabled": true,
     "logs": {

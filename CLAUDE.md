@@ -211,6 +211,7 @@ pnpm check           # astro check (typecheck) - run before committing
 pnpm check:template  # which copied components have upstream updates
 pnpm dev:worker      # wrangler dev, the only way to test /api/contact
 pnpm run deploy      # astro build && wrangler deploy
+pnpm preview:upload  # astro build && wrangler versions upload -> a preview URL
 ```
 
 > **`pnpm run deploy`, never `pnpm deploy`.** `deploy` is a built-in pnpm
@@ -219,7 +220,10 @@ pnpm run deploy      # astro build && wrangler deploy
 
 > `pnpm dev` does **not** serve `/api/contact`. That route belongs to the
 > Worker, so the contact form only works under `pnpm dev:worker`. This is the
-> most likely reason for "the contact form is broken".
+> most likely reason for "the contact form is broken". The second most likely:
+> you are looking at a preview URL, where the Worker refuses the post because
+> the preview's hostname is not in `CORS_ORIGINS` and — being different for
+> every version — cannot be put there. See the README.
 
 ## Things that will bite
 
