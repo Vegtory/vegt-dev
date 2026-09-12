@@ -1,8 +1,8 @@
 ---
 /**
  * @component SimpleBlogRenderer
- * @version   2.0.0
- * @updated   2026-09-11
+ * @version   2.0.1
+ * @updated   2026-09-12
  * @source    astro-template@0ad4fd0
  * @copied    2026-09-10
  * @modified  true
@@ -44,7 +44,7 @@ const posts = allBlogs
   <div class="mx-auto max-w-6xl px-6 lg:px-8">
     <div class="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
       <SectionHeading topic={topic} eyebrow={subtitle} title={title} index={index} />
-      <Button href="/blog" variant="inline" class="shrink-0">Alle notities</Button>
+      <Button href="/blog" variant="inline" class="shrink-0">Alle artikelen</Button>
     </div>
 
     {/* The measure lives on this wrapper, not on the prose element: the
