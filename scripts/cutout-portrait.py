@@ -31,10 +31,11 @@ Two details are what make it hold together:
     edge is measured against the shirt and the hair's against the hair.
 
 The source must already have a flat white backdrop. If a replacement photo has
-a lighting gradient behind the subject (the original of this one ran 231 at the
-top to 251 at the bottom), flat-field it first -- per-row median of the outer
-ten columns as that row's background level, scaled to 255 -- or every one of
-those levels is read here as thin foreground and the figure keeps a grey box.
+a lighting gradient behind the subject, pass `--flat-field` to level it first
+-- both deliveries of this portrait have needed it, the 400px crop running 231
+at the top of the frame to 251 at the bottom and the 1067px one 231 to 255.
+Without it every one of those levels is read here as thin foreground and the
+figure keeps a grey box.
 """
 import sys
 import numpy as np
@@ -47,8 +48,45 @@ WIN = 9          # px window the local foreground level is taken from
 D_HAIR = 200.0   # 255 - hair luminance, for strands with no body near them
 MIN_PEAK = 0.15  # drop specks that never get more opaque than this
 
-src, out = sys.argv[1], sys.argv[2]
+EDGE = 10        # px of frame edge the backdrop level is measured in
+MIN_LEVEL = 200  # a row darker than this at the edge is not backdrop
+
+
+def flat_field(rgb):
+    """Level a lighting gradient behind the subject, row by row.
+
+    The backdrop is lit unevenly but the subject does not reach the frame
+    edge, so each row's own background level is the median of its outer few
+    columns, and scaling that row to put the level at 255 leaves a flat white
+    the matte pass can find. It is per-row because the gradient here is
+    vertical; a horizontal one would need the transpose.
+
+    The subject reaching the edge in some row would make that row's median the
+    shirt and scale it to white, so refuse rather than quietly destroy the
+    figure -- crop the frame wider instead.
+    """
+    grey = rgb.mean(axis=2)
+    level = np.median(
+        np.concatenate([grey[:, :EDGE], grey[:, -EDGE:]], axis=1), axis=1
+    )
+    if level.min() < MIN_LEVEL:
+        rows = np.flatnonzero(level < MIN_LEVEL)
+        sys.exit(
+            f"flat-field: rows {rows.min()}-{rows.max()} measure "
+            f"{level.min():.0f} at the frame edge, too dark to be backdrop -- "
+            "the subject is touching the edge there."
+        )
+    print(f"flat-field: backdrop {level.min():.0f}-{level.max():.0f} -> 255")
+    return np.clip(rgb * (255.0 / level)[:, None, None], 0, 255)
+
+
+argv = [a for a in sys.argv[1:] if a != "--flat-field"]
+if len(argv) != 2:
+    sys.exit(f"usage: {sys.argv[0]} [--flat-field] <delivered>.jpg <out>.png")
+src, out = argv
 rgb = np.asarray(Image.open(src).convert("RGB")).astype(np.float64)
+if "--flat-field" in sys.argv:
+    rgb = flat_field(rgb)
 
 # Distance from white, which is alpha * (255 - foreground).
 d = 255.0 - rgb.min(axis=2)

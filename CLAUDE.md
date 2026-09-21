@@ -240,20 +240,20 @@ pnpm preview:upload  # astro build && wrangler versions upload -> a preview URL
   width, and it never upscales — hand it a 400px file and 400px is all any
   screen gets, however large the slot.
 
-  **Two assets are currently the limiting factor on the design**, and both are
-  a drop-in fix:
-  - `src/assets/portrait-bw.png` (hero portrait) is 400x400, and the subject
-    fills 97% x 96% of it, so there is no margin to crop and nothing to
-    reclaim. The
-    hero stretches it about 1.25x at `lg` — which a soft-edged black-and-white
-    figure carries and a crisp framed photo would not — and downscales it on
-    phone and tablet. A ~1400px version on the same white backdrop, run through
-    `scripts/cutout-portrait.py`, opens the hero up to the full reference
-    proportions: one constant and one `sizes` string, both named in
-    `Hero.astro`'s header comment.
-  - `src/assets/speaking-nimma-codes.jpg` is 356x200. `SpeakingFeature` is
-    drawn for a near-full-bleed photograph but caps the frame at `max-w-2xl`
-    for the same reason. A ~1600px original lets it run full width.
+  The **two assets that used to be the limiting factor on the design** are
+  not any more, and the workarounds they forced are gone with them:
+  - `src/assets/portrait-bw.png` (hero portrait) is 1067x1067, up from
+    400x400. The subject fills 97% x 95% of the frame, so there is still no
+    margin to crop and nothing to reclaim — the resolution is the whole
+    budget. Every step of the hero figure is now a downscale at DPR 1 where
+    the `lg` step used to stretch the file 1.25x, and `FIGURE_WIDTH` has gone
+    from `33rem` to `36rem` to match. It stops there because DPR 2 at `36rem`
+    already wants 1152px against the file's 1067; going wider means a larger
+    original. See `Hero.astro`'s header comment — one constant, one `sizes`
+    string, and they must agree.
+  - `src/assets/speaking-nimma-codes.jpg` is 1600x900, up from 356x200, so
+    `SpeakingFeature`'s `max-w-2xl` cap is gone and the frame runs at the full
+    width the layout was drawn for.
 
 - **The hero portrait is a real cut-out — an alpha PNG, not a blend mode.**
   It was a `mix-blend-mode: multiply` composite of a white-backdrop JPEG until
@@ -272,10 +272,13 @@ pnpm preview:upload  # astro build && wrangler versions upload -> a preview URL
 
   Replacing the photo means re-cutting it: `scripts/cutout-portrait.py` does
   that, and its docstring is the recipe. **A delivered photo's backdrop must be
-  flat white, not merely light** — this one arrived with a vertical lighting
-  gradient from 231 to 251, the light polo shirt sits in that same range so no
-  threshold separates them, and the fix is a flat-field correction (per-row
-  median of the outer ten columns as the background level, scaled to 255). Read
+  flat white, not merely light** — both deliveries of this one arrived with a
+  vertical lighting gradient (231 to 251 on the 400px crop, 231 to 255 on the
+  1067px one), the light polo shirt sits in that same range so no threshold
+  separates them, and the fix is a flat-field correction. That is the script's
+  `--flat-field` flag: per-row median of the outer ten columns as the
+  background level, scaled to 255. It refuses rather than guessing if the
+  subject touches the frame edge, since there the median is the shirt. Read
   `Hero.astro`'s header comment before restructuring that section.
 
 - **Flex `order` does not decide what is painted over what.** It reads as

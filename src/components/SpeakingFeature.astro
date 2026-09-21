@@ -1,8 +1,8 @@
 ---
 /**
  * @component SpeakingFeature
- * @version   1.1.0
- * @updated   2026-09-11
+ * @version   1.2.0
+ * @updated   2026-09-21
  *
  * "Soms leg ik het ook uit." — the talk photograph, roughly halfway down the
  * homepage.
@@ -20,11 +20,29 @@
  * block, which is the corporate version of this section and reads as stock.
  *
  * ---------------------------------------------------------------------------
- * ON THE IMAGE. `src/assets/speaking-nimma-codes.jpg` is 356x200. The layout
- * below is drawn for a near-full-bleed photograph but caps the frame at
- * `max-w-2xl`, because `CustomPicture` never upscales and a 356px source
- * stretched across a 1152px row would be visibly soft. Drop in the original
- * at ~1600px wide and raise the cap on the figure to let this run full width.
+ * ON THE IMAGE. `src/assets/speaking-nimma-codes.jpg` is 1600x900, and that
+ * is what lets the frame run at the width this layout was drawn for. It was a
+ * 356x200 export for a while, and since `CustomPicture` never upscales, the
+ * figure had to carry a `max-w-2xl` cap to keep it from going visibly soft.
+ * Both are gone now.
+ *
+ * What ships is capped below the source, on purpose. `CustomPicture`'s
+ * default ladder stops at 960 and will not add a native rung above it — that
+ * guard is what keeps the ~44 gallery originals from each emitting a
+ * full-resolution variant — so `widthsOverride` below raises the ceiling for
+ * this one image, to 1280 rather than to the source's 1600.
+ *
+ * 1280 is the honest stopping point. The desktop slot is 576 CSS px, so DPR 2
+ * wants 1152 and 1280 covers it outright. The widest this figure ever gets is
+ * a tablet just under `lg`, where it is the full container — ~975 CSS px, or
+ * ~1950 at DPR 2 — and serving that exactly would mean pushing a 1600px
+ * photograph down a tablet connection for a lazy-loaded supporting
+ * illustration. The source keeps its headroom for whenever the layout wants
+ * more; the ladder does not spend it.
+ *
+ * Keep `sizes` agreeing with the layout if either changes: the figure is the
+ * full container below `lg` and 576px above it, which is the row's width less
+ * the `max-w-md` text column and the gap.
  * ---------------------------------------------------------------------------
  */
 import type { ImageMetadata } from "astro";
@@ -85,13 +103,14 @@ const {
           comment as the first thing after `{cond && (` is a parse error. */}
       {
         imageItem?.image && (
-          <figure class="order-last w-full min-w-0 max-w-2xl lg:order-none lg:flex-1" data-reveal>
+          <figure class="order-last w-full min-w-0 lg:order-none lg:flex-1" data-reveal>
             <div class="relative">
               <CustomPicture
                 alt={imageItem.description}
                 classes="w-full aspect-[16/9]"
                 sizes="(min-width: 1024px) 576px, calc(100vw - 3rem)"
                 srcImagePath={imageItem.image}
+                widthsOverride={[240, 480, 720, 960, 1280]}
                 loading="lazy"
               />
               {/* Registration marks, as on the hero portrait, so the two

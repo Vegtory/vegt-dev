@@ -2,7 +2,7 @@
 /**
  * @component Hero
  * @version   3.2.0
- * @updated   2026-09-11
+ * @updated   2026-09-21
  * @source    astro-template@0ad4fd0
  * @copied    2026-09-10
  * @modified  true
@@ -49,9 +49,14 @@
  * nothing on this page removes a background. The matte was computed from the
  * studio shot on its white backdrop by `scripts/cutout-portrait.py`, which is
  * where the arithmetic lives, along with the flat-field correction a delivered
- * photo is likely to need first — this one arrived with a lighting gradient
- * behind the subject running 231 at the top of the frame to 251 at the bottom,
- * and every one of those levels reads as thin foreground.
+ * photo is likely to need first — every delivery of this shot has arrived with
+ * a lighting gradient behind the subject, the current one running 231 at the
+ * top of the frame to 255 at the bottom, and every one of those levels reads
+ * as thin foreground. That is the script's `--flat-field` flag, and the
+ * command that produced the file in the tree is
+ *
+ *     python3 scripts/cutout-portrait.py --flat-field <delivered>.jpg \
+ *       src/assets/portrait-bw.png
  *
  * It used to be done here instead: the JPEG on its white backdrop, composited
  * with `mix-blend-mode: multiply`, which keeps the darker of the two layers so
@@ -122,22 +127,40 @@
  * ---------------------------------------------------------------------------
  * ONE NUMBER TO KNOW: `FIGURE_WIDTH`.
  *
- * `src/assets/portrait-bw.png` is 400x400 and `CustomPicture` never upscales,
- * so 400px of real detail is all there is. The subject fills 97% x 96% of that
- * frame, so there is no margin to crop away and nothing to reclaim — the only
- * lever is how far the file gets stretched.
+ * `src/assets/portrait-bw.png` is 1067x1067 and `CustomPicture` never
+ * upscales, so 1067px of real detail is the ceiling. The subject fills 97% x
+ * 95% of the frame, so there is no margin to crop away and nothing to reclaim
+ * — the only lever is how far the file gets stretched.
  *
- * It is set below to a size that stretches it about 1.25x, which a soft-edged
- * black-and-white figure carries but a crisp framed colour photo would not.
- * That is why this hero is as large as it is and no larger.
+ * It was a 400x400 crop until this photo replaced it, and at that size the
+ * `lg` figure stretched the file about 1.25x even before device pixel ratio
+ * came into it. That was the constraint holding the hero at `33rem`, and it
+ * is gone: every step below is now a DOWNscale at DPR 1, so the figure is
+ * sharp at its resting size at every width.
  *
- * Note the phone and tablet sizes are DOWNscales of the same file, so they are
- * pin sharp; only the `lg` size stretches it.
+ * `36rem` rather than more, because DPR 2 is the real limit now. 576 CSS px
+ * wants 1152 device px and the file has 1067 — 93% of it, which on a
+ * soft-edged black-and-white cut-out is not a difference you can see. Going
+ * wider is a question of the file, not of this constant: `40rem` would want
+ * ~1280px and `44rem` ~1400. Raise them together, or the figure goes soft.
  *
- * A ~1400px portrait on the same white backdrop, run through
- * `scripts/cutout-portrait.py`, lets this go to the full reference
- * proportions: raise the `lg` step of `FIGURE_WIDTH` and update `sizes` to
- * match. Nothing else in this file needs to change.
+ * Keep the two agreeing. `sizes` is what picks the variant, and a `sizes`
+ * that disagrees with `FIGURE_WIDTH` is not a layout bug — it is a silently
+ * blurry or silently oversized download.
+ *
+ * There is a third number, and it is the one that actually bites.
+ * `CustomPicture`'s default ladder stops at 960 and deliberately refuses to
+ * add a native rung above it, because that guard is what keeps the ~44
+ * gallery originals from each emitting a full-resolution variant. Left on the
+ * default this portrait would ship at 960 whatever the file measures, and the
+ * jump from 400px would be most of the way wasted on exactly the screens it
+ * was made for. `widthsOverride` below raises the ceiling for this one image.
+ *
+ * It is written as a CEILING (1440), not as the file's own width, so the top
+ * rung stays the native size and follows the file if it is ever replaced.
+ * Note the ladder's own 10% rule: the native rung is only encoded if it beats
+ * the best fixed rung by that much, and 1067 clears 960 by 11%. A 1000px
+ * replacement would silently fall back to 960.
  * ---------------------------------------------------------------------------
  */
 import type { ImageMetadata } from "astro";
@@ -180,7 +203,7 @@ const {
 const portrait = imageItems[0];
 
 /** See the long note above before changing this. */
-const FIGURE_WIDTH = "w-full sm:w-[22rem] lg:w-[33rem]";
+const FIGURE_WIDTH = "w-full sm:w-[22rem] lg:w-[36rem]";
 /**
  * Pulls the figure back over the text column so the two overlap. A margin
  * rather than a transform, so the figure's box moves with it and the name's
@@ -381,10 +404,10 @@ const family = space > -1 ? title.slice(space + 1) : "";
       {
         portrait?.image && (
           <div class:list={["order-first shrink-0 lg:order-none lg:mx-0", FIGURE_WIDTH, FIGURE_OVERLAP]}>
-            {/* Quality is high on purpose: the file is a few hundred pixels
-                square, so this costs single-digit KB, and it is the only
-                photograph of a face above the fold. `showPlaceholder` must
-                stay false — see the header note. */}
+            {/* Quality is high on purpose: it is the only photograph of a
+                face above the fold, and the variants that actually ship are a
+                few hundred pixels square whatever the source measures.
+                `showPlaceholder` must stay false — see the header note. */}
             {/* The bottom fade is mobile-only, and it earns its place.
                 The source frame cuts the shoulders off square. On desktop that
                 never shows, because the figure bleeds past the section's bottom
@@ -399,8 +422,9 @@ const family = space > -1 ? title.slice(space + 1) : "";
             <CustomPicture
               alt={portrait.description}
               classes="aspect-square w-full grayscale [mask-image:linear-gradient(to_bottom,black_74%,transparent_100%)] lg:[mask-image:none]"
-              sizes="(max-width: 639px) 100vw, (max-width: 1023px) 352px, 528px"
+              sizes="(max-width: 639px) 100vw, (max-width: 1023px) 352px, 576px"
               srcImagePath={portrait.image}
+              widthsOverride={[240, 480, 720, 960, 1440]}
               priority={true}
               qualityOverride={86}
               showPlaceholder={false}
