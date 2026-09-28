@@ -1,0 +1,220 @@
+---
+/**
+ * @component ContactForm
+ * @version   1.0.0
+ * @updated   2026-09-28
+ *
+ * A short form in the footer's contact band, posting to the Worker at
+ * `/api/contact` (see `contact-worker/src/index.ts`, which mails it on).
+ *
+ * Written for this site rather than copied from the template's `ContactForm`:
+ * that one is a two-column card with a map pin, a phone number and rounded
+ * pastel inputs, and restyling it would have meant replacing every line. The
+ * wire format is the same — JSON with `name`, `email`, `message` and the
+ * `ph0ne` honeypot — because the Worker is shared with it.
+ *
+ * Looks like the rest of the journal: mono eyebrow labels, white fields on
+ * silver with a hairline border that darkens to a drawn rule on focus, the
+ * ink button, and a status line in the same `key: value` idiom as
+ * `StatusChip`, with a pad beside it. The pad is colour only; the word next to
+ * it carries the meaning, which is what lets `acid` be the "sent" colour.
+ *
+ * The submit button ships `disabled` and the script enables it. Without
+ * JavaScript the form cannot post JSON, and a plain submit would drop the
+ * message into a query string; a disabled default button also blocks Enter.
+ * The `<noscript>` line points at the address above instead.
+ *
+ * Every state class is a complete literal keyed off `data-state` on the form
+ * (`group-data-[state=…]`), so the script only ever sets one attribute and
+ * one line of text.
+ */
+
+export interface Props {
+  /** Where the form posts. The Worker only answers on this one path. */
+  endpoint?: string;
+  class?: string;
+}
+
+const { endpoint = "/api/contact", class: extraClass = "" } = Astro.props;
+
+const label =
+  "font-mono text-[0.6875rem] font-medium uppercase tracking-[0.22em] text-mutedText";
+
+// `:user-invalid` rather than `:invalid`: it only matches once the reader has
+// interacted with the field or tried to submit, so an untouched form does not
+// open covered in red.
+const field =
+  "mt-2 block w-full rounded border border-hairlineStrong bg-surface px-3.5 py-2.5 text-[0.9375rem] text-primaryText placeholder:text-ink-400 transition-colors duration-200 hover:border-ink-400 focus:border-ink-950 focus:outline-none focus-visible:ring-2 focus-visible:ring-cobalt/40 [&:user-invalid]:border-tomato";
+---
+
+<form
+  class:list={["group relative", extraClass]}
+  data-contact-form
+  data-endpoint={endpoint}
+  data-state="idle"
+  novalidate
+>
+  <div class="grid gap-5 sm:grid-cols-2">
+    <div>
+      <label for="contact-name" class={label}>Naam</label>
+      <input
+        id="contact-name"
+        name="name"
+        type="text"
+        autocomplete="name"
+        required
+        maxlength="200"
+        class={field}
+      />
+    </div>
+    <div>
+      <label for="contact-email" class={label}>E-mail</label>
+      <input
+        id="contact-email"
+        name="email"
+        type="email"
+        autocomplete="email"
+        inputmode="email"
+        required
+        maxlength="320"
+        class={field}
+      />
+    </div>
+  </div>
+
+  {/* The honeypot. The Worker answers "OK" and sends nothing when this is
+      filled in. Off-screen rather than `display: none`, which some bots
+      check for, and out of the tab order and the accessibility tree so no
+      person ever lands in it. The name matches what the Worker reads. */}
+  <div class="absolute -left-[10000px] h-px w-px overflow-hidden" aria-hidden="true">
+    <label for="contact-ph0ne">Laat dit veld leeg</label>
+    <input id="contact-ph0ne" name="ph0ne" type="text" tabindex="-1" autocomplete="off" />
+  </div>
+
+  <div class="mt-5">
+    <label for="contact-message" class={label}>Bericht</label>
+    <textarea
+      id="contact-message"
+      name="message"
+      rows="5"
+      required
+      maxlength="5000"
+      placeholder="Waar wil je het over hebben?"
+      class:list={[field, "min-h-[8rem] resize-y leading-relaxed"]}></textarea>
+  </div>
+
+  <div class="mt-6 flex flex-wrap items-center gap-x-5 gap-y-3">
+    {/* The primary button from `Button.astro`, as a <button>: that component
+        renders an anchor. Keep the two in step. */}
+    <button
+      type="submit"
+      disabled
+      class="group/btn inline-flex items-center gap-2 rounded bg-ink-950 px-5 py-2.5 text-sm font-semibold text-whiteText transition-colors duration-200 hover:bg-ink-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink-950 focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:cursor-not-allowed disabled:bg-ink-500"
+    >
+      Versturen
+      <svg
+        class="h-4 w-4 shrink-0 transition-transform duration-200 group-hover/btn:translate-x-0.5"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.75"
+        viewBox="0 0 24 24"
+        aria-hidden="true"
+      >
+        <path stroke-linecap="round" stroke-linejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+      </svg>
+    </button>
+
+    {/* The status line. Hidden while idle; `role="status"` makes it a polite
+        live region, so the text the script writes is announced. */}
+    <p
+      class="hidden items-center gap-2 font-mono text-[0.6875rem] leading-snug group-data-[state=error]:flex group-data-[state=invalid]:flex group-data-[state=sending]:flex group-data-[state=sent]:flex"
+    >
+      <span
+        class="h-1.5 w-1.5 shrink-0 group-data-[state=error]:bg-tomato group-data-[state=invalid]:bg-tomato group-data-[state=sending]:bg-amber group-data-[state=sending]:motion-safe:animate-node-pulse group-data-[state=sent]:bg-acid"
+        aria-hidden="true"></span>
+      <span class="text-mutedText">status:</span>
+      <span
+        role="status"
+        data-contact-status
+        class="text-primaryText group-data-[state=error]:text-tomato-ink group-data-[state=invalid]:text-tomato-ink group-data-[state=sent]:text-acid-ink"
+      ></span>
+    </p>
+  </div>
+
+  <noscript>
+    <p class="mt-4 text-sm text-mutedText">
+      Dit formulier heeft JavaScript nodig. Mail me anders direct op het adres
+      hierboven.
+    </p>
+  </noscript>
+</form>
+
+<script>
+  type State = "idle" | "invalid" | "sending" | "sent" | "error";
+
+  const MESSAGES: Record<Exclude<State, "idle">, string> = {
+    invalid: "vul je naam, een geldig e-mailadres en een bericht in",
+    sending: "versturen…",
+    sent: "verzonden — ik lees het zelf, en antwoord zo snel als ik kan",
+    error: "niet verstuurd — probeer het opnieuw, of mail me direct",
+  };
+
+  for (const form of document.querySelectorAll<HTMLFormElement>("[data-contact-form]")) {
+    const button = form.querySelector<HTMLButtonElement>('button[type="submit"]');
+    const status = form.querySelector<HTMLElement>("[data-contact-status]");
+    if (!button || !status) continue;
+
+    const setState = (state: State) => {
+      form.dataset.state = state;
+      status.textContent = state === "idle" ? "" : MESSAGES[state];
+      button.disabled = state === "sending";
+    };
+
+    // The button ships disabled so a no-JS reader cannot submit; this is the
+    // point at which the form actually works.
+    button.disabled = false;
+
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      if (form.dataset.state === "sending") return;
+
+      if (!form.checkValidity()) {
+        setState("invalid");
+        // Show the browser's own message on the first bad field and put the
+        // caret there.
+        form.reportValidity();
+        return;
+      }
+
+      const data = new FormData(form);
+      const body = {
+        name: String(data.get("name") ?? "").trim(),
+        email: String(data.get("email") ?? "").trim(),
+        message: String(data.get("message") ?? ""),
+        ph0ne: String(data.get("ph0ne") ?? ""),
+      };
+
+      setState("sending");
+      try {
+        const res = await fetch(form.dataset.endpoint ?? "/api/contact", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(body),
+        });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        form.reset();
+        setState("sent");
+      } catch (err) {
+        console.error("Contact form:", err);
+        setState("error");
+      }
+    });
+
+    // Typing again after a result clears it, so a stale "verzonden" never sits
+    // under a half-written second message.
+    form.addEventListener("input", () => {
+      const s = form.dataset.state;
+      if (s === "sent" || s === "error" || s === "invalid") setState("idle");
+    });
+  }
+</script>
