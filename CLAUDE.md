@@ -19,8 +19,8 @@ src/
   assets/             images
   site.ts             site-wide settings (name, lang, nav, analytics id)
   buildInfo.ts        rev / commit / build time — the footer's metadata is real
-astro-template/       submodule: shared components, imported as @template/*
-contact-worker/       Cloudflare Worker serving /api/contact
+astro-template/       submodule: shared components, imported as @template/*,
+                      and the contact Worker (see below)
 scripts/              one-off tools, run by hand, not part of the build
 ```
 
@@ -75,6 +75,17 @@ Keep the provenance stamp at the top of a copied file up to date, and set
 `@modified: true` once you edit it. `pnpm check:template` uses those stamps to
 report which copies have upstream fixes available; see
 `astro-template/docs/updating.md`.
+
+### The contact Worker is the template's, used in place
+
+`/api/contact` is served by `astro-template/contact-worker/src/index.ts`, which
+`wrangler.jsonc`'s `main` points at directly. It is **not** copied into this
+repo, and the copy-and-own rule above does not apply to it: it is the one piece
+of the template this site runs as-is, so that its fixes (security ones included)
+arrive with a submodule bump. Everything site-specific about it — SMTP account,
+recipient, `CORS_ORIGINS`, `MAIL_LOCALE` — is a variable in `wrangler.jsonc`;
+`astro-template/contact-worker/README.md` lists them. If the Worker itself needs
+to change, change it upstream in the template, then bump the submodule.
 
 ## Styling
 
