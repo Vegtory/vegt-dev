@@ -1,0 +1,47 @@
+---
+/**
+ * @component Comments
+ *
+ * Giscus: comments stored as GitHub Discussions on Vegtory/vegt-dev, one
+ * discussion per post, matched by pathname. Only the blog uses it.
+ *
+ * The ids below are the ones the site ran with before the redesign (they came
+ * from astro-template's old BlogLayout), so the discussions already on GitHub
+ * attach to their posts again. Regenerate them at giscus.app if the repo or
+ * the category ever moves; the category must stay an announcement-type one,
+ * so only giscus itself can open a new thread.
+ *
+ * `data-loading="lazy"` keeps the iframe, and GitHub with it, off the network
+ * until the reader scrolls down to it.
+ */
+---
+
+<section class="mt-20 border-t border-hairline pt-8" aria-labelledby="reacties">
+  <h2
+    id="reacties"
+    class="flex items-center gap-2.5 font-mono text-[0.6875rem] font-medium uppercase tracking-[0.22em] text-mutedText"
+  >
+    <span class="h-1.5 w-1.5 bg-cobalt" aria-hidden="true" />
+    Reacties
+  </h2>
+
+  <div class="giscus mt-6"></div>
+  <script
+    is:inline
+    src="https://giscus.app/client.js"
+    data-repo="Vegtory/vegt-dev"
+    data-repo-id="R_kgDOM2C0vA"
+    data-category="Announcements"
+    data-category-id="DIC_kwDOM2C0vM4CiuU3"
+    data-mapping="pathname"
+    data-strict="0"
+    data-reactions-enabled="1"
+    data-emit-metadata="0"
+    data-input-position="top"
+    data-theme="light"
+    data-lang="nl"
+    data-loading="lazy"
+    crossorigin="anonymous"
+    async
+  ></script>
+</section>
