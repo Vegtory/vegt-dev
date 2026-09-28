@@ -1,0 +1,65 @@
+---
+/**
+ * @component Comments
+ *
+ * Giscus: comments stored as GitHub Discussions on Vegtory/vegt-dev, one
+ * discussion per post, matched by pathname. Only the blog uses it.
+ *
+ * The ids below are the ones the site ran with before the redesign (they came
+ * from astro-template's old BlogLayout), so the discussions already on GitHub
+ * attach to their posts again. Regenerate them at giscus.app if the repo or
+ * the category ever moves; the category must stay an announcement-type one,
+ * so only giscus itself can open a new thread.
+ *
+ * The theme is `public/giscus-theme.css`, the site's tokens mapped onto the
+ * Primer variables Giscus reads. It is loaded inside Giscus's iframe, from
+ * giscus.app, which is why `public/_headers` gives it a CORS header.
+ *
+ * The widget's own chrome stays in English on purpose, unlike the site.
+ *
+ * `data-loading="lazy"` keeps the iframe, and GitHub with it, off the network
+ * until the reader scrolls down to it.
+ */
+---
+
+<section class="mt-20 border-t border-hairline pt-8" aria-labelledby="reacties">
+  <h2
+    id="reacties"
+    class="flex items-center gap-2.5 font-mono text-[0.6875rem] font-medium uppercase tracking-[0.22em] text-mutedText"
+  >
+    <span class="h-1.5 w-1.5 bg-cobalt" aria-hidden="true" />
+    Reacties
+  </h2>
+
+  <div class="giscus mt-6"></div>
+  {/* Built in script rather than written as a tag, because the theme URL has
+      to be absolute and should follow the host the page is served from, so
+      a preview upload is themed by its own copy of the stylesheet. `pnpm dev`
+      cannot serve it to another origin, so localhost borrows production's. */}
+  <script is:inline>
+    (() => {
+      const local = /^(localhost|127\.0\.0\.1)$/.test(location.hostname);
+      const origin = local ? "https://www.vegt.dev" : location.origin;
+      const attrs = {
+        src: "https://giscus.app/client.js",
+        "data-repo": "Vegtory/vegt-dev",
+        "data-repo-id": "R_kgDOM2C0vA",
+        "data-category": "Announcements",
+        "data-category-id": "DIC_kwDOM2C0vM4CiuU3",
+        "data-mapping": "pathname",
+        "data-strict": "0",
+        "data-reactions-enabled": "1",
+        "data-emit-metadata": "0",
+        "data-input-position": "top",
+        "data-theme": `${origin}/giscus-theme.css`,
+        "data-lang": "en",
+        "data-loading": "lazy",
+        crossorigin: "anonymous",
+      };
+      const script = document.createElement("script");
+      for (const [name, value] of Object.entries(attrs)) script.setAttribute(name, value);
+      script.async = true;
+      document.currentScript.after(script);
+    })();
+  </script>
+</section>

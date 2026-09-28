@@ -1,0 +1,172 @@
+/*
+ * vegt.dev theme for Giscus.
+ *
+ * Loaded by giscus.app *inside its iframe*, not by this site, so Tailwind
+ * never sees this file and the tokens cannot be referenced by name. Every hex
+ * below is copied from tailwind.config.cjs, with the token it came from in the
+ * comment beside it; change the config and this file has to follow by hand.
+ *
+ * The variable names are GitHub Primer's, as consumed by Giscus. The set is
+ * Giscus's own `light` theme with every value replaced (MIT, (c) GitHub Inc.,
+ * https://github.com/primer/primitives/blob/main/LICENSE).
+ *
+ * giscus.app requests this with `crossorigin`, so it needs the CORS header set
+ * in public/_headers, or the iframe renders with no theme at all.
+ */
+
+main {
+  /* Code in comments: the mark inks, which all clear 4.5:1 on surfaceMuted. */
+  --color-prettylights-syntax-comment: #555f6d; /* mutedText */
+  --color-prettylights-syntax-constant: #1d4ed8; /* cobalt.ink */
+  --color-prettylights-syntax-entity: #6d28d9; /* violet.ink */
+  --color-prettylights-syntax-storage-modifier-import: #131720; /* primaryText */
+  --color-prettylights-syntax-entity-tag: #456d0d; /* acid.ink */
+  --color-prettylights-syntax-keyword: #ad3818; /* tomato.ink */
+  --color-prettylights-syntax-string: #1d3c89; /* primary.900 */
+  --color-prettylights-syntax-variable: #a44b08; /* amber.ink */
+  --color-prettylights-syntax-brackethighlighter-unmatched: #ad3818; /* tomato.ink */
+  --color-prettylights-syntax-invalid-illegal-text: #eef1f5; /* whiteText */
+  --color-prettylights-syntax-invalid-illegal-bg: #ad3818; /* tomato.ink */
+  --color-prettylights-syntax-carriage-return-text: #eef1f5; /* whiteText */
+  --color-prettylights-syntax-carriage-return-bg: #ad3818; /* tomato.ink */
+  --color-prettylights-syntax-string-regexp: #456d0d; /* acid.ink */
+  --color-prettylights-syntax-markup-list: #a44b08; /* amber.ink */
+  --color-prettylights-syntax-markup-heading: #1d4ed8; /* cobalt.ink */
+  --color-prettylights-syntax-markup-italic: #131720; /* primaryText */
+  --color-prettylights-syntax-markup-bold: #131720; /* primaryText */
+  --color-prettylights-syntax-markup-deleted-text: #ad3818; /* tomato.ink */
+  --color-prettylights-syntax-markup-deleted-bg: #f7e4dd; /* tomato.wash */
+  --color-prettylights-syntax-markup-inserted-text: #456d0d; /* acid.ink */
+  --color-prettylights-syntax-markup-inserted-bg: #eaf4d7; /* acid.wash */
+  --color-prettylights-syntax-markup-changed-text: #a44b08; /* amber.ink */
+  --color-prettylights-syntax-markup-changed-bg: #fae7d3; /* amber.wash */
+  --color-prettylights-syntax-markup-ignored-text: #e3e8ee; /* surfaceMuted */
+  --color-prettylights-syntax-markup-ignored-bg: #1d4ed8; /* cobalt.ink */
+  --color-prettylights-syntax-meta-diff-range: #6d28d9; /* violet.ink */
+  --color-prettylights-syntax-brackethighlighter-angle: #555f6d; /* mutedText */
+  --color-prettylights-syntax-sublimelinter-gutter-mark: #a9b2be; /* ink.300 */
+  --color-prettylights-syntax-constant-other-reference-link: #1d4ed8; /* cobalt.ink */
+
+  /* Buttons. Hairline edges and no shadow: everything on the site is
+     separated by a rule, never by elevation. */
+  --color-btn-text: #131720; /* primaryText */
+  --color-btn-bg: #ffffff; /* surface */
+  --color-btn-border: #b4bdc8; /* hairlineStrong */
+  --color-btn-shadow: 0 0 transparent;
+  --color-btn-inset-shadow: 0 0 transparent;
+  --color-btn-hover-bg: #eef1f5; /* background */
+  --color-btn-hover-border: #a9b2be; /* ink.300 */
+  --color-btn-active-bg: #e3e8ee; /* surfaceMuted */
+  --color-btn-active-border: #a9b2be; /* ink.300 */
+  --color-btn-selected-bg: #e3e8ee; /* surfaceMuted */
+
+  /* The primary button is the contact form's: ink, not cobalt. */
+  --color-btn-primary-text: #eef1f5; /* whiteText */
+  --color-btn-primary-bg: #12151b; /* ink.950 */
+  --color-btn-primary-border: #12151b; /* ink.950 */
+  --color-btn-primary-shadow: 0 0 transparent;
+  --color-btn-primary-inset-shadow: 0 0 transparent;
+  --color-btn-primary-hover-bg: #232a34; /* ink.800 */
+  --color-btn-primary-hover-border: #232a34; /* ink.800 */
+  --color-btn-primary-selected-bg: #232a34; /* ink.800 */
+  --color-btn-primary-selected-shadow: 0 0 transparent;
+  --color-btn-primary-disabled-text: #eef1f5; /* whiteText */
+  --color-btn-primary-disabled-bg: #5a6472; /* ink.500 */
+  --color-btn-primary-disabled-border: #5a6472; /* ink.500 */
+
+  --color-action-list-item-default-hover-bg: #eef1f5; /* background */
+  --color-segmented-control-bg: #e3e8ee; /* surfaceMuted */
+  --color-segmented-control-button-bg: #ffffff; /* surface */
+  --color-segmented-control-button-selected-border: #b4bdc8; /* hairlineStrong */
+
+  /* Type. */
+  --color-fg-default: #131720; /* primaryText */
+  --color-fg-muted: #555f6d; /* mutedText */
+  --color-fg-subtle: #5d6573; /* noteText */
+
+  /* Surfaces. Comments are cards, so they take `surface` and lift off the
+     silver page the iframe sits on; headers and wells drop to the page. */
+  --color-canvas-default: #ffffff; /* surface */
+  --color-canvas-overlay: #ffffff; /* surface */
+  --color-canvas-inset: #eef1f5; /* background */
+  --color-canvas-subtle: #eef1f5; /* background */
+  --color-border-default: #d7dde5; /* hairline */
+  --color-border-muted: #d7dde5; /* hairline */
+  --color-neutral-muted: #e3e8ee; /* surfaceMuted */
+
+  /* Cobalt does the structural work here as everywhere: links, focus. */
+  --color-accent-fg: #1d4ed8; /* cobalt.ink */
+  --color-accent-emphasis: #2563eb; /* cobalt */
+  --color-accent-muted: #a1bef7; /* primary.300 */
+  --color-accent-subtle: #e4ebfb; /* cobalt.wash */
+
+  --color-success-fg: #456d0d; /* acid.ink */
+  --color-attention-fg: #a44b08; /* amber.ink */
+  --color-attention-muted: #f97316; /* amber */
+  --color-attention-subtle: #fae7d3; /* amber.wash */
+  --color-danger-fg: #ad3818; /* tomato.ink */
+  --color-danger-muted: #e4572e; /* tomato */
+  --color-danger-subtle: #f7e4dd; /* tomato.wash */
+  --color-primer-shadow-inset: 0 0 transparent;
+  --color-scale-gray-1: #e3e8ee; /* surfaceMuted */
+  --color-scale-blue-1: #e4ebfb; /* cobalt.wash */
+
+  --color-social-reaction-bg-hover: var(--color-scale-gray-1);
+  --color-social-reaction-bg-reacted-hover: var(--color-scale-blue-1);
+}
+
+/* The site's system stacks rather than GitHub's. Declared on `html:root` so it
+   wins over Giscus's own `:root` whichever sheet loads last. */
+html:root {
+  --font-family-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI",
+    Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji",
+    "Segoe UI Emoji";
+  --font-family-monospace: ui-monospace, SFMono-Regular, "SF Mono", Menlo,
+    Consolas, "Liberation Mono", monospace;
+}
+
+/* Near-square corners, as on every other frame on the site (`rounded` is
+   2px there). Giscus rounds at 6px. The avatars stay round: they are other
+   people's faces, not part of the page's furniture.
+
+   Flat class lists inside `:is()` on purpose: `:is()` takes the specificity
+   of its heaviest argument, and one compound selector in here would lift the
+   whole list over Giscus's own `rounded-none` exceptions. */
+main :is(
+    .btn,
+    .BtnGroup,
+    .BtnGroup-item,
+    .rounded-1,
+    .rounded-2,
+    .Box,
+    .flash,
+    .gsc-pagination-button,
+    .gsc-comment-box,
+    .gsc-comment-box-write,
+    .gsc-reactions-popover,
+    .gsc-social-reaction-summary-item,
+    .markdown pre,
+    .markdown code,
+    .markdown tt,
+    .markdown kbd
+  ) {
+  border-radius: 2px;
+}
+
+main :is(.Box-header, .gsc-comment-content, .gsc-comment-box-tabs, .gsc-comment-box-textarea) {
+  border-top-left-radius: 2px;
+  border-top-right-radius: 2px;
+}
+
+main :is(.blob-wrapper, .gsc-replies, .gsc-reply-box, .gsc-comment-box-textarea-extras) {
+  border-bottom-left-radius: 2px;
+  border-bottom-right-radius: 2px;
+}
+
+main .pagination-loader-container {
+  background-image: url("https://github.com/images/modules/pulls/progressive-disclosure-line.svg");
+}
+
+main .gsc-loading-image {
+  background-image: url("https://github.githubassets.com/images/mona-loading-default.gif");
+}

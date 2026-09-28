@@ -13,10 +13,13 @@
  * pad in the metadata line, and the lead image mounted with the same corner
  * registration marks as the hero portrait and the talk photo.
  *
+ * Comments (Giscus) sit under the article; see `Comments.astro`.
+ *
  * The long inline `prose-*` modifier list lives in `@ui/prose`, which is what
  * makes an article's links, code and quotes match the rest of the site.
  */
 import type { ImageMetadata } from "astro";
+import Comments from "@ui/Comments.astro";
 import CustomPicture from "@ui/CustomPicture.astro";
 import SiteHeader from "@ui/SiteHeader.astro";
 import SiteFooter from "@ui/SiteFooter.astro";
@@ -115,6 +118,8 @@ const postTopic = topicFor(topic);
       <article class:list={["mt-10", proseArticle]}>
         <slot />
       </article>
+
+      <Comments />
     </div>
   </main>
 
