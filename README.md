@@ -47,15 +47,18 @@ Set the environment once:
 
 ```bash
 export CLOUDFLARE_ACCOUNT_ID=...
-wrangler secret put SMTP_USER
-wrangler secret put SMTP_PASSWORD
-wrangler secret put INFO_EMAIL     # destination inbox
-wrangler secret put INFO_NAME
+wrangler secret put SMTP_PASSWORD                      # production
+wrangler preview base-config secret put SMTP_PASSWORD  # Previews Base
 ```
 
-Public values (`SMTP_HOST`, `SMTP_PORT`, `CORS_ORIGINS`) live in
-`wrangler.jsonc`. For local Worker development, mirror the four secrets in a
-gitignored `.dev.vars`.
+The password is the only secret. Everything else the contact Worker reads
+(`SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `INFO_EMAIL`, `INFO_NAME`,
+`CORS_ORIGINS`) lives in `wrangler.jsonc`, once under `vars` for production and
+again under `previews.vars` for Previews Base, which does not inherit the top
+level. For local Worker development, put `SMTP_PASSWORD=...` in a gitignored
+`.dev.vars`.
+
+Use a Zoho app-specific password rather than the account password.
 
 Then:
 
@@ -92,10 +95,10 @@ Two things to know before sharing one:
 - **A preview URL is public.** Anyone holding it can read an unreleased version.
   [Cloudflare Access](https://developers.cloudflare.com/workers/configuration/cloudflare-access/)
   is the way to put a login in front of it.
-- **The contact form answers 403 on a preview.** The Worker refuses any `Origin`
-  that is not in `CORS_ORIGINS`, and a preview's hostname is different for every
-  version, so it can never be on that list. Everything else — pages, images,
-  fonts, the 404 — behaves exactly as it will in production.
+- **The contact form works on a preview**, and sends real mail. The Worker
+  always accepts a post from its own origin, which is what lets a preview's
+  hostname through without being listed in `CORS_ORIGINS`; any other origin
+  not on that list still gets a 403.
 
 There is no infrastructure-as-code in the repo. DNS and any storage buckets are
 managed in the Cloudflare dashboard, or with `wrangler` directly — for example
