@@ -14,7 +14,13 @@ export default {
       .map((o: string) => o.trim())
       .filter(Boolean);
 
-    const isAllowedOrigin = origin !== null && allowedOrigins.includes(origin);
+    // The Worker's own origin is always allowed: a page served by this same
+    // Worker is not a cross-site caller. That is what makes the form work on
+    // preview URLs, whose hostname differs per version and so can never be
+    // written into CORS_ORIGINS.
+    const isAllowedOrigin =
+      origin !== null &&
+      (origin === url.origin || allowedOrigins.includes(origin));
 
     // Only ever echo back an origin that is actually on the list. A wildcard
     // here would let any site on the internet POST this form from a visitor's

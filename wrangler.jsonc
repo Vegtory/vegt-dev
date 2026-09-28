@@ -42,13 +42,31 @@
     }
   },
 
-  // Public values only. Credentials and the destination inbox are secrets --
-  // see README.md. INFO_EMAIL is deliberately not here: the email-obscurer
-  // integration exists to keep that address out of shipped HTML, and there is
-  // no point undoing that by committing it.
+  // Everything the contact Worker reads, except the SMTP password, which is
+  // the one secret -- see README.md. The address is written plainly: it is
+  // already in src/site.ts, and the email-obscurer only rewrites the built
+  // HTML, so keeping it out of this file hid nothing.
   "vars": {
     "SMTP_HOST": "smtppro.zoho.eu",
     "SMTP_PORT": "587",
+    "SMTP_USER": "william@vegt.dev",
+    "INFO_EMAIL": "william@vegt.dev",
+    "INFO_NAME": "William van der Vegt",
     "CORS_ORIGINS": "https://vegt.dev;https://www.vegt.dev"
+  },
+
+  // The dashboard's "Previews Base". `vars` is not inherited from the top
+  // level, so it is repeated here in full. CORS_ORIGINS stays
+  // the production pair: a preview's own hostname is let through by the
+  // Worker's same-origin check, and cannot be listed since it changes.
+  "previews": {
+    "vars": {
+      "SMTP_HOST": "smtppro.zoho.eu",
+      "SMTP_PORT": "587",
+      "SMTP_USER": "william@vegt.dev",
+      "INFO_EMAIL": "william@vegt.dev",
+      "INFO_NAME": "William van der Vegt",
+      "CORS_ORIGINS": "https://vegt.dev;https://www.vegt.dev"
+    }
   }
 }
