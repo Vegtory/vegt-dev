@@ -1,0 +1,8 @@
+# Cloudflare static-asset headers (Workers assets read this file; it is not
+# served itself).
+#
+# giscus.app loads the comment theme into its own iframe with `crossorigin`,
+# so without this the browser refuses the stylesheet and the comments render
+# unthemed. See src/components/Comments.astro.
+/giscus-theme.css
+  Access-Control-Allow-Origin: https://giscus.app
