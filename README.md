@@ -51,9 +51,11 @@ wrangler secret put SMTP_PASSWORD                      # production
 wrangler preview base-config secret put SMTP_PASSWORD  # Previews Base
 ```
 
-The password is the only secret. Everything else the contact Worker reads
-(`SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `INFO_EMAIL`, `INFO_NAME`,
-`CORS_ORIGINS`) lives in `wrangler.jsonc`, once under `vars` for production and
+The contact Worker is the template's own
+(`astro-template/contact-worker/`, pointed at from `wrangler.jsonc`), not a
+copy; its README lists every variable it reads. The password is the only
+secret. Everything else (`SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `INFO_EMAIL`,
+`INFO_NAME`, `CORS_ORIGINS`, `MAIL_LOCALE`) lives in `wrangler.jsonc`, once under `vars` for production and
 again under `previews.vars` for Previews Base, which does not inherit the top
 level. For local Worker development, put `SMTP_PASSWORD=...` in a gitignored
 `.dev.vars`.
